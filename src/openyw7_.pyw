@@ -8,6 +8,8 @@ For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
 import sys
+import os
+import subprocess
 
 from pywriter.model.odt_proof_writer import OdtProofWriter
 from pywriter.model.odt_manuscript_writer import OdtManuscriptWriter
@@ -18,6 +20,23 @@ from pywriter.model.scenelist import SceneList
 from pywriter.plot.plotlist import PlotList
 from pywriter.model.odt_file_writer import OdtFileWriter
 from pywriter.converter.cnv_runner import CnvRunner
+
+OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
+              'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
+              'c:/Program Files/OpenOffice 4/program/swriter.exe',
+              'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
+
+
+class Converter(CnvRunner):
+    """Standalone yWriter 7 converter with a simple GUI. """
+
+    def edit(self):
+        for office in OPENOFFICE:
+
+            if os.path.isfile(office):
+                subprocess.Popen([os.path.normpath(office),
+                                  os.path.normpath(self._newFile)])
+                sys.exit()
 
 
 def run(sourcePath, suffix):
@@ -59,7 +78,7 @@ def run(sourcePath, suffix):
         extension = 'odt'
         targetDoc = OdtFileWriter(sourcePath.split('.yw7')[0] + '.odt')
 
-    converter = CnvRunner(sourcePath, targetDoc,
+    converter = Converter(sourcePath, targetDoc,
                           extension, False, suffix)
 
 
