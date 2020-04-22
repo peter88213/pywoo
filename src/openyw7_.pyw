@@ -1,4 +1,4 @@
-"""PyWriter v1.4 - Convert yw7 to odt. 
+"""PyWriter v1.5 - Convert yw7 to odt. 
 
 Input file format: yw7
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
@@ -7,9 +7,9 @@ Copyright (c) 2020 Peter Triesberger.
 For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
-import sys
 import os
 import subprocess
+from tkinter import *
 
 from pywriter.model.odt_proof_writer import OdtProofWriter
 from pywriter.model.odt_manuscript_writer import OdtManuscriptWriter
@@ -42,6 +42,10 @@ class Converter(CnvRunner):
 
         if sourcePath.endswith('.yw7'):
             self._newFile = document.filePath
+            self.root.editButton = Button(
+                text="Edit", command=self.edit)
+            self.root.editButton.config(height=1, width=10)
+            self.root.editButton.pack(padx=5, pady=5)
 
     def edit(self):
         for office in OPENOFFICE:
