@@ -30,13 +30,26 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
 class Converter(CnvRunner):
     """Standalone yWriter 7 converter with a simple GUI. """
 
+    def convert(self, sourcePath,
+                document,
+                extension,
+                suffix):
+
+        CnvRunner.convert(self, sourcePath,
+                          document,
+                          extension,
+                          suffix)
+
+        if sourcePath.endswith('.yw7'):
+            self._newFile = document.filePath
+
     def edit(self):
         for office in OPENOFFICE:
 
             if os.path.isfile(office):
                 subprocess.Popen([os.path.normpath(office),
                                   os.path.normpath(self._newFile)])
-                sys.exit()
+                sys.exit(0)
 
 
 def run(sourcePath, suffix):
