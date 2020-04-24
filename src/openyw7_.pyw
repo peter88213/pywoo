@@ -42,7 +42,7 @@ class Converter(CnvRunner):
                           extension,
                           suffix)
 
-        if sourcePath.endswith('.yw7'):
+        if self._success and sourcePath.endswith('.yw7'):
             self._newFile = document.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -53,6 +53,10 @@ class Converter(CnvRunner):
         for office in OPENOFFICE:
 
             if os.path.isfile(office):
+
+                if self._newFile.endswith('.csv'):
+                    office = office.replace('swriter', 'scalc')
+
                 subprocess.Popen([os.path.normpath(office),
                                   os.path.normpath(self._newFile)])
                 sys.exit(0)
