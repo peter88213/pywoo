@@ -11,12 +11,12 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import sys
 import os
 
-from pywriter.fileop.html_proof_reader import HtmlProofReader
-from pywriter.fileop.html_manuscript_reader import HtmlManuscriptReader
-from pywriter.fileop.html_scenedesc_reader import HtmlSceneDescReader
-from pywriter.fileop.html_chapterdesc_reader import HtmlChapterDescReader
-from pywriter.fileop.scenelist import SceneList
-from pywriter.plot.plotlist import PlotList
+from pywriter.html.html_proof import HtmlProof
+from pywriter.html.html_manuscript import HtmlManuscript
+from pywriter.html.html_scenedesc import HtmlSceneDesc
+from pywriter.html.html_chapterdesc import HtmlChapterDesc
+from pywriter.csv.csv_scenelist import CsvSceneList
+from pywriter.csv.csv_plotlist import CsvPlotList
 from pywriter.converter.cnv_runner import CnvRunner
 
 
@@ -56,37 +56,37 @@ def run(sourcePath):
     if sourcePath.endswith('_proof.html'):
         suffix = '_proof'
         extension = 'html'
-        sourceDoc = HtmlProofReader(sourcePath)
+        sourceDoc = HtmlProof(sourcePath)
 
     elif sourcePath.endswith('_manuscript.html'):
         suffix = '_manuscript'
         extension = 'html'
-        sourceDoc = HtmlManuscriptReader(sourcePath)
+        sourceDoc = HtmlManuscript(sourcePath)
 
     elif sourcePath.endswith('_scenes.html'):
         suffix = '_scenes'
         extension = 'html'
-        sourceDoc = HtmlSceneDescReader(sourcePath)
+        sourceDoc = HtmlSceneDesc(sourcePath)
 
     elif sourcePath.endswith('_chapters.html'):
         suffix = '_chapters'
         extension = 'html'
-        sourceDoc = HtmlChapterDescReader(sourcePath)
+        sourceDoc = HtmlChapterDesc(sourcePath)
 
     elif sourcePath.endswith('_parts.html'):
         suffix = '_parts'
         extension = 'html'
-        sourceDoc = HtmlChapterDescReader(sourcePath)
+        sourceDoc = HtmlChapterDesc(sourcePath)
 
     elif sourcePath.endswith('_scenelist.csv'):
         suffix = '_scenelist'
         extension = 'csv'
-        sourceDoc = SceneList(sourcePath)
+        sourceDoc = CsvSceneList(sourcePath)
 
     elif sourcePath.endswith('_plotlist.csv'):
         suffix = '_plotlist'
         extension = 'csv'
-        sourceDoc = PlotList(sourcePath)
+        sourceDoc = CsvPlotList(sourcePath)
 
     else:
         suffix = ''

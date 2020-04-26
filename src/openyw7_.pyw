@@ -13,14 +13,14 @@ import os
 import subprocess
 from tkinter import *
 
-from pywriter.fileop.odt_proof_writer import OdtProofWriter
-from pywriter.fileop.odt_manuscript_writer import OdtManuscriptWriter
-from pywriter.fileop.odt_scenedesc_writer import OdtSceneDescWriter
-from pywriter.fileop.odt_chapterdesc_writer import OdtChapterDescWriter
-from pywriter.fileop.odt_partdesc_writer import OdtPartDescWriter
-from pywriter.fileop.scenelist import SceneList
-from pywriter.plot.plotlist import PlotList
-from pywriter.fileop.odt_file_writer import OdtFileWriter
+from pywriter.odt.odt_proof import OdtProof
+from pywriter.odt.odt_manuscript import OdtManuscript
+from pywriter.odt.odt_scenedesc import OdtSceneDesc
+from pywriter.odt.odt_chapterdesc import OdtChapterDesc
+from pywriter.odt.odt_partdesc import OdtPartDesc
+from pywriter.csv.csv_scenelist import CsvSceneList
+from pywriter.csv.csv_plotlist import CsvPlotList
+from pywriter.odt.odt_file import OdtFile
 from pywriter.converter.cnv_runner import CnvRunner
 
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
@@ -66,40 +66,40 @@ def run(sourcePath, suffix):
 
     if suffix == '_proof':
         extension = 'odt'
-        targetDoc = OdtProofWriter(
+        targetDoc = OdtProof(
             sourcePath.split('.yw7')[0] + suffix + '.odt')
 
     elif suffix == '_manuscript':
         extension = 'odt'
-        targetDoc = OdtManuscriptWriter(
+        targetDoc = OdtManuscript(
             sourcePath.split('.yw7')[0] + suffix + '.odt')
 
     elif suffix == '_scenes':
         extension = 'odt'
-        targetDoc = OdtSceneDescWriter(
+        targetDoc = OdtSceneDesc(
             sourcePath.split('.yw7')[0] + suffix + '.odt')
 
     elif suffix == '_chapters':
         extension = 'odt'
-        targetDoc = OdtChapterDescWriter(
+        targetDoc = OdtChapterDesc(
             sourcePath.split('.yw7')[0] + suffix + '.odt')
 
     elif suffix == '_parts':
         extension = 'odt'
-        targetDoc = OdtPartDescWriter(
+        targetDoc = OdtPartDesc(
             sourcePath.split('.yw7')[0] + suffix + '.odt')
 
     elif suffix == '_scenelist':
         extension = 'csv'
-        targetDoc = SceneList(sourcePath.split('.yw7')[0] + suffix + '.csv')
+        targetDoc = CsvSceneList(sourcePath.split('.yw7')[0] + suffix + '.csv')
 
     elif suffix == '_plotlist':
         extension = 'csv'
-        targetDoc = PlotList(sourcePath.split('.yw7')[0] + suffix + '.csv')
+        targetDoc = CsvPlotList(sourcePath.split('.yw7')[0] + suffix + '.csv')
 
     else:
         extension = 'odt'
-        targetDoc = OdtFileWriter(sourcePath.split('.yw7')[0] + '.odt')
+        targetDoc = OdtFile(sourcePath.split('.yw7')[0] + '.odt')
 
     converter = Converter(sourcePath, targetDoc,
                           extension, False, suffix)
