@@ -33,9 +33,11 @@ class Converter(YwCnvGui):
                          extension,
                          suffix)
 
+        # If an Office file exists, delete the temporary file.
+
         if sourcePath.endswith('.html'):
 
-            if os.path.isfile(sourcePath.split('.html')[0] + '.odt'):
+            if os.path.isfile(sourcePath.replace('.html', '.odt')):
                 try:
                     os.remove(sourcePath)
                 except:
@@ -43,7 +45,7 @@ class Converter(YwCnvGui):
 
         elif sourcePath.endswith('.csv'):
 
-            if os.path.isfile(sourcePath.split('.csv')[0] + '.ods'):
+            if os.path.isfile(sourcePath.replace('.csv', '.ods')):
                 try:
                     os.remove(sourcePath)
                 except:
