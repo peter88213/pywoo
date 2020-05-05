@@ -1,4 +1,4 @@
-""" Build python script for the LibreOffice "open yw7" script.
+""" Build python script for the LibreOffice "open yWriter project" script.
         
 In order to distribute single scripts without dependencies, 
 this script "inlines" all modules imported from the pywriter package.
@@ -15,7 +15,7 @@ BUILD = '../test/'
 
 def main():
     os.chdir(SRC)
-    inliner.run('openyw7_.pyw', BUILD + 'openyw7.pyw', 'pywriter')
+    inliner.run('openyw_.pyw', BUILD + 'openyw.pyw', 'pywriter')
     print('Done.')
 
 

@@ -1,8 +1,8 @@
-"""Convert html or csv to yw7. 
+"""Convert html or csv to yWriter project. 
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Depends on the PyWriter library v1.5
+Depends on the PyWriter library v1.6
 
 Copyright (c) 2020 Peter Triesberger.
 For further information see https://github.com/peter88213/PyWriter
@@ -17,10 +17,10 @@ from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
-from pywriter.converter.cnv_runner import CnvRunner
+from pywriter.converter.yw_cnv_gui import YwCnvGui
 
 
-class Converter(CnvRunner):
+class Converter(YwCnvGui):
     """Deletes temporary html or csv file after conversion. """
 
     def convert(self, sourcePath,
@@ -28,10 +28,10 @@ class Converter(CnvRunner):
                 extension,
                 suffix):
 
-        CnvRunner.convert(self, sourcePath,
-                          document,
-                          extension,
-                          suffix)
+        YwCnvGui.convert(self, sourcePath,
+                         document,
+                         extension,
+                         suffix)
 
         if sourcePath.endswith('.html'):
 

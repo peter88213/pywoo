@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="pywriter_oo" basedir=".">
-	<property name="release" value="0.9.5" />
+	<property name="release" value="0.10.0" />
 	<property name="src" location="../src" />
 	<property name="test" location="../test" />
 	<property name="dist" location="../dist" />
@@ -12,13 +12,13 @@
 	<target name="build" description="inline all library modules">
 		
 		<delete dir="${dist}" />
-		<delete file="${test}/saveyw7.pyw" />
-		<delete file="${test}/openyw7.pyw" />
+		<delete file="${test}/saveyw.pyw" />
+		<delete file="${test}/openyw.pyw" />
 			<exec executable="python" failonerror="true">
-			    <arg value="${src}/build_saveyw7_pyw.py"/>
+			    <arg value="${src}/build_saveyw_pyw.py"/>
 			</exec>
 			<exec executable="python" failonerror="true">
-			    <arg value="${src}/build_openyw7_pyw.py"/>
+			    <arg value="${src}/build_openyw_pyw.py"/>
 			</exec>
 	</target>
 
@@ -29,9 +29,9 @@
 		<mkdir dir="${dist}/PyWriter_OO_v${release}/setup" />
 		<mkdir dir="${dist}/PyWriter_OO_v${release}/setup/program" />
 
-		<copy file="${test}/saveyw7.pyw" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
-		<copy file="${test}/openyw7.pyw" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
-		<copy file="${oxt}/WriteYw7-${release}.oxt" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
+		<copy file="${test}/saveyw.pyw" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
+		<copy file="${test}/openyw.pyw" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
+		<copy file="${oxt}/WriteYw-${release}.oxt" todir="${dist}/PyWriter_OO_v${release}/setup/program" />
 		<copy file="${reg}/add_cm.reg" todir="${dist}/PyWriter_OO_v${release}/setup" />
 		<copy file="${reg}/del_cm.reg" todir="${dist}/PyWriter_OO_v${release}/setup" />
 
@@ -46,8 +46,8 @@
 
 	<target name="clean" description="clean up">
 		
-		<delete file="${test}/saveyw7.pyw" />
-		<delete file="${test}/openyw7.pyw" />
+		<delete file="${test}/saveyw.pyw" />
+		<delete file="${test}/openyw.pyw" />
 		
 	</target>
 	

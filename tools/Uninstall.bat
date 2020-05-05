@@ -15,7 +15,7 @@ REM Postconditions:
 REM * Previously auto-installed items of PyWriter Tools are removed.
 REM * The Explorer context menu entry "PyWriter Tools" is removed.
 
-set _release=0.9.5
+set _release=0.10.0
 
 pushd setup
 
@@ -30,7 +30,7 @@ set _OpenOffice3_Userprofile=AppData\Roaming\OpenOffice.org\3\user
 
 
 echo -----------------------------------------------------------------
-echo PyWriter (yWriter to LibreOffice) v%_release%
+echo PyWriter (yWriter to OpenOffice) v%_release%
 echo Installing software package ...
 echo -----------------------------------------------------------------
 
@@ -40,7 +40,7 @@ if exist "%_OpenOffice4_w64%\program\swriter.exe" goto OpenOffice4-Win64
 if exist "%_OpenOffice4_w32%\program\swriter.exe" goto OpenOffice4-Win32
 if exist "%_OpenOffice3_w64%\program\swriter.exe" goto OpenOffice3-Win64
 if exist "%_OpenOffice3_w32%\program\swriter.exe" goto OpenOffice3-Win32
-echo ERROR: No supported version of OpenOffice/LibreOffice found!
+echo ERROR: No supported version of OpenOffice found!
 echo Installation aborted.
 goto end
 
@@ -72,14 +72,14 @@ goto settings_done
 
 echo Deleting program components in %_user%\Scripts\python ...
 
-del /q "%_user%\Scripts\python\saveyw7.pyw"
-del /q "%_user%\Scripts\python\saveyw7.bat"
-del /q "%_user%\Scripts\python\openyw7.pyw"
-del /q c:\pywriter\openyw7.bat
+del /q "%_user%\Scripts\python\saveyw.pyw"
+del /q "%_user%\Scripts\python\saveyw.bat"
+del /q "%_user%\Scripts\python\openyw.pyw"
+del /q c:\pywriter\openyw.bat
 
-echo Removing LibreOffice extension ...
+echo Removing OpenOffice extension ...
 
-"%_writer%\program\unopkg" remove -f WriteYw7-%_release%.oxt
+"%_writer%\program\unopkg" remove -f WriteYw-%_release%.oxt
 
 echo Removing Explorer context menu entry (You may be asked for approval) ...
 

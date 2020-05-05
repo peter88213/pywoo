@@ -38,7 +38,7 @@ Sub Main
 	&apos; ----------------------------------------------------------------------
 	
 	Dim ScriptPath as String
-	ScriptPath = ConvertToURL(Environ(&quot;USERPROFILE&quot;)+&quot;\AppData\Roaming\OpenOffice.org\3\user\Scripts\python\saveyw7.bat&quot;)
+	ScriptPath = ConvertToURL(Environ(&quot;USERPROFILE&quot;)+&quot;\AppData\Roaming\OpenOffice.org\3\user\Scripts\python\saveyw.bat&quot;)
 	
 	shell(ScriptPath, 2, HtmlPath, false)
 	

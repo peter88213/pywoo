@@ -14,9 +14,9 @@ REM
 REM Postconditions: 
 REM * The PyWriter Tools Python scripts are installed in the OpenOffice user profile.
 REM * The OpenOffice extension "WriteYw-<version>" is installed.
-REM * For yWriter7 files, there is an Explorer context menu entry "PyWriter Tools".
+REM * For yWriter files, there is an Explorer context menu entry "PyWriter Tools".
 
-set _release=0.9.5
+set _release=0.10.0
 
 pushd setup
 
@@ -31,7 +31,7 @@ set _OpenOffice3_Userprofile=AppData\Roaming\OpenOffice.org\3\user
 
 
 echo -----------------------------------------------------------------
-echo PyWriter (yWriter to LibreOffice) v%_release%
+echo PyWriter (yWriter to OpenOffice) v%_release%
 echo Installing software package ...
 echo -----------------------------------------------------------------
 
@@ -41,7 +41,7 @@ if exist "%_OpenOffice4_w64%\program\swriter.exe" goto OpenOffice4-Win64
 if exist "%_OpenOffice4_w32%\program\swriter.exe" goto OpenOffice4-Win32
 if exist "%_OpenOffice3_w64%\program\swriter.exe" goto OpenOffice3-Win64
 if exist "%_OpenOffice3_w32%\program\swriter.exe" goto OpenOffice3-Win32
-echo ERROR: No supported version of OpenOffice/LibreOffice found!
+echo ERROR: No supported version of OpenOffice found!
 echo Installation aborted.
 goto end
 
@@ -75,18 +75,18 @@ echo Copying program components to %_user%\Scripts\python ...
 
 if not exist "%_user%\Scripts" mkdir "%_user%\Scripts"
 if not exist "%_user%\Scripts\python" mkdir "%_user%\Scripts\python"
-copy /y program\*.py "%_user%\Scripts\python"
+copy /y program\*.pyw "%_user%\Scripts\python"
 
-echo Installing LibreOffice extension ...
+echo Installing OpenOffice extension ...
 
-"%_writer%\program\unopkg" add -f program\WriteYw7-%_release%.oxt
+"%_writer%\program\unopkg" add -f program\WriteYw-%_release%.oxt
 
 echo Installing Explorer context menu entry (You may be asked for approval) ...
 
 if not exist c:\pywriter mkdir c:\pywriter 
 
-echo start %_user%\Scripts\python\openyw7.pyw %%1 %%2 > c:\pywriter\openyw7.bat
-echo %_user%\Scripts\python\saveyw7.pyw %%1 > %_user%\Scripts\python\saveyw7.bat
+echo start %_user%\Scripts\python\openyw.pyw %%1 %%2 > c:\pywriter\openyw.bat
+echo %_user%\Scripts\python\saveyw.pyw %%1 > %_user%\Scripts\python\saveyw.bat
 
 add_cm.reg
 
@@ -97,8 +97,8 @@ echo #
 echo # Installation of PyWriter software package v%_release% finished.
 echo #
 echo # Operation: 
-echo # Right click your yWriter7 Project file
-echo # and select "Proof read with LibreOffice".
+echo # Right click your yWriter Project file
+echo # and select "PyWriter Tools".
 echo #
 echo -----------------------------------------------------------------
 

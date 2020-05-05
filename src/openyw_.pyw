@@ -1,9 +1,9 @@
-"""Convert yw7 to odt or csv. 
+"""Convert yWriter project to odt or csv. 
 
-Input file format: yw7
+Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Depends on the PyWriter library v1.5
+Depends on the PyWriter library v1.6
 
 Copyright (c) 2020 Peter Triesberger.
 For further information see https://github.com/peter88213/PyWriter
@@ -21,7 +21,7 @@ from pywriter.odt.odt_partdesc import OdtPartDesc
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
 from pywriter.odt.odt_file import OdtFile
-from pywriter.converter.cnv_runner import CnvRunner
+from pywriter.converter.yw_cnv_gui import YwCnvGui
 
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
@@ -29,7 +29,7 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
 
-class Converter(CnvRunner):
+class Converter(YwCnvGui):
     """Standalone yWriter 7 converter with a simple GUI. """
 
     def convert(self, sourcePath,
@@ -37,12 +37,14 @@ class Converter(CnvRunner):
                 extension,
                 suffix):
 
-        CnvRunner.convert(self, sourcePath,
-                          document,
-                          extension,
-                          suffix)
+        YwCnvGui.convert(self, sourcePath,
+                         document,
+                         extension,
+                         suffix)
 
-        if self._success and sourcePath.endswith('.yw7'):
+        fileName, FileExtension = os.path.splitext(sourcePath)
+
+        if self._success and FileExtension in ['.yw5', '.yw6', 'yw7']:
             self._newFile = document.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -111,7 +113,9 @@ if __name__ == '__main__':
     except:
         sourcePath = ''
 
-    if sourcePath.endswith('.yw7'):
+    fileName, FileExtension = os.path.splitext(sourcePath)
+
+    if FileExtension in ['.yw5', '.yw6', 'yw7']:
         try:
             suffix = sys.argv[2]
         except:

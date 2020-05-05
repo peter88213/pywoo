@@ -1,4 +1,4 @@
-""" Build python script for the LibreOffice "save to yw7" script.
+""" Build python script for the LibreOffice "save to yWriter" script.
         
 In order to distribute single scripts without dependencies, 
 this script "inlines" all modules imported from the pywriter package.
@@ -15,7 +15,7 @@ BUILD = '../test/'
 
 def main():
     os.chdir(SRC)
-    inliner.run('saveyw7_.pyw', BUILD + 'saveyw7.pyw', 'pywriter')
+    inliner.run('saveyw_.pyw', BUILD + 'saveyw.pyw', 'pywriter')
     print('Done.')
 
 
