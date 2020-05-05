@@ -44,7 +44,7 @@ class Converter(YwCnvGui):
 
         fileName, FileExtension = os.path.splitext(sourcePath)
 
-        if self._success and FileExtension in ['.yw5', '.yw6', 'yw7']:
+        if self._success and FileExtension in ['.yw5', '.yw6', '.yw7']:
             self._newFile = document.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -66,42 +66,44 @@ class Converter(YwCnvGui):
 
 def run(sourcePath, suffix):
 
+    fileName, FileExtension = os.path.splitext(sourcePath)
+
     if suffix == '_proof':
         extension = 'odt'
         targetDoc = OdtProof(
-            sourcePath.split('.yw7')[0] + suffix + '.odt')
+            fileName + suffix + '.odt')
 
     elif suffix == '_manuscript':
         extension = 'odt'
         targetDoc = OdtManuscript(
-            sourcePath.split('.yw7')[0] + suffix + '.odt')
+            fileName + suffix + '.odt')
 
     elif suffix == '_scenes':
         extension = 'odt'
         targetDoc = OdtSceneDesc(
-            sourcePath.split('.yw7')[0] + suffix + '.odt')
+            fileName + suffix + '.odt')
 
     elif suffix == '_chapters':
         extension = 'odt'
         targetDoc = OdtChapterDesc(
-            sourcePath.split('.yw7')[0] + suffix + '.odt')
+            fileName + suffix + '.odt')
 
     elif suffix == '_parts':
         extension = 'odt'
         targetDoc = OdtPartDesc(
-            sourcePath.split('.yw7')[0] + suffix + '.odt')
+            fileName + suffix + '.odt')
 
     elif suffix == '_scenelist':
         extension = 'csv'
-        targetDoc = CsvSceneList(sourcePath.split('.yw7')[0] + suffix + '.csv')
+        targetDoc = CsvSceneList(fileName + suffix + '.csv')
 
     elif suffix == '_plotlist':
         extension = 'csv'
-        targetDoc = CsvPlotList(sourcePath.split('.yw7')[0] + suffix + '.csv')
+        targetDoc = CsvPlotList(fileName + suffix + '.csv')
 
     else:
         extension = 'odt'
-        targetDoc = OdtFile(sourcePath.split('.yw7')[0] + '.odt')
+        targetDoc = OdtFile(fileName + '.odt')
 
     converter = Converter(sourcePath, targetDoc,
                           extension, False, suffix)
@@ -115,7 +117,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if FileExtension in ['.yw5', '.yw6', 'yw7']:
+    if FileExtension in ['.yw5', '.yw6', '.yw7']:
         try:
             suffix = sys.argv[2]
         except:
@@ -124,4 +126,4 @@ if __name__ == '__main__':
         print(run(sourcePath, suffix))
 
     else:
-        print('ERROR: File is not an yWriter 7 project.')
+        print('ERROR: File is not an yWriter project.')
