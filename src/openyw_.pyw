@@ -70,28 +70,23 @@ def run(sourcePath, suffix):
 
     if suffix == '_proof':
         extension = 'odt'
-        targetDoc = OdtProof(
-            fileName + suffix + '.odt')
+        targetDoc = OdtProof(fileName + suffix + '.odt')
 
     elif suffix == '_manuscript':
         extension = 'odt'
-        targetDoc = OdtManuscript(
-            fileName + suffix + '.odt')
+        targetDoc = OdtManuscript(fileName + suffix + '.odt')
 
     elif suffix == '_scenes':
         extension = 'odt'
-        targetDoc = OdtSceneDesc(
-            fileName + suffix + '.odt')
+        targetDoc = OdtSceneDesc(fileName + suffix + '.odt')
 
     elif suffix == '_chapters':
         extension = 'odt'
-        targetDoc = OdtChapterDesc(
-            fileName + suffix + '.odt')
+        targetDoc = OdtChapterDesc(fileName + suffix + '.odt')
 
     elif suffix == '_parts':
         extension = 'odt'
-        targetDoc = OdtPartDesc(
-            fileName + suffix + '.odt')
+        targetDoc = OdtPartDesc(fileName + suffix + '.odt')
 
     elif suffix == '_scenelist':
         extension = 'csv'
