@@ -20,6 +20,9 @@ from pywriter.odt.odt_chapterdesc import OdtChapterDesc
 from pywriter.odt.odt_partdesc import OdtPartDesc
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
+from pywriter.csv.csv_charlist import CsvCharList
+from pywriter.csv.csv_loclist import CsvLocList
+from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.odt.odt_file import OdtFile
 from pywriter.converter.yw_cnv_gui import YwCnvGui
 
@@ -95,6 +98,18 @@ def run(sourcePath, suffix):
     elif suffix == '_plotlist':
         extension = 'csv'
         targetDoc = CsvPlotList(fileName + suffix + '.csv')
+
+    elif suffix == '_charlist':
+        extension = 'csv'
+        targetDoc = CsvCharList(fileName + suffix + '.csv')
+
+    elif suffix == '_loclist':
+        extension = 'csv'
+        targetDoc = CsvLocList(fileName + suffix + '.csv')
+
+    elif suffix == '_itemlist':
+        extension = 'csv'
+        targetDoc = CsvItemList(fileName + suffix + '.csv')
 
     else:
         extension = 'odt'

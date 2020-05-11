@@ -17,6 +17,9 @@ from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
+from pywriter.csv.csv_charlist import CsvCharList
+from pywriter.csv.csv_loclist import CsvLocList
+from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.converter.yw_cnv_gui import YwCnvGui
 
 
@@ -89,6 +92,21 @@ def run(sourcePath):
         suffix = '_plotlist'
         extension = 'csv'
         sourceDoc = CsvPlotList(sourcePath)
+
+    elif sourcePath.endswith('_charlist.csv'):
+        suffix = '_charlist'
+        extension = 'csv'
+        sourceDoc = CsvCharList(sourcePath)
+
+    elif sourcePath.endswith('_loclist.csv'):
+        suffix = '_loclist'
+        extension = 'csv'
+        sourceDoc = CsvLocList(sourcePath)
+
+    elif sourcePath.endswith('_itemlist.csv'):
+        suffix = '_itemlist'
+        extension = 'csv'
+        sourceDoc = CsvItemList(sourcePath)
 
     else:
         suffix = ''
