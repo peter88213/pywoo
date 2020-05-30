@@ -13,8 +13,7 @@ import os
 import subprocess
 from tkinter import *
 
-from pywriter.globals import (PROOF_SUFFIX, MANUSCRIPT_SUFFIX, SCENEDESC_SUFFIX, CHAPTERDESC_SUFFIX,
-                              PARTDESC_SUFFIX, SCENELIST_SUFFIX, PLOTLIST_SUFFIX, CHARLIST_SUFFIX, LOCLIST_SUFFIX, ITEMLIST_SUFFIX)
+from pywriter.globals import *
 from pywriter.odt.odt_proof import OdtProof
 from pywriter.odt.odt_manuscript import OdtManuscript
 from pywriter.odt.odt_scenedesc import OdtSceneDesc
