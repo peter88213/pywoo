@@ -13,6 +13,8 @@ import os
 import subprocess
 from tkinter import *
 
+from pywriter.globals import (PROOF_SUFFIX, MANUSCRIPT_SUFFIX, SCENEDESC_SUFFIX, CHAPTERDESC_SUFFIX,
+                              PARTDESC_SUFFIX, SCENELIST_SUFFIX, PLOTLIST_SUFFIX, CHARLIST_SUFFIX, LOCLIST_SUFFIX, ITEMLIST_SUFFIX)
 from pywriter.odt.odt_proof import OdtProof
 from pywriter.odt.odt_manuscript import OdtManuscript
 from pywriter.odt.odt_scenedesc import OdtSceneDesc
@@ -71,43 +73,43 @@ def run(sourcePath, suffix):
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if suffix == '_proof':
+    if suffix == PROOF_SUFFIX:
         extension = 'odt'
         targetDoc = OdtProof(fileName + suffix + '.odt')
 
-    elif suffix == '_manuscript':
+    elif suffix == MANUSCRIPT_SUFFIX:
         extension = 'odt'
         targetDoc = OdtManuscript(fileName + suffix + '.odt')
 
-    elif suffix == '_scenes':
+    elif suffix == SCENEDESC_SUFFIX:
         extension = 'odt'
         targetDoc = OdtSceneDesc(fileName + suffix + '.odt')
 
-    elif suffix == '_chapters':
+    elif suffix == CHAPTERDESC_SUFFIX:
         extension = 'odt'
         targetDoc = OdtChapterDesc(fileName + suffix + '.odt')
 
-    elif suffix == '_parts':
+    elif suffix == PARTDESC_SUFFIX:
         extension = 'odt'
         targetDoc = OdtPartDesc(fileName + suffix + '.odt')
 
-    elif suffix == '_scenelist':
+    elif suffix == SCENELIST_SUFFIX:
         extension = 'csv'
         targetDoc = CsvSceneList(fileName + suffix + '.csv')
 
-    elif suffix == '_plotlist':
+    elif suffix == PLOTLIST_SUFFIX:
         extension = 'csv'
         targetDoc = CsvPlotList(fileName + suffix + '.csv')
 
-    elif suffix == '_charlist':
+    elif suffix == CHARLIST_SUFFIX:
         extension = 'csv'
         targetDoc = CsvCharList(fileName + suffix + '.csv')
 
-    elif suffix == '_loclist':
+    elif suffix == LOCLIST_SUFFIX:
         extension = 'csv'
         targetDoc = CsvLocList(fileName + suffix + '.csv')
 
-    elif suffix == '_itemlist':
+    elif suffix == ITEMLIST_SUFFIX:
         extension = 'csv'
         targetDoc = CsvItemList(fileName + suffix + '.csv')
 

@@ -11,6 +11,10 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import sys
 import os
 
+from pywriter.globals import (PROOF_HTML, MANUSCRIPT_HTML, SCENEDESC_HTML, CHAPTERDESC_HTML,
+                              PARTDESC_HTML, SCENELIST_CSV, PLOTLIST_CSV, CHARLIST_CSV, LOCLIST_CSV, ITEMLIST_CSV)
+from pywriter.globals import (PROOF_SUFFIX, MANUSCRIPT_SUFFIX, SCENEDESC_SUFFIX, CHAPTERDESC_SUFFIX,
+                              PARTDESC_SUFFIX, SCENELIST_SUFFIX, PLOTLIST_SUFFIX, CHARLIST_SUFFIX, LOCLIST_SUFFIX, ITEMLIST_SUFFIX)
 from pywriter.html.html_proof import HtmlProof
 from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
@@ -21,6 +25,12 @@ from pywriter.csv.csv_charlist import CsvCharList
 from pywriter.csv.csv_loclist import CsvLocList
 from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.converter.yw_cnv_gui import YwCnvGui
+
+TAILS = [PROOF_HTML, MANUSCRIPT_HTML, SCENEDESC_HTML,
+         CHAPTERDESC_HTML, PARTDESC_HTML, SCENELIST_CSV,
+         PLOTLIST_CSV, CHARLIST_CSV, LOCLIST_CSV, ITEMLIST_CSV]
+
+YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 class Converter(YwCnvGui):
@@ -58,53 +68,53 @@ class Converter(YwCnvGui):
 def run(sourcePath):
     sourcePath = sourcePath.replace('file:///', '').replace('%20', ' ')
 
-    if sourcePath.endswith('_proof.html'):
-        suffix = '_proof'
+    if sourcePath.endswith(PROOF_HTML):
+        suffix = PROOF_SUFFIX
         extension = 'html'
         sourceDoc = HtmlProof(sourcePath)
 
-    elif sourcePath.endswith('_manuscript.html'):
-        suffix = '_manuscript'
+    elif sourcePath.endswith(MANUSCRIPT_HTML):
+        suffix = MANUSCRIPT_SUFFIX
         extension = 'html'
         sourceDoc = HtmlManuscript(sourcePath)
 
-    elif sourcePath.endswith('_scenes.html'):
-        suffix = '_scenes'
+    elif sourcePath.endswith(SCENEDESC_HTML):
+        suffix = SCENEDESC_SUFFIX
         extension = 'html'
         sourceDoc = HtmlSceneDesc(sourcePath)
 
-    elif sourcePath.endswith('_chapters.html'):
-        suffix = '_chapters'
+    elif sourcePath.endswith(CHAPTERDESC_HTML):
+        suffix = CHAPTERDESC_SUFFIX
         extension = 'html'
         sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith('_parts.html'):
-        suffix = '_parts'
+    elif sourcePath.endswith(PARTDESC_HTML):
+        suffix = PARTDESC_SUFFIX
         extension = 'html'
         sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith('_scenelist.csv'):
-        suffix = '_scenelist'
+    elif sourcePath.endswith(SCENELIST_CSV):
+        suffix = SCENELIST_SUFFIX
         extension = 'csv'
         sourceDoc = CsvSceneList(sourcePath)
 
-    elif sourcePath.endswith('_plotlist.csv'):
-        suffix = '_plotlist'
+    elif sourcePath.endswith(PLOTLIST_CSV):
+        suffix = PLOTLIST_SUFFIX
         extension = 'csv'
         sourceDoc = CsvPlotList(sourcePath)
 
-    elif sourcePath.endswith('_charlist.csv'):
-        suffix = '_charlist'
+    elif sourcePath.endswith(CHARLIST_CSV):
+        suffix = CHARLIST_SUFFIX
         extension = 'csv'
         sourceDoc = CsvCharList(sourcePath)
 
-    elif sourcePath.endswith('_loclist.csv'):
-        suffix = '_loclist'
+    elif sourcePath.endswith(LOCLIST_CSV):
+        suffix = LOCLIST_SUFFIX
         extension = 'csv'
         sourceDoc = CsvLocList(sourcePath)
 
-    elif sourcePath.endswith('_itemlist.csv'):
-        suffix = '_itemlist'
+    elif sourcePath.endswith(ITEMLIST_CSV):
+        suffix = ITEMLIST_SUFFIX
         extension = 'csv'
         sourceDoc = CsvItemList(sourcePath)
 
