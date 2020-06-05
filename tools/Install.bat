@@ -17,7 +17,7 @@ REM * The OpenOffice extension "WriteYw-<version>" is installed.
 REM * For yWriter files, there is an Explorer context menu entry "PyWriter Tools".
 REM * There is a batch file in c:\pywriter to invoke the Python interpreter.
 
-set _release=0.11.0
+set _release=0.11.1
 
 pushd setup
 
