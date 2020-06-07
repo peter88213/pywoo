@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Depends on the PyWriter library v1.6
+Depends on the PyWriter library v1.9
 
 Copyright (c) 2020, peter88213
 For further information see https://github.com/peter88213/PyWriter
@@ -16,6 +16,7 @@ from pywriter.html.html_proof import HtmlProof
 from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
+from pywriter.html.html_import import HtmlImport
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
 from pywriter.csv.csv_charlist import CsvCharList
@@ -83,6 +84,11 @@ def run(sourcePath):
         suffix = PARTDESC_SUFFIX
         extension = 'html'
         sourceDoc = HtmlChapterDesc(sourcePath)
+
+    elif sourcePath.endswith('.html'):
+        suffix = ''
+        extension = 'html'
+        sourceDoc = HtmlImport(sourcePath)
 
     elif sourcePath.endswith(SCENELIST_SUFFIX + '.csv'):
         suffix = SCENELIST_SUFFIX
