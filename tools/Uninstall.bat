@@ -15,7 +15,8 @@ REM Postconditions:
 REM * Previously auto-installed items of PyWriter Tools are removed.
 REM * The Explorer context menu entry "PyWriter Tools" is removed.
 
-set _release=0.12.0
+set _release=@release
+set _oxt=@oxt_file
 
 pushd setup
 
@@ -31,7 +32,7 @@ set _OpenOffice3_Userprofile=AppData\Roaming\OpenOffice.org\3\user
 
 echo -----------------------------------------------------------------
 echo PyWriter (yWriter to OpenOffice) v%_release%
-echo Installing software package ...
+echo Deinstalling software package ...
 echo -----------------------------------------------------------------
 
 rem Detect combination of Windows and Office 
@@ -75,11 +76,11 @@ echo Deleting program components in %_user%\Scripts\python ...
 del /q "%_user%\Scripts\python\saveyw.pyw"
 del /q "%_user%\Scripts\python\saveyw.bat"
 del /q "%_user%\Scripts\python\openyw.pyw"
-del /q c:\pywriter\openyw.bat
+del /q c:\pywriter\openyw_o.bat
 
 echo Removing OpenOffice extension ...
 
-"%_writer%\program\unopkg" remove -f WriteYw-%_release%.oxt
+"%_writer%\program\unopkg" remove -f %_oxt%
 
 echo Removing Explorer context menu entry (You may be asked for approval) ...
 

@@ -1,204 +1,22 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter]
-"MUIVerb"="PyWriter Tools"
-"subcommands"=""
+[HKEY_CLASSES_ROOT\yWriter6\shell\Proof read with OpenOffice]
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell]
+[HKEY_CLASSES_ROOT\yWriter6\shell\Proof read with OpenOffice\command]
+@="\"C:\\pywriter\\openyw_o.bat\" \"%1\" _proof"
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\00proof]
-@="Proof reading"
+[HKEY_CLASSES_ROOT\yWriter7\shell\Proof read with OpenOffice]
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\00proof\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _proof"
+[HKEY_CLASSES_ROOT\yWriter7\shell\Proof read with OpenOffice\command]
+@="\"C:\\pywriter\\openyw_o.bat\" \"%1\" _proof"
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\01manuscript]
-@="Manuscript"
+[HKEY_CLASSES_ROOT\yWriter6\shell\Export to OpenOffice]
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\01manuscript\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _manuscript"
+[HKEY_CLASSES_ROOT\yWriter6\shell\Export to OpenOffice\command]
+@="\"C:\\pywriter\\openyw_o.bat\" \"%1\""
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\02scenedesc]
-@="Scene Descriptions"
+[HKEY_CLASSES_ROOT\yWriter7\shell\Export to OpenOffice]
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\02scenedesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenes"
+[HKEY_CLASSES_ROOT\yWriter7\shell\Export to OpenOffice\command]
+@="\"C:\\pywriter\\openyw_o.bat\" \"%1\""
 
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\03chapterdesc]
-@="Chapter Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\03chapterdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _chapters"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\04partdesc]
-@="Part Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\04partdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _parts"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\05scenelist]
-@="Scene List"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\05scenelist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenelist"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\06plotlist]
-@="Plot List"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\06plotlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _plotlist"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\07export]
-@="Export to odt"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\08export\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\""
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\08charlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _charlist"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\09loclist]
-@="Location List"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\09loclist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _loclist"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\10itemlist]
-@="Item List"
-
-[HKEY_CLASSES_ROOT\yWriter7\shell\0pywriter\shell\10itemlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _itemlist"
-
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter]
-"MUIVerb"="PyWriter Tools"
-"subcommands"=""
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell]
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\00proof]
-@="Proof reading"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\00proof\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _proof"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\01manuscript]
-@="Manuscript"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\01manuscript\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _manuscript"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\02scenedesc]
-@="Scene Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\02scenedesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenes"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\03chapterdesc]
-@="Chapter Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\03chapterdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _chapters"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\04partdesc]
-@="Part Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\04partdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _parts"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\05scenelist]
-@="Scene List"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\05scenelist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenelist"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\06plotlist]
-@="Plot List"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\06plotlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _plotlist"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\07export]
-@="Export to odt"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\07export\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\""
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\08charlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _charlist"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\09loclist]
-@="Location List"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\09loclist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _loclist"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\10itemlist]
-@="Item List"
-
-[HKEY_CLASSES_ROOT\yWriter6\shell\0pywriter\shell\10itemlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _itemlist"
-
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter]
-"MUIVerb"="PyWriter Tools"
-"subcommands"=""
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell]
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\00proof]
-@="Proof reading"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\00proof\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _proof"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\01scenedesc]
-@="Scene Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\01scenedesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenes"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\02chapterdesc]
-@="Chapter Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\02chapterdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _chapters"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\03partdesc]
-@="Part Descriptions"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\03partdesc\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _parts"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\04scenelist]
-@="Scene List"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\04scenelist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _scenelist"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\05plotlist]
-@="Plot List"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\05plotlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _plotlist"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\06export]
-@="Export to odt"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\06export\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\""
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\08charlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _charlist"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\09loclist]
-@="Location List"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\09loclist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _loclist"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\10itemlist]
-@="Item List"
-
-[HKEY_CLASSES_ROOT\yWriter5\shell\0pywriter\shell\10itemlist\command]
-@="\"C:\\pywriter\\openyw.bat\" \"%1\" _itemlist"

@@ -2,6 +2,15 @@
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
 <script:module xmlns:script="http://openoffice.org/2000/script" script:name="OdsYw" script:language="StarBasic" script:moduleType="normal">REM  *****  BASIC  *****
 
+&apos; OdsYw - OpenOffice macro for yWriter file export 
+&apos; 
+&apos; Save an ods file as csv and call an external Python 3 script
+&apos; via batch file to convert the csv file to yWriter format.
+&apos; 
+&apos; Copyright (c) 2020, peter88213
+&apos; For further information see https://github.com/peter88213/pywoo
+&apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
+
 Sub Main
 
 	dim document   as object
@@ -37,9 +46,8 @@ Sub Main
 	dispatcher.executeDispatch(document, &quot;.uno:SaveAs&quot;, &quot;&quot;, 0, args1())
 	
 	&apos; ----------------------------------------------------------------------
-	&apos; Run batch script to convert to yw7
+	&apos; Call a batch script to convert to yw7
 	&apos; ----------------------------------------------------------------------
-	
 	Dim ScriptPath as String
 	ScriptPath = ConvertToURL(Environ(&quot;USERPROFILE&quot;)+&quot;\AppData\Roaming\OpenOffice.org\3\user\Scripts\python\saveyw.bat&quot;)
 	

@@ -13,11 +13,12 @@ REM * OpenOffice 3.x or 4.x is installed.
 REM
 REM Postconditions: 
 REM * The PyWriter Tools Python scripts are installed in the OpenOffice user profile.
-REM * The OpenOffice extension "WriteYw-<version>" is installed.
+REM * The OpenOffice extension "SaveYw-<version>" is installed.
 REM * For yWriter files, there is an Explorer context menu entry "PyWriter Tools".
 REM * There is a batch file in c:\pywriter to invoke the Python interpreter.
 
-set _release=0.12.0
+set _release=@release
+set _oxt=@oxt_file
 
 pushd setup
 
@@ -80,13 +81,13 @@ copy /y program\*.pyw "%_user%\Scripts\python"
 
 echo Installing OpenOffice extension ...
 
-"%_writer%\program\unopkg" add -f program\WriteYw-%_release%.oxt
+"%_writer%\program\unopkg" add -f program\%_oxt%
 
 echo Installing Explorer context menu entry (You may be asked for approval) ...
 
 if not exist c:\pywriter mkdir c:\pywriter 
 
-echo start %_user%\Scripts\python\openyw.pyw %%1 %%2 > c:\pywriter\openyw.bat
+echo start %_user%\Scripts\python\openyw.pyw %%1 %%2 > c:\pywriter\openyw_o.bat
 echo %_user%\Scripts\python\saveyw.pyw %%1 > %_user%\Scripts\python\saveyw.bat
 
 add_cm.reg
