@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.14.0
+Version 0.15.0
 
 Copyright (c) 2020, peter88213
 For further information see https://github.com/peter88213/PyWriter
@@ -1581,6 +1581,7 @@ class Novel():
                 lines.append('  ScID:' + str(scId) + '\n')
 
         return ''.join(lines)
+from html import escape
 
 
 def to_odt(text):
@@ -1597,21 +1598,32 @@ def to_odt(text):
                 line = '[i]' + line
                 italics = False
 
-            if line.count('[i]') > line.count('[/i]'):
+            while line.count('[i]') > line.count('[/i]'):
                 line += '[/i]'
                 italics = True
+
+            while line.count('[/i]') > line.count('[i]'):
+                line = '[i]' + line
+
+            line = line.replace('[i][/i]', '')
 
             if bold:
                 line = '[b]' + line
                 bold = False
 
-            if line.count('[b]') > line.count('[/b]'):
+            while line.count('[b]') > line.count('[/b]'):
                 line += '[/b]'
                 bold = True
+
+            while line.count('[/b]') > line.count('[b]'):
+                line = '[b]' + line
+
+            line = line.replace('[b][/b]', '')
 
             newlines.append(line)
 
         text = '\n'.join(newlines)
+        text = escape(text)
         text = text.rstrip().replace(
             '\n', '</text:p>\n<text:p text:style-name="First_20_line_20_indent">')
         text = text.replace(
@@ -1620,7 +1632,6 @@ def to_odt(text):
         text = text.replace(
             '[b]', '<text:span text:style-name="Strong_20_Emphasis">')
         text = text.replace('[/b]', '</text:span>')
-        text = text.replace('&', '&amp;')
 
     except:
         pass
@@ -3715,7 +3726,7 @@ from tkinter import messagebox
 
 import xml.etree.ElementTree as ET
 
-import html
+from html import unescape
 
 EM_DASH = '—'
 EN_DASH = '–'
@@ -3777,8 +3788,7 @@ def xml_postprocess(filePath, fileEncoding, cdataTags: list):
     newXml = ''.join(newlines)
     newXml = newXml.replace('[CDATA[ \n', '[CDATA[')
     newXml = newXml.replace('\n]]', ']]')
-    newXml = newXml.replace('&amp;', '&')
-    newXml = html.unescape(newXml)
+    newXml = unescape(newXml)
 
     try:
         with open(filePath, 'w', encoding=fileEncoding) as f:
