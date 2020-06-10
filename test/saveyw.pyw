@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.13.0
+Version 0.14.0
 
 Copyright (c) 2020, peter88213
 For further information see https://github.com/peter88213/PyWriter
@@ -3244,6 +3244,8 @@ class YwNewFile(Novel):
         if novel.fieldTitle4 is not None:
             self.fieldTitle4 = novel.fieldTitle4
 
+        self.srtChapters = novel.srtChapters
+
         # Merge attributes at chapter level.
 
         if novel.chapters != {}:
@@ -3565,7 +3567,7 @@ class YwNewFile(Novel):
 
         chapters = ET.SubElement(root, 'CHAPTERS')
 
-        for chId in self.chapters:
+        for chId in self.srtChapters:
             chp = ET.SubElement(chapters, 'CHAPTER')
             ET.SubElement(chp, 'ID').text = chId
 
