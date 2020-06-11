@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.16.0
+Version 0.17.0
 
 Copyright (c) 2020, peter88213
 For further information see https://github.com/peter88213/PyWriter
@@ -4012,10 +4012,17 @@ class YwFile(Novel):
         if prj.find('Desc') is not None:
             self.desc = prj.find('Desc').text
 
-        self.fieldTitle1 = prj.find('FieldTitle1').text
-        self.fieldTitle2 = prj.find('FieldTitle2').text
-        self.fieldTitle3 = prj.find('FieldTitle3').text
-        self.fieldTitle4 = prj.find('FieldTitle4').text
+        if prj.find('FieldTitle1') is not None:
+            self.fieldTitle1 = prj.find('FieldTitle1').text
+
+        if prj.find('FieldTitle2') is not None:
+            self.fieldTitle2 = prj.find('FieldTitle2').text
+
+        if prj.find('FieldTitle3') is not None:
+            self.fieldTitle3 = prj.find('FieldTitle3').text
+
+        if prj.find('FieldTitle4') is not None:
+            self.fieldTitle4 = prj.find('FieldTitle4').text
 
         # Read attributes at chapter level from the xml element tree.
 
@@ -4034,7 +4041,8 @@ class YwFile(Novel):
             else:
                 self.chapters[chId].chLevel = 0
 
-            self.chapters[chId].chType = int(chp.find('Type').text)
+            if chp.find('Type') is not None:
+                self.chapters[chId].chType = int(chp.find('Type').text)
 
             if chp.find('Unused') is not None:
                 self.chapters[chId].isUnused = True
@@ -4163,26 +4171,29 @@ class YwFile(Novel):
             if scn.find('Outcome') is not None:
                 self.scenes[scId].outcome = scn.find('Outcome').text
 
-            for crId in scn.find('Characters').iter('CharID'):
+            if scn.find('Characters') is not None:
+                for crId in scn.find('Characters').iter('CharID'):
 
-                if self.scenes[scId].characters is None:
-                    self.scenes[scId].characters = []
+                    if self.scenes[scId].characters is None:
+                        self.scenes[scId].characters = []
 
-                self.scenes[scId].characters.append(crId.text)
+                    self.scenes[scId].characters.append(crId.text)
 
-            for lcId in scn.find('Locations').iter('LocID'):
+            if scn.find('Locations') is not None:
+                for lcId in scn.find('Locations').iter('LocID'):
 
-                if self.scenes[scId].locations is None:
-                    self.scenes[scId].locations = []
+                    if self.scenes[scId].locations is None:
+                        self.scenes[scId].locations = []
 
-                self.scenes[scId].locations.append(lcId.text)
+                    self.scenes[scId].locations.append(lcId.text)
 
-            for itId in scn.find('Items').iter('ItemID'):
+            if scn.find('Items') is not None:
+                for itId in scn.find('Items').iter('ItemID'):
 
-                if self.scenes[scId].items is None:
-                    self.scenes[scId].items = []
+                    if self.scenes[scId].items is None:
+                        self.scenes[scId].items = []
 
-                self.scenes[scId].items.append(itId.text)
+                    self.scenes[scId].items.append(itId.text)
 
         return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
 
@@ -5224,6 +5235,12 @@ class YwNewFile(Novel):
             if self.scenes[scId].title is not None:
                 ET.SubElement(scn, 'Title').text = self.scenes[scId].title
 
+            for chId in self.chapters:
+
+                if scId in self.chapters[chId].srtScenes:
+                    ET.SubElement(scn, 'BelongsToChID').text = chId
+                    break
+
             if self.scenes[scId].desc is not None:
                 ET.SubElement(scn, 'Desc').text = self.scenes[scId].desc
 
@@ -5302,9 +5319,13 @@ class YwNewFile(Novel):
 
         chapters = ET.SubElement(root, 'CHAPTERS')
 
+        sortOrder = 0
+
         for chId in self.srtChapters:
+            sortOrder += 1
             chp = ET.SubElement(chapters, 'CHAPTER')
             ET.SubElement(chp, 'ID').text = chId
+            ET.SubElement(chp, 'SortOrder').text = str(sortOrder)
 
             if self.chapters[chId].title is not None:
                 ET.SubElement(chp, 'Title').text = self.chapters[chId].title
