@@ -7,7 +7,7 @@
 &apos; Save an odt file as html and call an external Python 3 script
 &apos; via batch file to convert the html file to yWriter format.
 &apos; 
-&apos; Copyright (c) 2020, peter88213
+&apos; Copyright (c) 2020 Peter Triesberger
 &apos; For further information see https://github.com/peter88213/pywoo
 &apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
