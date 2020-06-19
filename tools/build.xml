@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="pywriter_oo" basedir=".">
-	<property name="release" value="0.17.1" />
-	<property name="oxt_file" value="SaveYw-1.0.0.oxt" />
+	<property name="release" value="0.18.0" />
+	<property name="oxt_file" value="SaveYw-1.0.1.oxt" />
 	
 	<property name="oxt" location="../oxt" />
 	<property name="src" location="../src" />
@@ -53,13 +53,8 @@
 		<copy file="../LICENSE" todir="${dist}/PyWriter_OO_v${release}" />
 
 		<zip destfile="${dist}/PyWriter_OO_v${release}.zip" basedir="${dist}/PyWriter_OO_v${release}" />
+
 	</target>
 
-	<target name="clean" description="clean up">
-		
-		<!--delete file="${test}/saveyw.pyw" /-->
-		<!--delete file="${test}/openyw.pyw" /-->
-		
-	</target>
 	
 </project>

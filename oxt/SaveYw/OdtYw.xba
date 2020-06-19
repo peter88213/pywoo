@@ -25,6 +25,7 @@ Sub Main
 	document   = ThisComponent.CurrentController.Frame
 	dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
 	OdtPath = ThisComponent.getURL()
+	OdtPath = REPLACE(OdtPath,&quot;.html&quot;,&quot;.odt&quot;)
 	HtmlPath = REPLACE(OdtPath,&quot;.odt&quot;,&quot;.html&quot;)
 	&apos; Use path and name of input file -- just change file extension
 	

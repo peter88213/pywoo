@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.17.1
+Version 0.18.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -4031,8 +4031,15 @@ class YwFile(Novel):
         for chp in root.iter('CHAPTER'):
             chId = chp.find('ID').text
             self.chapters[chId] = Chapter()
-            self.chapters[chId].title = chp.find('Title').text
             self.srtChapters.append(chId)
+
+            self.chapters[chId].title = chp.find('Title').text
+
+            if self.chapters[chId].title.startswith('@'):
+                self.chapters[chId].suppressChapterTitle = True
+
+            else:
+                self.chapters[chId].suppressChapterTitle = False
 
             if chp.find('Desc') is not None:
                 self.chapters[chId].desc = chp.find('Desc').text
@@ -4056,12 +4063,8 @@ class YwFile(Novel):
 
                 if fields.find('Field_SuppressChapterTitle') is not None:
 
-                    if (fields.find('Field_SuppressChapterTitle').text == '1'
-                            or self.chapters[chId].title.startswith('@')):
+                    if fields.find('Field_SuppressChapterTitle').text == '1':
                         self.chapters[chId].suppressChapterTitle = True
-
-                    else:
-                        self.chapters[chId].suppressChapterTitle = False
 
                 if fields.find('Field_IsTrash') is not None:
 
@@ -4097,6 +4100,7 @@ class YwFile(Novel):
         for scn in root.iter('SCENE'):
             scId = scn.find('ID').text
             self.scenes[scId] = Scene()
+
             self.scenes[scId].title = scn.find('Title').text
 
             if scn.find('Desc') is not None:

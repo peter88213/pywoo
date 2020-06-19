@@ -17,12 +17,14 @@ from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
 from pywriter.html.html_import import HtmlImport
+from pywriter.html.html_outline import HtmlOutline
 from pywriter.csv.csv_scenelist import CsvSceneList
 from pywriter.csv.csv_plotlist import CsvPlotList
 from pywriter.csv.csv_charlist import CsvCharList
 from pywriter.csv.csv_loclist import CsvLocList
 from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.converter.yw_cnv_gui import YwCnvGui
+from pywriter.html.html_form import *
 
 
 class Converter(YwCnvGui):
@@ -88,7 +90,20 @@ def run(sourcePath):
     elif sourcePath.endswith('.html'):
         suffix = ''
         extension = 'html'
-        sourceDoc = HtmlImport(sourcePath)
+        result = read_html_file(sourcePath)
+
+        if 'SUCCESS' in result[0]:
+
+            if "<h3" in result[1].lower():
+                sourceDoc = HtmlOutline(sourcePath)
+
+            else:
+                sourceDoc = HtmlImport(sourcePath)
+
+        else:
+            suffix = ''
+            extension = ''
+            sourceDoc = None
 
     elif sourcePath.endswith(SCENELIST_SUFFIX + '.csv'):
         suffix = SCENELIST_SUFFIX
