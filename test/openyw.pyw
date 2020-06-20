@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.18.4
+Version 0.18.5
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -1935,6 +1935,8 @@ class OdtProof(OdtFile):
 
         return 'SUCCESS: Content written to "content.xml"'
 
+from urllib.parse import quote
+
 
 
 class OdtManuscript(OdtFile):
@@ -1953,8 +1955,8 @@ class OdtManuscript(OdtFile):
                 - the scene content.
         Return a message beginning with SUCCESS or ERROR.
         """
-        sceneDescPath = '../' + os.path.basename(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(MANUSCRIPT_SUFFIX, SCENEDESC_SUFFIX)
+        sceneDescPath = '../' + quote(os.path.basename(self.filePath).replace(
+            '\\', '/'), '/:').replace(MANUSCRIPT_SUFFIX, SCENEDESC_SUFFIX)
         chapterDescPath = [sceneDescPath.replace(SCENEDESC_SUFFIX, CHAPTERDESC_SUFFIX),
                            sceneDescPath.replace(SCENEDESC_SUFFIX, PARTDESC_SUFFIX)]
 
@@ -2058,6 +2060,7 @@ class OdtManuscript(OdtFile):
 
 
 
+
 class OdtSceneDesc(OdtFile):
     """OpenDocument xml scene summaries file representation."""
 
@@ -2077,8 +2080,8 @@ class OdtSceneDesc(OdtFile):
                 - the scene summary.
         Return a message beginning with SUCCESS or ERROR.
         """
-        manuscriptPath = '../' + os.path.basename(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(SCENEDESC_SUFFIX, MANUSCRIPT_SUFFIX)
+        manuscriptPath = '../' + quote(os.path.basename(self.filePath).replace(
+            '\\', '/'), '/:').replace(SCENEDESC_SUFFIX, MANUSCRIPT_SUFFIX)
         chapterDescPath = [manuscriptPath.replace(MANUSCRIPT_SUFFIX, CHAPTERDESC_SUFFIX),
                            manuscriptPath.replace(MANUSCRIPT_SUFFIX, PARTDESC_SUFFIX)]
 
@@ -2178,6 +2181,7 @@ class OdtSceneDesc(OdtFile):
 
 
 
+
 class OdtChapterDesc(OdtFile):
     """OpenDocument xml manuscript file representation."""
 
@@ -2195,8 +2199,8 @@ class OdtChapterDesc(OdtFile):
             - the chapter summary.
         Return a message beginning with SUCCESS or ERROR.
         """
-        manuscriptPath = '../' + os.path.basename(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(CHAPTERDESC_SUFFIX, MANUSCRIPT_SUFFIX)
+        manuscriptPath = '../' + quote(os.path.basename(self.filePath).replace(
+            '\\', '/'), '/:').replace(CHAPTERDESC_SUFFIX, MANUSCRIPT_SUFFIX)
         partDescPath = manuscriptPath.replace(
             MANUSCRIPT_SUFFIX, PARTDESC_SUFFIX)
         linkPath = [manuscriptPath, partDescPath]
@@ -2262,6 +2266,7 @@ class OdtChapterDesc(OdtFile):
 
 
 
+
 class OdtPartDesc(OdtFile):
     """OpenDocument xml manuscript file representation."""
 
@@ -2279,8 +2284,8 @@ class OdtPartDesc(OdtFile):
             - the "part" (i.e. chapter) summary.
         Return a message beginning with SUCCESS or ERROR.
         """
-        manuscriptPath = '../' + os.path.basename(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(PARTDESC_SUFFIX, MANUSCRIPT_SUFFIX)
+        manuscriptPath = '../' + quote(os.path.basename(self.filePath).replace(
+            '\\', '/'), '/:').replace(PARTDESC_SUFFIX, MANUSCRIPT_SUFFIX)
 
         lines = [self._CONTENT_XML_HEADER]
         lines.append(self._ODT_TITLE_START + self.title + self._ODT_PARA_END)
@@ -2339,6 +2344,7 @@ class OdtPartDesc(OdtFile):
             return 'ERROR: Cannot write "content.xml".'
 
         return 'SUCCESS: Content written to "content.xml"'
+
 
 
 
@@ -2727,8 +2733,8 @@ class CsvSceneList(Novel):
         """Generate a csv file containing a row per scene
         Return a message beginning with SUCCESS or ERROR.
         """
-        odtPath = os.path.realpath(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(SCENELIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
+        odtPath = quote(os.path.realpath(self.filePath).replace(
+            '\\', '/'), '/:').replace(SCENELIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
 
         # first record: the table's column headings
 
@@ -2906,6 +2912,7 @@ class CsvSceneList(Novel):
     def get_structure(self):
         """This file format has no comparable structure."""
         return None
+
 
 
 
@@ -3150,8 +3157,8 @@ class CsvPlotList(Novel):
         Return a message beginning with SUCCESS or ERROR.
         """
 
-        odtPath = os.path.realpath(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(PLOTLIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
+        odtPath = quote(os.path.realpath(self.filePath).replace(
+            '\\', '/'), '/:').replace(PLOTLIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
 
         # first record: the table's column headings
 

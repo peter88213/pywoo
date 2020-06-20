@@ -10,6 +10,8 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import sys
 import os
 
+from urllib.parse import unquote
+
 from pywriter.html.html_outline import HtmlOutline
 from pywriter.converter.yw_cnv_gui import YwCnvGui
 
@@ -40,7 +42,7 @@ class Converter(YwCnvGui):
 
 def run(sourcePath):
 
-    sourcePath = sourcePath.replace('file:///', '').replace('%20', ' ')
+    sourcePath = unquote(sourcePath.replace('file:///', ''))
     fileName, FileExtension = os.path.splitext(sourcePath)
 
     if FileExtension == '.html':

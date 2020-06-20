@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.18.4
+Version 0.18.5
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -10,6 +10,8 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 """
 import sys
 import os
+
+from urllib.parse import unquote
 
 
 MANUSCRIPT_SUFFIX = '_manuscript'
@@ -904,6 +906,8 @@ class HtmlOutline(HtmlManuscript):
         return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
 
 
+from urllib.parse import quote
+
 
 
 class CsvSceneList(Novel):
@@ -1157,8 +1161,8 @@ class CsvSceneList(Novel):
         """Generate a csv file containing a row per scene
         Return a message beginning with SUCCESS or ERROR.
         """
-        odtPath = os.path.realpath(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(SCENELIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
+        odtPath = quote(os.path.realpath(self.filePath).replace(
+            '\\', '/'), '/:').replace(SCENELIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
 
         # first record: the table's column headings
 
@@ -1340,6 +1344,7 @@ class CsvSceneList(Novel):
 
 
 
+
 class CsvPlotList(Novel):
     """csv file representation of an yWriter project's scenes table. 
 
@@ -1513,8 +1518,8 @@ class CsvPlotList(Novel):
         Return a message beginning with SUCCESS or ERROR.
         """
 
-        odtPath = os.path.realpath(self.filePath).replace('\\', '/').replace(
-            ' ', '%20').replace(PLOTLIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
+        odtPath = quote(os.path.realpath(self.filePath).replace(
+            '\\', '/'), '/:').replace(PLOTLIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
 
         # first record: the table's column headings
 
@@ -4082,7 +4087,7 @@ class Converter(YwCnvGui):
 
 
 def run(sourcePath):
-    sourcePath = sourcePath.replace('file:///', '').replace('%20', ' ')
+    sourcePath = unquote(sourcePath.replace('file:///', ''))
 
     if sourcePath.endswith(PROOF_SUFFIX + '.html'):
         suffix = PROOF_SUFFIX
