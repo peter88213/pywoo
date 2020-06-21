@@ -20,7 +20,7 @@
 * The yWriter 6/7 project to rewrite must exist in the same folder as the document.
 * If both yw6 and yw7 project files exist, yw7 is rewritten. 
 
-### Import from yw6/7 project 
+### Export to odt from yw6/7 project 
 
 Generate a "standard manuscript" formatted OpenDocument textfile from an yWriter 6/7 project.
 
@@ -64,14 +64,7 @@ An outline has at least one third level heading.
 
 2. Unzip `PyWriter_OO_<version number>.zip` within your user profile.
 
-3. Move into the `PyWriter_OO_<version number>` folder and run `Install.bat` (double click).
-   This will copy all needed files to the right places, install an OpenOffice extension.
-   You may be asked for approval to modify the Windows registry. Please accept in order to 
-   install Explorer context menu entries for yWriter7 files.
-
-4. Start OpenOffice Writer. You should see a small toolbar window containing a button with
-   a yWriter logo. This button is for writing the proofread file back to the yWriter project.
-   Dock this toolbar anywhere for your convenience. 
+3. Move into the `PyWriter_OO_<version number>` folder and run `Install.bat` (double click). This will copy all needed files to the right places, install an OpenOffice extension. You may be asked for approval to modify the Windows registry. Please accept in order to install Explorer context menu entries for yWriter7 files.
 
 ## How to use
 
@@ -79,20 +72,29 @@ An outline has at least one third level heading.
 
 1. Write your novel with yWriter. Please consider the conventions descripted above. Backup entire project and close yWriter.
 
-2. Move into your yWriter project folder, and right-click your .yw6 or .yw7 project file. 
-   In the context menu, choose `Proof reading`. 
+2. Move into your yWriter project folder, and right-click your .yw6 or .yw7 project file. In the context menu, select `Proof read with OpenOffice`. 
    
-3. If everything goes well, you find an OpenDocument file named `<your yWriter project>_proof.odt`.
-   Open it (double click) for proof reading. The proof reading document contains Chapter `[ChID:x]`
-   and scene `[ScID:y]` markers according to yWriter 5 standard.  __Do not touch lines
-   containing the markers__  if you want to be able to reimport the document into yWriter. 
+3. If everything goes well, you find an OpenDocument file named `<your yWriter project>_proof.odt`. Open it (double click) for proof reading. The proof reading document contains Chapter `[ChID:x]` and scene `[ScID:y]` markers according to yWriter 5 standard.  __Do not touch lines containing the markers__  if you want to be able to reimport the document into yWriter. 
 
-4. In order to write back the proofread scenes to the yWriter project, klick the toolbar button
-   with the yWriter logo, or select the menu item 
-   `Tools > Add-ons > yWriter export > Write proofed scenes back to yWriter`.
+4. In order to write back the proofread scenes to the yWriter project, select the menu item `File > Export to yWriter`.
 
- 
- 
+### Exporting from yw6/7 project 
+
+1. Write your novel with yWriter. Backup entire project and close yWriter.
+
+2. Move into your yWriter project folder, and right-click your .yw6 or .yw7 project file. In the context menu, select `Export to OpenOffice`. 
+   
+3. If everything goes well, you find an OpenDocument file named `<your yWriter project>.odt`. 
+
+
+### Creating a new yw7 project 
+
+1. Open your work in progress or outline in OpenOffice writer. Please consider the conventions descripted above. 
+
+2. Select the menu item `File > Export to yWriter`.
+
+3. Close OpenOffice Writer. If everything goes well, you find a new yWriter project named `<your document>.yw7`.
+
 ## Requirements
 
 * Windows
