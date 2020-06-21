@@ -26,6 +26,9 @@ from pywriter.csv.csv_loclist import CsvLocList
 from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.odt.odt_file import OdtFile
 from pywriter.converter.yw_cnv_gui import YwCnvGui
+from pywriter.odt.odt_characters import OdtCharacters
+from pywriter.odt.odt_items import OdtItems
+from pywriter.odt.odt_locations import OdtLocations
 
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
@@ -91,6 +94,18 @@ def run(sourcePath, suffix):
     elif suffix == PARTDESC_SUFFIX:
         extension = 'odt'
         targetDoc = OdtPartDesc(fileName + suffix + '.odt')
+
+    elif suffix == CHARDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtCharacters(fileName + suffix + '.odt')
+
+    elif suffix == LOCDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtLocations(fileName + suffix + '.odt')
+
+    elif suffix == ITEMDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtItems(fileName + suffix + '.odt')
 
     elif suffix == SCENELIST_SUFFIX:
         extension = 'csv'

@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.18.5
+Version 0.19.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -18,9 +18,16 @@ MANUSCRIPT_SUFFIX = '_manuscript'
 PARTDESC_SUFFIX = '_parts'
 CHAPTERDESC_SUFFIX = '_chapters'
 SCENEDESC_SUFFIX = '_scenes'
+
+CHARDESC_SUFFIX = '_characters'
+LOCDESC_SUFFIX = '_locations'
+ITEMDESC_SUFFIX = '_items'
+
 PROOF_SUFFIX = '_proof'
+
 SCENELIST_SUFFIX = '_scenelist'
 PLOTLIST_SUFFIX = '_plotlist'
+
 CHARLIST_SUFFIX = '_charlist'
 LOCLIST_SUFFIX = '_loclist'
 ITEMLIST_SUFFIX = '_itemlist'
@@ -5691,6 +5698,256 @@ class YwCnvGui(YwCnv):
     def edit(self):
         pass
 
+
+
+class OdtCharacters(OdtFile):
+    """OpenDocument xml character descriptions file representation."""
+
+    def write_content_xml(self):
+        """Write character descriptions to "content.xml".
+
+
+        Generate "content.xml" containing:
+        - book title,
+        - character sections containing:
+            - the character description.
+        Return a message beginning with SUCCESS or ERROR.
+        """
+
+        lines = [self._CONTENT_XML_HEADER]
+        lines.append(self._ODT_TITLE_START + self.title +
+                     self._ODT_PARA_END)
+        lines.append(self._ODT_SUBTITLE_START +
+                     'Characters' + self._ODT_PARA_END)
+
+        for crId in self.characters:
+
+            # Write character title as heading
+
+            if self.characters[crId].aka:
+                aka = ' ("' + self.characters[crId].aka + '")'
+
+            else:
+                aka = ''
+
+            if self.characters[crId].fullName:
+                fullName = '/' + self.characters[crId].fullName
+
+            else:
+                fullName = ''
+
+            lines.append(
+                self._ODT_HEADING_STARTS[0] + self.characters[crId].title + fullName + aka + self._ODT_HEADING_END)
+
+            lines.append(
+                self._ODT_HEADING_STARTS[2] + 'Description' + self._ODT_HEADING_END)
+
+            # Write invisible "start character description" tag.
+
+            lines.append(
+                '<text:section text:style-name="Sect1" text:name="CrID_desc:' + crId + '">')
+
+            if self.characters[crId].desc is not None:
+
+                # Write character description.
+
+                lines.append(self._ODT_FIRST_PARA_START +
+                             to_odt(self.characters[crId].desc) + self._ODT_PARA_END)
+
+            else:
+                lines.append(self._ODT_FIRST_PARA_START + self._ODT_PARA_END)
+
+            # Write invisible "end character description" tag.
+
+            lines.append('</text:section>')
+
+            lines.append(
+                self._ODT_HEADING_STARTS[2] + 'Bio' + self._ODT_HEADING_END)
+
+            # Write invisible "start character bio" tag.
+
+            lines.append(
+                '<text:section text:style-name="Sect1" text:name="CrID_bio:' + crId + '">')
+
+            if self.characters[crId].bio is not None:
+
+                # Write character bio.
+
+                lines.append(self._ODT_FIRST_PARA_START +
+                             to_odt(self.characters[crId].bio) + self._ODT_PARA_END)
+
+            else:
+                lines.append(self._ODT_FIRST_PARA_START + self._ODT_PARA_END)
+
+            # Write invisible "end character bio" tag.
+
+            lines.append('</text:section>')
+
+            lines.append(
+                self._ODT_HEADING_STARTS[2] + 'Goals' + self._ODT_HEADING_END)
+
+            # Write invisible "start character goals" tag.
+
+            lines.append(
+                '<text:section text:style-name="Sect1" text:name="CrID_goals:' + crId + '">')
+
+            if self.characters[crId].goals is not None:
+
+                # Write character goals.
+
+                lines.append(self._ODT_FIRST_PARA_START +
+                             to_odt(self.characters[crId].goals) + self._ODT_PARA_END)
+
+            else:
+                lines.append(self._ODT_FIRST_PARA_START + self._ODT_PARA_END)
+
+            # Write invisible "end character goals" tag.
+
+            lines.append('</text:section>')
+
+        lines.append(self._CONTENT_XML_FOOTER)
+        text = '\n'.join(lines)
+
+        try:
+            with open(self._TEMPDIR + '/content.xml', 'w', encoding='utf-8') as f:
+                f.write(text)
+
+        except:
+            return 'ERROR: Cannot write "content.xml".'
+
+        return 'SUCCESS: Content written to "content.xml"'
+
+
+
+class OdtItems(OdtFile):
+    """OpenDocument xml item descriptions file representation."""
+
+    def write_content_xml(self):
+        """Write item descriptions to "content.xml".
+
+
+        Generate "content.xml" containing:
+        - book title,
+        - item sections containing:
+            - the item description.
+        Return a message beginning with SUCCESS or ERROR.
+        """
+
+        lines = [self._CONTENT_XML_HEADER]
+        lines.append(self._ODT_TITLE_START + self.title +
+                     self._ODT_PARA_END)
+        lines.append(self._ODT_SUBTITLE_START +
+                     'Items' + self._ODT_PARA_END)
+
+        for itId in self.items:
+
+            # Write item title as heading
+
+            if self.items[itId].aka:
+                aka = ' ("' + self.items[itId].aka + '")'
+
+            else:
+                aka = ''
+
+            lines.append(
+                self._ODT_HEADING_STARTS[0] + self.items[itId].title + aka + self._ODT_HEADING_END)
+
+            # Write invisible "start item" tag.
+
+            lines.append(
+                '<text:section text:style-name="Sect1" text:name="ItID:' + itId + '">')
+
+            if self.items[itId].desc is not None:
+
+                # Write item description.
+
+                lines.append(self._ODT_FIRST_PARA_START +
+                             to_odt(self.items[itId].desc) + self._ODT_PARA_END)
+
+            else:
+                lines.append(self._ODT_FIRST_PARA_START + self._ODT_PARA_END)
+
+            # Write invisible "end item" tag.
+
+            lines.append('</text:section>')
+
+        lines.append(self._CONTENT_XML_FOOTER)
+        text = '\n'.join(lines)
+
+        try:
+            with open(self._TEMPDIR + '/content.xml', 'w', encoding='utf-8') as f:
+                f.write(text)
+
+        except:
+            return 'ERROR: Cannot write "content.xml".'
+
+        return 'SUCCESS: Content written to "content.xml"'
+
+
+
+class OdtLocations(OdtFile):
+    """OpenDocument xml location descriptions file representation."""
+
+    def write_content_xml(self):
+        """Write location descriptions to "content.xml".
+
+
+        Generate "content.xml" containing:
+        - book title,
+        - location sections containing:
+            - the location description.
+        Return a message beginning with SUCCESS or ERROR.
+        """
+        lines = [self._CONTENT_XML_HEADER]
+        lines.append(self._ODT_TITLE_START + self.title +
+                     self._ODT_PARA_END)
+        lines.append(self._ODT_SUBTITLE_START +
+                     'Locations' + self._ODT_PARA_END)
+
+        for lcId in self.locations:
+
+            # Write location title as heading
+
+            if self.locations[lcId].aka:
+                aka = ' ("' + self.locations[lcId].aka + '")'
+
+            else:
+                aka = ''
+
+            lines.append(
+                self._ODT_HEADING_STARTS[0] + self.locations[lcId].title + aka + self._ODT_HEADING_END)
+
+            # Write invisible "start location" tag.
+
+            lines.append(
+                '<text:section text:style-name="Sect1" text:name="LcID:' + lcId + '">')
+
+            if self.locations[lcId].desc is not None:
+
+                # Write location description.
+
+                lines.append(self._ODT_FIRST_PARA_START +
+                             to_odt(self.locations[lcId].desc) + self._ODT_PARA_END)
+
+            else:
+                lines.append(self._ODT_FIRST_PARA_START + self._ODT_PARA_END)
+
+            # Write invisible "end location" tag.
+
+            lines.append('</text:section>')
+
+        lines.append(self._CONTENT_XML_FOOTER)
+        text = '\n'.join(lines)
+
+        try:
+            with open(self._TEMPDIR + '/content.xml', 'w', encoding='utf-8') as f:
+                f.write(text)
+
+        except:
+            return 'ERROR: Cannot write "content.xml".'
+
+        return 'SUCCESS: Content written to "content.xml"'
+
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files/OpenOffice 4/program/swriter.exe',
@@ -5755,6 +6012,18 @@ def run(sourcePath, suffix):
     elif suffix == PARTDESC_SUFFIX:
         extension = 'odt'
         targetDoc = OdtPartDesc(fileName + suffix + '.odt')
+
+    elif suffix == CHARDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtCharacters(fileName + suffix + '.odt')
+
+    elif suffix == LOCDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtLocations(fileName + suffix + '.odt')
+
+    elif suffix == ITEMDESC_SUFFIX:
+        extension = 'odt'
+        targetDoc = OdtItems(fileName + suffix + '.odt')
 
     elif suffix == SCENELIST_SUFFIX:
         extension = 'csv'

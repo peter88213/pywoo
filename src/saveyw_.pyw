@@ -18,6 +18,9 @@ from pywriter.html.html_proof import HtmlProof
 from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
+from pywriter.html.html_characters import HtmlCharacters
+from pywriter.html.html_locations import HtmlLocations
+from pywriter.html.html_items import HtmlItems
 from pywriter.html.html_import import HtmlImport
 from pywriter.html.html_outline import HtmlOutline
 from pywriter.csv.csv_scenelist import CsvSceneList
@@ -88,6 +91,21 @@ def run(sourcePath):
         suffix = PARTDESC_SUFFIX
         extension = 'html'
         sourceDoc = HtmlChapterDesc(sourcePath)
+
+    elif sourcePath.endswith(CHARDESC_SUFFIX + '.html'):
+        suffix = CHARDESC_SUFFIX
+        extension = 'html'
+        sourceDoc = HtmlCharacters(sourcePath)
+
+    elif sourcePath.endswith(LOCDESC_SUFFIX + '.html'):
+        suffix = LOCDESC_SUFFIX
+        extension = 'html'
+        sourceDoc = HtmlLocations(sourcePath)
+
+    elif sourcePath.endswith(ITEMDESC_SUFFIX + '.html'):
+        suffix = ITEMDESC_SUFFIX
+        extension = 'html'
+        sourceDoc = HtmlItems(sourcePath)
 
     elif sourcePath.endswith('.html'):
         suffix = ''
