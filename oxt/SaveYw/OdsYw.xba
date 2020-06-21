@@ -48,8 +48,25 @@ Sub Main
 	&apos; ----------------------------------------------------------------------
 	&apos; Call a batch script to convert to yw7
 	&apos; ----------------------------------------------------------------------
+	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
+	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.SaveYw&quot;)
+
+	Dim FileNo As Integer
+	Dim BatchDir, Filename, Batchcommand As String
+		
+	BatchDir = ConvertFromURL(sPackageLocation)
+	Filename = BatchDir + &quot;\python\saveyw.bat&quot;
+	Batchcommand = BatchDir + &quot;\python\saveyw.pyw %1&quot;
+
+	FileNo = FreeFile               		&apos; Establish free file handle
+	
+	Open Filename For Output As #FileNo     &apos; Open file (writing mode)
+	Print #FileNo, Batchcommand      		&apos; Save line
+	Close #FileNo                  			&apos; Close file
+	
+	
 	Dim ScriptPath as String
-	ScriptPath = ConvertToURL(Environ(&quot;USERPROFILE&quot;)+&quot;\AppData\Roaming\OpenOffice.org\3\user\Scripts\python\saveyw.bat&quot;)
+	ScriptPath = ConvertToURL(Filename)
 	
 	shell(ScriptPath, 2, CsvPath, false)
 
