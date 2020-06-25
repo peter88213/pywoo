@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="OpenYw" script:language="StarBasic">REM  *****  BASIC  *****
+
+&apos; OpenYw - OpenOffice macros for yWriter file import 
+&apos; 
+&apos; Save an ods file as csv and call an external Python 3 script
+&apos; via batch file to convert the csv file to yWriter format.
+&apos; 
+&apos; Copyright (c) 2020 Peter Triesberger
+&apos; For further information see https://github.com/peter88213/pywoo
+&apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
+
+sub import_yw
+
+end sub
+
+
+sub proof_yw
+
+end sub
+
+
+
+sub get_manuscript
+
+end sub
+
+
+
+sub get_scenedesc
+
+end sub
+
+
+sub get_chapterdesc
+
+end sub
+
+
+sub get_partdesc
+
+end sub
+
+
+sub get_chardesc
+
+end sub
+
+
+sub get_locdesc
+
+end sub
+
+
+sub get_itemdesc
+
+end sub
+
+
+sub get_scenelist
+
+end sub
+
+
+sub get_charlist
+
+end sub
+
+
+sub get_loclist
+
+end sub
+
+
+sub get_itemlist
+
+end sub
+
+
+sub get_plotlist
+
+end sub
+
+
+
+
+
+
+
+
+</script:module>

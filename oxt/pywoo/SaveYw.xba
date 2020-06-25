@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
-<script:module xmlns:script="http://openoffice.org/2000/script" script:name="OdsYw" script:language="StarBasic" script:moduleType="normal">REM  *****  BASIC  *****
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="SaveYw" script:language="StarBasic">REM  *****  BASIC  *****
 
 &apos; OdsYw - OpenOffice macro for yWriter file export 
 &apos; 
@@ -11,7 +11,7 @@
 &apos; For further information see https://github.com/peter88213/pywoo
 &apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
-Sub Main
+Sub OdsYw
 
 	dim document   as object
 	dim dispatcher as object
@@ -69,6 +69,79 @@ Sub Main
 	ScriptPath = ConvertToURL(Filename)
 	
 	shell(ScriptPath, 2, CsvPath, false)
+
+DontSave:
+
+end Sub
+
+REM  *****  BASIC  *****
+
+&apos; OdtYw - OpenOffice macro for yWriter file export 
+&apos; 
+&apos; Save an odt file as html and call an external Python 3 script
+&apos; via batch file to convert the html file to yWriter format.
+&apos; 
+&apos; Copyright (c) 2020 Peter Triesberger
+&apos; For further information see https://github.com/peter88213/pywoo
+&apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
+
+Sub OdtYw
+
+	dim document   as object
+	dim dispatcher as object
+	dim DocPath as string
+	
+	On Error goto DontSave
+	
+	&apos; ----------------------------------------------------------------------
+	&apos; Save document in HTML format
+	&apos; ----------------------------------------------------------------------
+	document   = ThisComponent.CurrentController.Frame
+	dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
+	OdtPath = ThisComponent.getURL()
+	OdtPath = REPLACE(OdtPath,&quot;.html&quot;,&quot;.odt&quot;)
+	HtmlPath = REPLACE(OdtPath,&quot;.odt&quot;,&quot;.html&quot;)
+	&apos; Use path and name of input file -- just change file extension
+	
+	dim args1(1) as new com.sun.star.beans.PropertyValue
+	args1(0).Name = &quot;URL&quot;
+	args1(0).Value = HtmlPath
+	args1(1).Name = &quot;FilterName&quot;
+	args1(1).Value = &quot;HTML (StarWriter)&quot;
+	dispatcher.executeDispatch(document, &quot;.uno:SaveAs&quot;, &quot;&quot;, 0, args1())
+	
+	&apos; ----------------------------------------------------------------------
+	&apos; Save document in OpenDocument format
+	&apos; ----------------------------------------------------------------------
+	args1(0).Value = OdtPath
+	args1(1).Value = &quot;writer8&quot;
+	dispatcher.executeDispatch(document, &quot;.uno:SaveAs&quot;, &quot;&quot;, 0, args1())
+	
+	&apos; ----------------------------------------------------------------------
+	&apos; Call a batch script to convert to yw7
+	&apos; ----------------------------------------------------------------------
+	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
+	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.SaveYw&quot;)
+
+	Dim FileNo As Integer
+	Dim BatchDir, Filename, Batchcommand As String
+		
+	BatchDir = ConvertFromURL(sPackageLocation)
+	Filename = BatchDir + &quot;\python\saveyw.bat&quot;
+	Batchcommand = BatchDir + &quot;\python\saveyw.pyw %1&quot;
+
+	FileNo = FreeFile               		&apos; Establish free file handle
+	
+	Open Filename For Output As #FileNo     &apos; Open file (writing mode)
+	Print #FileNo, Batchcommand      		&apos; Save line
+	Close #FileNo                  			&apos; Close file
+	
+	
+	Dim ScriptPath as String
+	ScriptPath = ConvertToURL(Filename)
+	
+	shell(ScriptPath, 2, HtmlPath, false)
+	
 
 DontSave:
 
