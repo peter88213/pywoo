@@ -1,6 +1,6 @@
-# The pywoo tools for OpenOffice: Import and export yWriter 6/7 projects with Python
+# The pywoo extension for OpenOffice: Import and export yWriter 6/7 projects
 
-## Features
+## Features (a Python 3 installation is required)
 
 ### yWriter5 style proof reading
 
