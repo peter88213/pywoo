@@ -159,7 +159,7 @@ Sub open_yw(suffix As String, new_ext As String)
 
 	batch_file = ConvertToURL(batch_file)
 
-	shell(batch_file, 2, file_path + &quot; &quot; + suffix, false)
+	shell(batch_file, 2, &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix, false)
 
 End Sub
 

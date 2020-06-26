@@ -101,7 +101,7 @@ Sub export_yw
 	
 	batch_file = ConvertToURL(batch_file)
 	
-	shell(batch_file, 2, ConvertFromURL(temp_path), false)
+	shell(batch_file, 2, &quot;&quot;&quot;&quot; + ConvertFromURL(temp_path) + &quot;&quot;&quot;&quot;, false)
 	
 
 DontSave:
