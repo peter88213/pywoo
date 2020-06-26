@@ -147,14 +147,11 @@ Sub open_yw(suffix As String, new_ext As String)
     &apos; ----------------------------------------------------------------------
     Dim batch_file As String
 
-
-
     batch_file = script_dir + &quot;\python\openyw.bat&quot;
-	batch_cmd = script_dir + &quot;\python\openyw.pyw %1 %2&quot;
     file_no = FreeFile
 	Open batch_file For Output As #file_no
-	Print #file_no, &quot;cd &quot; + script_dir
-	Print #file_no, batch_cmd	
+	Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
+	Print #file_no, &quot;openyw.pyw %1 %2&quot;	
 	Close #file_no
 
 	batch_file = ConvertToURL(batch_file)
