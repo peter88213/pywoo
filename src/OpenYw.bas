@@ -1,100 +1,152 @@
 REM  *****  BASIC  *****
 
-' OpenYw - OpenOffice macro for yWriter file import 
-' 
+' OpenYw - OpenOffice macro for yWriter file import
+'
 ' Copyright (c) 2020 Peter Triesberger
 ' For further information see https://github.com/peter88213/pywoo
 ' Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
-sub import_yw
-open_yw7("", ".odt")
-end sub
+Sub import_yw
+	open_yw("", ".odt")
+End Sub
+
+Sub proof_yw
+    open_yw("_proof", ".odt")
+End Sub
+
+Sub get_manuscript
+    open_yw("_manuscript", ".odt")
+End Sub
+
+Sub get_scenedesc
+    open_yw("_scenes", ".odt")
+End Sub
+
+Sub get_chapterdesc
+    open_yw("_chapters", ".odt")
+End Sub
+
+Sub get_partdesc
+    open_yw("_parts", ".odt")
+End Sub
+
+Sub get_chardesc
+    open_yw("_characters", ".odt")
+End Sub
+
+Sub get_locdesc
+    open_yw("_locations", ".odt")
+End Sub
+
+Sub get_itemdesc
+    open_yw("_items", ".odt")
+End Sub
+
+Sub get_scenelist
+    open_yw("_scenelist", ".csv")
+End Sub
+
+Sub get_charlist
+    open_yw("_charlist", ".csv")
+End Sub
+
+Sub get_loclist
+    open_yw("_loclist", ".csv")
+End Sub
+
+Sub get_itemlist
+    open_yw("_itemlist", ".csv")
+End Sub
+
+Sub get_plotlist
+    open_yw("_plotlist", ".csv")
+End Sub
 
 
-sub proof_yw
-open_yw7("_proof", ".odt")
-end sub
+Sub open_yw(suffix As String, new_ext As String)
+    ' ----------------------------------------------------------------------
+    ' Set last opened yWriter project As default (if existing).
+    ' ----------------------------------------------------------------------
+	oPackageInfoProvider = GetDefaultContext.getByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
+	sPackageLocation = oPackageInfoProvider.getPackageLocation("org.peter88213.pywoo")
+
+    Dim file_no As Integer
+	Dim script_dir, ini_file, yw_last_open, default_file As String
+
+	script_dir = ConvertFromURL(sPackageLocation)
+	ini_file = script_dir + "\python\pywoo.ini"
+
+    If FileExists(ini_file) Then
+        file_no = FreeFile
+        Open ini_file For Input As #file_no
+        Line Input #file_no, yw_last_open
+        Close #file_no
+
+        If FileExists(yw_last_open) Then
+            default_file = yw_last_open
+        End If
+
+    End If
+
+    ' ----------------------------------------------------------------------
+    ' Ask for yWriter 6 or 7 project to open:
+    ' ----------------------------------------------------------------------
+    Dim file_dialog As Object
+    Dim file_path As String
+
+    GlobalScope.BasicLibraries.LoadLibrary("Tools")
+    file_dialog = CreateUnoService("com.sun.star.ui.dialogs.FilePicker")
 
 
+    Dim filterNames(2) As String
 
-sub get_manuscript
-open_yw7("_manuscript", ".odt")
-end sub
+    filterNames(0) = "*.yw7"
+    filterNames(1) = "*.yw6"
 
+    AddFiltersToDialog(FilterNames(), file_dialog)
+    file_dialog.SetDisplayDirectory(default_file)
+    open_status = file_dialog.Execute()
 
+    If open_status = 1 Then
+        file_path = file_dialog.Files(0)
+	    ' ----------------------------------------------------------------------
+	    ' Store selected yWriter project as "last opened".
+	    ' ----------------------------------------------------------------------
+	    file_no = FreeFile
+		Open ini_file For Output As #file_no
+		Print #file_no, file_path
+		Close #file_no
+    End If
 
-sub get_scenedesc
-open_yw7("_scenes", ".odt")
-end sub
-
-
-sub get_chapterdesc
-open_yw7("_chapters", ".odt")
-end sub
-
-
-sub get_partdesc
-open_yw7("_parts", ".odt")
-end sub
-
-
-sub get_chardesc
-open_yw7("_characters", ".odt")
-end sub
+    file_dialog.Dispose()
 
 
-sub get_locdesc
-open_yw7("_locations", ".odt")
-end sub
+    ' ----------------------------------------------------------------------
+    ' Check whether import file is already open in OpenOffice.
+    ' ----------------------------------------------------------------------
+    Dim lock_file As String
+
+    file_path = ConvertFromURL(file_path)
 
 
-sub get_itemdesc
-open_yw7("_items", ".odt")
-end sub
+    ' ----------------------------------------------------------------------
+    ' Open yWriter project and convert data.
+    ' ----------------------------------------------------------------------
+    Dim batch_file As String
 
+    batch_file = script_dir + "\python\openyw.bat"
+	batch_cmd = script_dir + "\python\openyw.pyw %1 %2"
+    file_no = FreeFile
+	Open batch_file For Output As #file_no
+	Print #file_no, "cd " + script_dir
+	Print #file_no, batch_cmd	
+	Close #file_no
 
-sub get_scenelist
-open_yw7("_scenelist", ".csv")
-end sub
+	batch_file = ConvertToURL(batch_file)
 
+	shell(batch_file, 2, file_path + " " + suffix, false)
 
-sub get_charlist
-open_yw7("_charlist", ".csv")
-end sub
-
-
-sub get_loclist
-open_yw7("_loclist", ".csv")
-end sub
-
-
-sub get_itemlist
-open_yw7("_itemlist", ".csv")
-end sub
-
-
-sub get_plotlist
-open_yw7("_plotlist", ".csv")
-end sub
-
-
-sub open_yw(suffix As String, newExt As String)
-
-' Set last opened yWriter project as default (if existing).
-
-
-' Ask for yWriter 6 or 7 project to open:
-
-
-' Store selected yWriter project as "last opened".
-
-
-' Check if import file is already open in OpenOffice.
-
-
-' Open yWriter project and convert data.
-
-end sub
+End Sub
 
 
 

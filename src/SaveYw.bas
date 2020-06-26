@@ -10,9 +10,9 @@ Sub OdsYw
 ' Save an ods file as csv and call an external Python 3 script
 ' via batch file to convert the csv file to yWriter format.
 
-	dim document   as object
-	dim dispatcher as object
-	dim DocPath as string
+	Dim document   As object
+	Dim dispatcher As object
+	Dim ods_path, csv_path As string
 	
 	On Error goto DontSave
 	
@@ -21,14 +21,14 @@ Sub OdsYw
 	' ----------------------------------------------------------------------
 	document   = ThisComponent.CurrentController.Frame
 	dispatcher = createUnoService("com.sun.star.frame.DispatchHelper")
-	OdsPath = ThisComponent.getURL()
-	OdsPath = REPLACE(OdsPath,".csv",".ods")
-	CsvPath = REPLACE(OdsPath,".ods",".csv")
+	ods_path = ThisComponent.getURL()
+	ods_path = REPLACE(ods_path,".csv",".ods")
+	csv_path = REPLACE(ods_path,".ods",".csv")
 	' Use path and name of input file -- just change file extension
 	
-	dim args1(2) as new com.sun.star.beans.PropertyValue
+	Dim args1(2) As new com.sun.star.beans.PropertyValue
 	args1(0).Name = "URL"
-	args1(0).Value = CsvPath
+	args1(0).Value = csv_path
 	args1(1).Name = "FilterName"
 	args1(1).Value = "Text - txt - csv (StarCalc)"
 	args1(2).Name = "FilterOptions"
@@ -38,7 +38,7 @@ Sub OdsYw
 	' ----------------------------------------------------------------------
 	' Save document in OpenDocument format
 	' ----------------------------------------------------------------------
-	args1(0).Value = OdsPath
+	args1(0).Value = ods_path
 	args1(1).Value = "calc8"
 	dispatcher.executeDispatch(document, ".uno:SaveAs", "", 0, args1())
 	
@@ -48,24 +48,23 @@ Sub OdsYw
 	oPackageInfoProvider = GetDefaultContext.getByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
 	sPackageLocation = oPackageInfoProvider.getPackageLocation("org.peter88213.pywoo")
 
-	Dim FileNo As Integer
-	Dim BatchDir, Filename, Batchcommand As String
+	Dim file_no As Integer
+	Dim script_dir, batch_file, batch_cmd As String
 		
-	BatchDir = ConvertFromURL(sPackageLocation)
-	Filename = BatchDir + "\python\saveyw.bat"
-	Batchcommand = BatchDir + "\python\saveyw.pyw %1"
+	script_dir = ConvertFromURL(sPackageLocation)
+	batch_file = script_dir + "\python\saveyw.bat"
+	batch_cmd = script_dir + "\python\saveyw.pyw %1"
 
-	FileNo = FreeFile               		' Establish free file handle
+	file_no = FreeFile
 	
-	Open Filename For Output As #FileNo     ' Open file (writing mode)
-	Print #FileNo, Batchcommand      		' Save line
-	Close #FileNo                  			' Close file
+	Open batch_file For Output As #file_no
+	Print #file_no, "cd " + script_dir
+	Print #file_no, batch_cmd
+	Close #file_no
 	
+	batch_file = ConvertToURL(batch_file)
 	
-	Dim ScriptPath as String
-	ScriptPath = ConvertToURL(Filename)
-	
-	shell(ScriptPath, 2, CsvPath, false)
+	shell(batch_file, 2, csv_path, false)
 
 DontSave:
 
@@ -76,9 +75,9 @@ Sub OdtYw
 ' Save an odt file as html and call an external Python 3 script
 ' via batch file to convert the html file to yWriter format.
 
-	dim document   as object
-	dim dispatcher as object
-	dim DocPath as string
+	Dim document   As object
+	Dim dispatcher As object
+	Dim odt_path, html_path As string
 	
 	On Error goto DontSave
 	
@@ -87,14 +86,14 @@ Sub OdtYw
 	' ----------------------------------------------------------------------
 	document   = ThisComponent.CurrentController.Frame
 	dispatcher = createUnoService("com.sun.star.frame.DispatchHelper")
-	OdtPath = ThisComponent.getURL()
-	OdtPath = REPLACE(OdtPath,".html",".odt")
-	HtmlPath = REPLACE(OdtPath,".odt",".html")
+	odt_path = ThisComponent.getURL()
+	odt_path = REPLACE(odt_path,".html",".odt")
+	html_path = REPLACE(odt_path,".odt",".html")
 	' Use path and name of input file -- just change file extension
 	
-	dim args1(1) as new com.sun.star.beans.PropertyValue
+	Dim args1(1) As new com.sun.star.beans.PropertyValue
 	args1(0).Name = "URL"
-	args1(0).Value = HtmlPath
+	args1(0).Value = html_path
 	args1(1).Name = "FilterName"
 	args1(1).Value = "HTML (StarWriter)"
 	dispatcher.executeDispatch(document, ".uno:SaveAs", "", 0, args1())
@@ -102,7 +101,7 @@ Sub OdtYw
 	' ----------------------------------------------------------------------
 	' Save document in OpenDocument format
 	' ----------------------------------------------------------------------
-	args1(0).Value = OdtPath
+	args1(0).Value = odt_path
 	args1(1).Value = "writer8"
 	dispatcher.executeDispatch(document, ".uno:SaveAs", "", 0, args1())
 	
@@ -112,24 +111,23 @@ Sub OdtYw
 	oPackageInfoProvider = GetDefaultContext.getByName("/singletons/com.sun.star.deployment.PackageInformationProvider")
 	sPackageLocation = oPackageInfoProvider.getPackageLocation("org.peter88213.pywoo")
 
-	Dim FileNo As Integer
-	Dim BatchDir, Filename, Batchcommand As String
+	Dim file_no As Integer
+	Dim script_dir, batch_file, batch_cmd As String
 		
-	BatchDir = ConvertFromURL(sPackageLocation)
-	Filename = BatchDir + "\python\saveyw.bat"
-	Batchcommand = BatchDir + "\python\saveyw.pyw %1"
+	script_dir = ConvertFromURL(sPackageLocation)
+	batch_file = script_dir + "\python\saveyw.bat"
+	batch_cmd = script_dir + "\python\saveyw.pyw %1"
 
-	FileNo = FreeFile               		' Establish free file handle
+	file_no = FreeFile
 	
-	Open Filename For Output As #FileNo     ' Open file (writing mode)
-	Print #FileNo, Batchcommand      		' Save line
-	Close #FileNo                  			' Close file
+	Open batch_file For Output As #file_no
+	Print #file_no, "cd " + script_dir
+	Print #file_no, batch_cmd
+	Close #file_no
 	
+	batch_file = ConvertToURL(batch_file)
 	
-	Dim ScriptPath as String
-	ScriptPath = ConvertToURL(Filename)
-	
-	shell(ScriptPath, 2, HtmlPath, false)
+	shell(batch_file, 2, html_path, false)
 	
 
 DontSave:
