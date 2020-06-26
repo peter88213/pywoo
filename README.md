@@ -1,5 +1,7 @@
 # The pywoo extension for OpenOffice: Import and export yWriter 6/7 projects
 
+![Screenshot: Menu in LibreOffice](https://raw.githubusercontent.com/peter88213/yw-cnv/master/docs/Screenshots/lo_menu.png)
+
 ## Features (a Python 3 installation is required)
 
 ### yWriter5 style proof reading
@@ -60,47 +62,28 @@ An outline has at least one third level heading.
 
 [Download page](https://github.com/peter88213/pywoo/releases/latest)
 
-1. Download `PyWriter_OO_<version number>.zip` . 
+* Download the `OXT` file.
 
-2. Unzip `PyWriter_OO_<version number>.zip` within your user profile.
+* Install it using the OpenOffice extension manager.
 
-3. Move into the `PyWriter_OO_<version number>` folder and run `Install.bat` (double click). This will copy all needed files to the right places, install an OpenOffice extension. You may be asked for approval to modify the Windows registry. Please accept in order to install Explorer context menu entries for yWriter7 files.
+* After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.
 
-## How to use
-
-### Proof reading
-
-1. Write your novel with yWriter. Please consider the conventions descripted above. Backup entire project and close yWriter.
-
-2. Move into your yWriter project folder, and right-click your .yw6 or .yw7 project file. In the context menu, select `Proof read with OpenOffice`. 
-   
-3. If everything goes well, you find an OpenDocument file named `<your yWriter project>_proof.odt`. Open it (double click) for proof reading. The proof reading document contains Chapter `[ChID:x]` and scene `[ScID:y]` markers according to yWriter 5 standard.  __Do not touch lines containing the markers__  if you want to be able to reimport the document into yWriter. 
-
-4. In order to write back the proofread scenes to the yWriter project, select the menu item `File > Export to yWriter`.
-
-### Exporting from yw6/7 project 
-
-1. Write your novel with yWriter. Backup entire project and close yWriter.
-
-2. Move into your yWriter project folder, and right-click your .yw6 or .yw7 project file. In the context menu, select `Export to OpenOffice`. 
-   
-3. If everything goes well, you find an OpenDocument file named `<your yWriter project>.odt`. 
-
-
-### Creating a new yw7 project 
-
-1. Open your work in progress or outline in OpenOffice writer. Please consider the conventions descripted above. 
-
-2. Select the menu item `File > Export to yWriter`.
-
-3. Close OpenOffice Writer. If everything goes well, you find a new yWriter project named `<your document>.yw7`.
+* If no additional "yWriter Import/Export" submenu shows up in the "Files" menu, please look at the "Tools" > "Extensions" menu.
 
 ## Requirements
 
-* Windows
+* Windows.
+* OpenOffice 3.0 or more recent. 
 * Python 3.4 or more recent.
-* OpenOffice 3.0 or more recent.
 * Java Runtime Environment (OpenOffice needs it for macro execution).
 * yWriter 7. 
 
-The  _yw-cnv_  extension is distributed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
+## Credits
+
+[yWriter](http://spacejock.com/yWriter7.html) by Simon Haynes.
+
+[OpenOffice Extension Compiler](https://wiki.openoffice.org/wiki/Extensions_Packager#Extension_Compiler) by Bernard Marcelly.
+
+## License
+
+This extension is distributed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
