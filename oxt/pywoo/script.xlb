@@ -3,4 +3,5 @@
 <library:library xmlns:library="http://openoffice.org/2000/library" library:name="pywoo" library:readonly="false" library:passwordprotected="false">
  <library:element library:name="SaveYw"/>
  <library:element library:name="OpenYw"/>
+ <library:element library:name="help"/>
 </library:library>

@@ -148,11 +148,14 @@ Sub open_yw(suffix As String, new_ext As String)
     Dim batch_file As String
 
     batch_file = script_dir + &quot;\python\openyw.bat&quot;
-    file_no = FreeFile
-	Open batch_file For Output As #file_no
-	Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
-	Print #file_no, &quot;openyw.pyw %1 %2&quot;	
-	Close #file_no
+    
+    If NOT FileExists(batch_file) Then
+	    file_no = FreeFile
+		Open batch_file For Output As #file_no
+		Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
+		Print #file_no, &quot;openyw.pyw %1 %2&quot;	
+		Close #file_no
+	End If
 
 	batch_file = ConvertToURL(batch_file)
 
