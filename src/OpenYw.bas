@@ -121,18 +121,31 @@ Sub open_yw(suffix As String, new_ext As String)
     file_dialog.Dispose()
 
 
+
     ' ----------------------------------------------------------------------
     ' Check whether import file is already open in OpenOffice.
     ' ----------------------------------------------------------------------
-    Dim lock_file As String
-
+    Dim lock_file, source_dir, source_name As String
     file_path = ConvertFromURL(file_path)
-
+    source_dir = DirectoryNameoutofPath(file_path,"\")
+    source_name = FileNameoutofPath(file_path,"\")
+    source_name = REPLACE(source_name, ".yw7", suffix + new_ext)
+    source_name = REPLACE(source_name, ".yw6", suffix + new_ext)
+	
+	lock_file = source_dir  + "\.~lock." + source_name + "#"
+    
+    If FileExists(lock_file) Then
+    	msgbox("Please close '" + source_name + "' first.")
+    	Exit Sub
+    	
+    End If
 
     ' ----------------------------------------------------------------------
     ' Open yWriter project and convert data.
     ' ----------------------------------------------------------------------
     Dim batch_file As String
+
+
 
     batch_file = script_dir + "\python\openyw.bat"
 	batch_cmd = script_dir + "\python\openyw.pyw %1 %2"

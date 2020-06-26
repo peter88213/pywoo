@@ -58,7 +58,6 @@ Sub OdsYw
 	file_no = FreeFile
 	
 	Open batch_file For Output As #file_no
-	Print #file_no, "cd " + script_dir
 	Print #file_no, batch_cmd
 	Close #file_no
 	
