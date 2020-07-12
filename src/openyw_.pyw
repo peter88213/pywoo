@@ -24,7 +24,7 @@ from pywriter.csv.csv_plotlist import CsvPlotList
 from pywriter.csv.csv_charlist import CsvCharList
 from pywriter.csv.csv_loclist import CsvLocList
 from pywriter.csv.csv_itemlist import CsvItemList
-from pywriter.odt.odt_file import OdtFile
+from pywriter.odt.odt_export import OdtExport
 from pywriter.converter.yw_cnv_gui import YwCnvGui
 from pywriter.odt.odt_characters import OdtCharacters
 from pywriter.odt.odt_items import OdtItems
@@ -129,7 +129,7 @@ def run(sourcePath, suffix):
 
     else:
         extension = 'odt'
-        targetDoc = OdtFile(fileName + '.odt')
+        targetDoc = OdtExport(fileName + '.odt')
 
     converter = Converter(sourcePath, targetDoc,
                           extension, False, suffix)
