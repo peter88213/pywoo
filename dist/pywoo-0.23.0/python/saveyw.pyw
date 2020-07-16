@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.22.2
+Version 0.23.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -14,27 +14,11 @@ import os
 from urllib.parse import unquote
 
 
-MANUSCRIPT_SUFFIX = '_manuscript'
-PARTDESC_SUFFIX = '_parts'
-CHAPTERDESC_SUFFIX = '_chapters'
-SCENEDESC_SUFFIX = '_scenes'
-
-CHARDESC_SUFFIX = '_characters'
-LOCDESC_SUFFIX = '_locations'
-ITEMDESC_SUFFIX = '_items'
-
-PROOF_SUFFIX = '_proof'
-
-SCENELIST_SUFFIX = '_scenelist'
-PLOTLIST_SUFFIX = '_plotlist'
-
-CHARLIST_SUFFIX = '_charlist'
-LOCLIST_SUFFIX = '_loclist'
-ITEMLIST_SUFFIX = '_itemlist'
 
 from html.parser import HTMLParser
 
 from abc import abstractmethod
+from urllib.parse import quote
 
 
 class Novel():
@@ -45,7 +29,8 @@ class Novel():
     of the information included in an yWriter project file).
     """
 
-    _FILE_EXTENSION = ''
+    EXTENSION = ''
+    SUFFIX = ''
     # To be extended by file format specific subclasses.
 
     def __init__(self, filePath):
@@ -120,6 +105,14 @@ class Novel():
         # Path to the file. The setter only accepts files of a
         # supported type as specified by _FILE_EXTENSION.
 
+        self._projectName = None
+        # str
+        # URL-coded file name without suffix and extension.
+
+        self._projectPath = None
+        # str
+        # URL-coded path to the project directory.
+
         self.filePath = filePath
 
     @property
@@ -129,8 +122,12 @@ class Novel():
     @filePath.setter
     def filePath(self, filePath):
         """Accept only filenames with the right extension. """
-        if filePath.lower().endswith(self._FILE_EXTENSION):
+        if filePath.lower().endswith(self.SUFFIX + self.EXTENSION):
             self._filePath = filePath
+            head, tail = os.path.split(os.path.realpath(filePath))
+            self.projectPath = quote(head.replace('\\', '/'), '/:')
+            self.projectName = quote(tail.replace(
+                self.SUFFIX + self.EXTENSION, ''))
 
     @abstractmethod
     def read(self):
@@ -223,7 +220,7 @@ class Chapter():
 
         self.doNotExport = None
         # bool
-        # xml: <<Fields>Field_SuppressChapterBreak> 0
+        # xml: <Fields><Field_SuppressChapterBreak> 0
 
         self.srtScenes = []
         # list of str
@@ -251,6 +248,8 @@ class Scene():
     # Emulate an enumeration for the scene status
 
     STATUS = [None, 'Outline', 'Draft', '1st Edit', '2nd Edit', 'Done']
+    ACTION_MARKER = 'A'
+    REACTION_MARKER = 'R'
 
     def __init__(self):
         self.title = None
@@ -278,6 +277,10 @@ class Scene():
         self.isUnused = None
         # bool
         # xml: <Unused> -1
+
+        self.doNotExport = None
+        # bool
+        # xml: <ExportCondSpecific><ExportWhenRTF>
 
         self.status = None
         # int # xml: <Status>
@@ -342,15 +345,38 @@ class Scene():
         # list of str
         # xml: <Items><ItemID>
 
-        # xml: <SpecificDateMode>-1</SpecificDateMode>
-        # xml: <SpecificDateTime>1900-06-01 20:38:00</SpecificDateTime>
+        self.date = None
+        # str
+        # xml: <SpecificDateMode>-1
+        # xml: <SpecificDateTime>1900-06-01 20:38:00
 
+        self.time = None
+        # str
+        # xml: <SpecificDateMode>-1
+        # xml: <SpecificDateTime>1900-06-01 20:38:00
+
+        self.minute = None
+        # str
         # xml: <Minute>
+
+        self.hour = None
+        # str
         # xml: <Hour>
+
+        self.day = None
+        # str
         # xml: <Day>
 
+        self.lastsMinutes = None
+        # str
         # xml: <LastsMinutes>
+
+        self.lastsHours = None
+        # str
         # xml: <LastsHours>
+
+        self.lastsDays = None
+        # str
         # xml: <LastsDays>
 
     @property
@@ -462,62 +488,86 @@ def read_html_file(filePath):
 
 
 
-class HtmlProof(Novel, HTMLParser):
-    """HTML file representation of an yWriter project's OfficeFile part.
-
-    Represents a html file with visible chapter and scene tags 
-    to be read and written by Open/LibreOffice Writer.
+class HtmlFile(Novel, HTMLParser):
+    """HTML file representation of an yWriter project's part.
     """
 
-    _FILE_EXTENSION = 'html'
-    # overwrites Novel._FILE_EXTENSION
+    EXTENSION = 'html'
 
     def __init__(self, filePath):
         Novel.__init__(self, filePath)
         HTMLParser.__init__(self)
         self._lines = []
-        self._collectText = False
+        self._scId = None
+        self._chId = None
+
+    def preprocess(self, text):
+        """Process the html text before parsing.
+        """
+        return strip_markup(to_yw7(text))
+
+    def postprocess(self):
+        """Process the plain text after parsing.
+        """
 
     def handle_starttag(self, tag, attrs):
-        """Recognize the paragraph's beginning.
-        Overwrites HTMLparser.handle_endtag().
+        """Identify scenes and chapters.
+        Overwrites HTMLparser.handle_starttag()
         """
-        if tag == 'p':
-            self._collectText = True
+        if tag == 'div':
 
-    def handle_endtag(self, tag):
-        """Recognize the paragraph's end.
-        Overwrites HTMLparser.handle_endtag().
-        """
-        if tag == 'p':
-            self._collectText = False
+            if attrs[0][0] == 'id':
 
-    def handle_data(self, data):
-        """Copy the scene paragraphs.
-        Overwrites HTMLparser.handle_data().
-        """
-        if self._collectText:
-            self._lines.append(data)
+                if attrs[0][1].startswith('ScID'):
+                    self._scId = re.search('[0-9]+', attrs[0][1]).group()
+                    self.scenes[self._scId] = Scene()
+                    self.chapters[self._chId].srtScenes.append(self._scId)
+
+                elif attrs[0][1].startswith('ChID'):
+                    self._chId = re.search('[0-9]+', attrs[0][1]).group()
+                    self.chapters[self._chId] = Chapter()
+                    self.chapters[self._chId].srtScenes = []
+                    self.srtChapters.append(self._chId)
 
     def read(self):
-        """Read scene content from a html file  
-        with visible chapter and scene tags.
-        Return a message beginning with SUCCESS or ERROR.
+        """Read scene content from a html file 
+        with chapter and scene sections.
+        Return a message beginning with SUCCESS or ERROR. 
         """
         result = read_html_file(self._filePath)
 
         if result[0].startswith('ERROR'):
             return (result[0])
 
-        text = to_yw7(result[1])
-
-        # Invoke HTML parser to write the html body as raw text
-        # to self._lines.
-
+        text = self.preprocess(result[1])
         self.feed(text)
+        self.postprocess()
 
-        # Parse the HTML body to identify chapters and scenes.
+        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
 
+
+
+class HtmlProof(HtmlFile):
+    """HTML file representation of an yWriter project's OfficeFile part.
+
+    Represents a html file with visible chapter and scene tags 
+    to be read and written by Open/LibreOffice Writer.
+    """
+
+    SUFFIX = '_proof'
+
+    def __init__(self, filePath):
+        HtmlFile.__init__(self, filePath)
+        self._collectText = False
+
+    def preprocess(self, text):
+        """Process the html text before parsing.
+        """
+        return to_yw7(text)
+
+    def postprocess(self):
+        """Parse the converted text to identify chapters and scenes.
+        """
         sceneText = []
         scId = ''
         chId = ''
@@ -547,12 +597,30 @@ class HtmlProof(Novel, HTMLParser):
             elif inScene:
                 sceneText.append(line)
 
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
+    def handle_starttag(self, tag, attrs):
+        """Recognize the paragraph's beginning.
+        Overwrites HTMLparser.handle_endtag().
+        """
+        if tag == 'p':
+            self._collectText = True
+
+    def handle_endtag(self, tag):
+        """Recognize the paragraph's end.
+        Overwrites HTMLparser.handle_endtag().
+        """
+        if tag == 'p':
+            self._collectText = False
+
+    def handle_data(self, data):
+        """Copy the scene paragraphs.
+        Overwrites HTMLparser.handle_data().
+        """
+        if self._collectText:
+            self._lines.append(data)
 
 
 
-
-class HtmlManuscript(Novel, HTMLParser):
+class HtmlManuscript(HtmlFile):
     """HTML file representation of an yWriter project's manuscript part.
 
     Represents a html file with chapter and scene sections 
@@ -560,46 +628,12 @@ class HtmlManuscript(Novel, HTMLParser):
     OpenOffice/LibreOffice Writer.
     """
 
-    _FILE_EXTENSION = 'html'
-    # overwrites Novel._FILE_EXTENSION
+    SUFFIX = '_manuscript'
 
-    def __init__(self, filePath):
-        Novel.__init__(self, filePath)
-        HTMLParser.__init__(self)
-        self._lines = []
-        self._scId = None
-        self._chId = None
-        self._isTitle = False
-
-    def handle_starttag(self, tag, attrs):
-        """Recognize the beginning ot the body section.
-        Overwrites HTMLparser.handle_starttag()
+    def preprocess(self, text):
+        """Process the html text before parsing.
         """
-        if tag == 'div':
-
-            if attrs[0][0] == 'id':
-
-                if attrs[0][1].startswith('ChID'):
-                    self._chId = re.search('[0-9]+', attrs[0][1]).group()
-                    self.chapters[self._chId] = Chapter()
-                    self.chapters[self._chId].srtScenes = []
-                    self.srtChapters.append(self._chId)
-
-                elif attrs[0][1].startswith('ScID'):
-                    self._scId = re.search('[0-9]+', attrs[0][1]).group()
-                    self.scenes[self._scId] = Scene()
-                    self.chapters[self._chId].srtScenes.append(self._scId)
-
-        elif tag == 'meta':
-
-            if attrs[0][1].lower() == 'author':
-                self.author = attrs[1][1]
-
-            if attrs[0][1].lower() == 'description':
-                self.desc = attrs[1][1]
-
-        elif tag == 'title':
-            self._isTitle = True
+        return to_yw7(text)
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
@@ -627,35 +661,16 @@ class HtmlManuscript(Novel, HTMLParser):
         if self._scId is not None:
             self._lines.append(data.rstrip().lstrip())
 
-        if self._isTitle:
-            self.title = data
-            self._isTitle = False
-
-    def read(self):
-        """Read scene content from a html file 
-        with chapter and scene sections.
-        Return a message beginning with SUCCESS or ERROR. 
-        """
-        result = read_html_file(self._filePath)
-
-        if result[0].startswith('ERROR'):
-            return (result[0])
-
-        text = to_yw7(result[1])
-
-        # Invoke HTML parser.
-
-        self.feed(text)
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
-
     def get_structure(self):
         """This file format has no comparable structure."""
-        return None
 
 
 
-class HtmlSceneDesc(HtmlManuscript):
-    """HTML file representation of an yWriter project's scene summaries."""
+class HtmlSceneDesc(HtmlFile):
+    """HTML file representation of an yWriter project's scene summaries.
+    """
+
+    SUFFIX = '_scenes'
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
@@ -676,27 +691,22 @@ class HtmlSceneDesc(HtmlManuscript):
             if tag == 'div':
                 self._chId = None
 
-    def read(self):
-        """Read scene summaries from a html file 
-        with chapter and scene sections.
-        Return a message beginning with SUCCESS or ERROR. 
+    def handle_data(self, data):
+        """Collect data within scene sections.
+        Overwrites HTMLparser.handle_data().
         """
-        result = read_html_file(self._filePath)
+        if self._scId is not None:
+            self._lines.append(data.rstrip().lstrip())
 
-        if result[0].startswith('ERROR'):
-            return (result[0])
-
-        text = strip_markup(to_yw7(result[1]))
-
-        # Invoke HTML parser.
-
-        self.feed(text)
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
+    def get_structure(self):
+        """This file format has no comparable structure."""
 
 
 
-class HtmlChapterDesc(HtmlSceneDesc):
+class HtmlChapterDesc(HtmlFile):
     """HTML file representation of an yWriter project's chapters summaries."""
+
+    SUFFIX = '_chapters'
 
     def handle_endtag(self, tag):
         """Recognize the end of the chapter section and save data.
@@ -718,6 +728,16 @@ class HtmlChapterDesc(HtmlSceneDesc):
         """
         if self._chId is not None:
             self._lines.append(data.rstrip().lstrip())
+
+    def get_structure(self):
+        """This file format has no comparable structure."""
+
+
+
+class HtmlPartDesc(HtmlChapterDesc):
+    """HTML file representation of an yWriter project's parts summaries."""
+
+    SUFFIX = '_parts'
 
 
 
@@ -751,6 +771,9 @@ class Character(Object):
     # xml: <CHARACTERS><CHARACTER>
     """
 
+    MAJOR_MARKER = 'Major'
+    MINOR_MARKER = 'Minor'
+
     def __init__(self):
         Object.__init__(self)
 
@@ -775,18 +798,18 @@ class Character(Object):
         # xml: <Major>
 
 
-class HtmlCharacters(HtmlManuscript):
+class HtmlCharacters(HtmlFile):
     """HTML file representation of an yWriter project's character descriptions."""
 
+    SUFFIX = '_characters'
+
     def __init__(self, filePath):
-        Novel.__init__(self, filePath)
-        HTMLParser.__init__(self)
-        self._lines = []
+        HtmlFile.__init__(self, filePath)
         self._crId = None
         self._section = None
 
     def handle_starttag(self, tag, attrs):
-        """Recognize the beginning ot the body section.
+        """Identify characters with subsections.
         Overwrites HTMLparser.handle_starttag()
         """
         if tag == 'div':
@@ -837,20 +860,23 @@ class HtmlCharacters(HtmlManuscript):
         if self._section is not None:
             self._lines.append(data.rstrip().lstrip())
 
+    def get_structure(self):
+        """This file format has no comparable structure."""
 
 
 
-class HtmlLocations(HtmlManuscript):
+
+class HtmlLocations(HtmlFile):
     """HTML file representation of an yWriter project's location descriptions."""
 
+    SUFFIX = '_locations'
+
     def __init__(self, filePath):
-        Novel.__init__(self, filePath)
-        HTMLParser.__init__(self)
-        self._lines = []
+        HtmlFile.__init__(self, filePath)
         self._lcId = None
 
     def handle_starttag(self, tag, attrs):
-        """Recognize the beginning ot the body section.
+        """Identify locations.
         Overwrites HTMLparser.handle_starttag()
         """
         if tag == 'div':
@@ -882,20 +908,22 @@ class HtmlLocations(HtmlManuscript):
         if self._lcId is not None:
             self._lines.append(data.rstrip().lstrip())
 
+    def get_structure(self):
+        """This file format has no comparable structure."""
 
 
 
-class HtmlItems(HtmlManuscript):
+class HtmlItems(HtmlFile):
     """HTML file representation of an yWriter project's item descriptions."""
 
+    SUFFIX = '_items'
+
     def __init__(self, filePath):
-        Novel.__init__(self, filePath)
-        HTMLParser.__init__(self)
-        self._lines = []
+        HtmlFile.__init__(self, filePath)
         self._itId = None
 
     def handle_starttag(self, tag, attrs):
-        """Recognize the beginning ot the body section.
+        """Identify items.
         Overwrites HTMLparser.handle_starttag()
         """
         if tag == 'div':
@@ -927,22 +955,32 @@ class HtmlItems(HtmlManuscript):
         if self._itId is not None:
             self._lines.append(data.rstrip().lstrip())
 
+    def get_structure(self):
+        """This file format has no comparable structure."""
 
 
-class HtmlImport(HtmlManuscript):
+
+class HtmlImport(HtmlFile):
     """HTML file representation of an yWriter project's OfficeFile part.
 
     Represents a html file without chapter and scene tags 
     to be written by Open/LibreOffice Writer.
     """
 
+    SUFFIX = ''
+
     _SCENE_DIVIDER = '* * *'
     _LOW_WORDCOUNT = 10
 
     def __init__(self, filePath):
-        HtmlManuscript.__init__(self, filePath)
+        HtmlFile.__init__(self, filePath)
         self._chCount = 0
         self._scCount = 0
+
+    def preprocess(self, text):
+        """Process the html text before parsing.
+        """
+        return to_yw7(text)
 
     def handle_starttag(self, tag, attrs):
 
@@ -1019,17 +1057,22 @@ class HtmlImport(HtmlManuscript):
         else:
             self._lines.append(data.rstrip().lstrip())
 
+    def get_structure(self):
+        """This file format has no comparable structure."""
 
 
-class HtmlOutline(HtmlManuscript):
+
+class HtmlOutline(HtmlFile):
     """HTML file representation of an yWriter project's OfficeFile part.
 
     Represents a html file without chapter and scene tags 
     to be written by Open/LibreOffice Writer.
     """
 
+    SUFFIX = ''
+
     def __init__(self, filePath):
-        HtmlManuscript.__init__(self, filePath)
+        HtmlFile.__init__(self, filePath)
         self._chCount = 0
         self._scCount = 0
 
@@ -1103,29 +1146,423 @@ class HtmlOutline(HtmlManuscript):
         """
         self._lines.append(data.rstrip().lstrip())
 
-    def read(self):
-        """Read chapter and scene titles and 
-        summaries from a html file. 
-        Return a message beginning with SUCCESS or ERROR. 
+    def get_structure(self):
+        """This file format has no comparable structure."""
+
+
+from string import Template
+
+
+
+class FileExport(Novel):
+    """Abstract yWriter project file exporter representation.
+    """
+
+    fileHeader = ''
+    partTemplate = ''
+    chapterTemplate = ''
+    unusedChapterTemplate = ''
+    infoChapterTemplate = ''
+    sceneTemplate = ''
+    unusedSceneTemplate = ''
+    infoSceneTemplate = ''
+    sceneDivider = ''
+    chapterEndTemplate = ''
+    unusedChapterEndTemplate = ''
+    infoChapterEndTemplate = ''
+    characterTemplate = ''
+    locationTemplate = ''
+    itemTemplate = ''
+    fileFooter = ''
+
+    def convert_markup(self, text):
+        """Convert yw7 markup to target format.
+        To be overwritten by file format specific subclasses.
         """
-        result = read_html_file(self._filePath)
 
-        if result[0].startswith('ERROR'):
-            return (result[0])
+        if text is None:
+            text = ''
 
-        text = strip_markup(to_yw7(result[1]))
+        return(text)
 
-        # Invoke HTML parser.
+    def merge(self, novel):
+        """Copy selected novel attributes.
+        """
 
-        self.feed(text)
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
+        if novel.title is not None:
+            self.title = novel.title
+
+        else:
+            self.title = ''
+
+        if novel.desc is not None:
+            self.desc = novel.desc
+
+        else:
+            self.desc = ''
+
+        if novel.author is not None:
+            self.author = novel.author
+
+        else:
+            self.author = ''
+
+        if novel.fieldTitle1 is not None:
+            self.fieldTitle1 = novel.fieldTitle1
+
+        else:
+            self.fieldTitle1 = 'Field 1'
+
+        if novel.fieldTitle2 is not None:
+            self.fieldTitle2 = novel.fieldTitle2
+
+        else:
+            self.fieldTitle2 = 'Field 2'
+
+        if novel.fieldTitle3 is not None:
+            self.fieldTitle3 = novel.fieldTitle3
+
+        else:
+            self.fieldTitle3 = 'Field 3'
+
+        if novel.fieldTitle4 is not None:
+            self.fieldTitle4 = novel.fieldTitle4
+
+        else:
+            self.fieldTitle4 = 'Field 4'
+
+        if novel.srtChapters != []:
+            self.srtChapters = novel.srtChapters
+
+        if novel.scenes is not None:
+            self.scenes = novel.scenes
+
+        if novel.chapters is not None:
+            self.chapters = novel.chapters
+
+        if novel.characters is not None:
+            self.characters = novel.characters
+
+        if novel.locations is not None:
+            self.locations = novel.locations
+
+        if novel.items is not None:
+            self.items = novel.items
+
+    def get_projectTemplateSubst(self):
+        return dict(
+            Title=self.title,
+            Desc=self.convert_markup(self.desc),
+            AuthorName=self.author,
+            FieldTitle1=self.fieldTitle1,
+            FieldTitle2=self.fieldTitle2,
+            FieldTitle3=self.fieldTitle3,
+            FieldTitle4=self.fieldTitle4,
+        )
+
+    def get_chapterSubst(self, chId, chapterNumber):
+        return dict(
+            ID=chId,
+            ChapterNumber=chapterNumber,
+            Title=self.chapters[chId].title,
+            Desc=self.convert_markup(self.chapters[chId].desc),
+            ProjectName=self.projectName,
+            ProjectPath=self.projectPath,
+        )
+
+    def get_sceneSubst(self, scId, sceneNumber, wordsTotal, lettersTotal):
+
+        if self.scenes[scId].tags is not None:
+            tags = ', '.join(self.scenes[scId].tags)
+
+        else:
+            tags = ''
+
+        if self.scenes[scId].characters is not None:
+            sChList = []
+
+            for chId in self.scenes[scId].characters:
+                sChList.append(self.characters[chId].title)
+
+            sceneChars = ', '.join(sChList)
+            viewpointChar = sChList[0]
+
+        else:
+            sceneChars = ''
+            viewpointChar = ''
+
+        if self.scenes[scId].locations is not None:
+            sLcList = []
+
+            for lcId in self.scenes[scId].locations:
+                sLcList.append(self.locations[lcId].title)
+
+            sceneLocs = ', '.join(sLcList)
+
+        else:
+            sceneLocs = ''
+
+        if self.scenes[scId].items is not None:
+            sItList = []
+
+            for itId in self.scenes[scId].items:
+                sItList.append(self.items[itId].title)
+
+            sceneItems = ', '.join(sItList)
+
+        else:
+            sceneItems = ''
+
+        if self.scenes[scId].isReactionScene:
+            reactionScene = Scene.REACTION_MARKER
+
+        else:
+            reactionScene = Scene.ACTION_MARKER
+
+        return dict(
+            ID=scId,
+            SceneNumber=sceneNumber,
+            Title=self.scenes[scId].title,
+            Desc=self.convert_markup(self.scenes[scId].desc),
+            WordCount=str(self.scenes[scId].wordCount),
+            WordsTotal=wordsTotal,
+            LetterCount=str(self.scenes[scId].letterCount),
+            LettersTotal=lettersTotal,
+            Status=Scene.STATUS[self.scenes[scId].status],
+            SceneContent=self.convert_markup(
+                self.scenes[scId].sceneContent),
+            FieldTitle1=self.fieldTitle1,
+            FieldTitle2=self.fieldTitle2,
+            FieldTitle3=self.fieldTitle3,
+            FieldTitle4=self.fieldTitle4,
+            Field1=self.scenes[scId].field1,
+            Field2=self.scenes[scId].field2,
+            Field3=self.scenes[scId].field3,
+            Field4=self.scenes[scId].field4,
+            Date=self.scenes[scId].date,
+            Time=self.scenes[scId].time,
+            Day=self.scenes[scId].day,
+            Hour=self.scenes[scId].hour,
+            Minute=self.scenes[scId].minute,
+            LastsDays=self.scenes[scId].lastsDays,
+            LastsHours=self.scenes[scId].lastsHours,
+            LastsMinutes=self.scenes[scId].lastsMinutes,
+            ReactionScene=reactionScene,
+            Goal=self.convert_markup(self.scenes[scId].goal),
+            Conflict=self.convert_markup(self.scenes[scId].conflict),
+            Outcome=self.convert_markup(self.scenes[scId].outcome),
+            Tags=tags,
+            Characters=sceneChars,
+            Viewpoint=viewpointChar,
+            Locations=sceneLocs,
+            Items=sceneItems,
+            Notes=self.convert_markup(self.scenes[scId].sceneNotes),
+            ProjectName=self.projectName,
+            ProjectPath=self.projectPath,
+        )
+
+    def get_characterSubst(self, crId):
+
+        if self.characters[crId].tags is not None:
+            tags = ', '.join(self.characters[crId].tags)
+
+        else:
+            tags = ''
+
+        if self.characters[crId].isMajor:
+            characterStatus = Character.MAJOR_MARKER
+
+        else:
+            characterStatus = Character.MINOR_MARKER
+
+        return dict(
+            ID=crId,
+            Title=self.characters[crId].title,
+            Desc=self.convert_markup(self.characters[crId].desc),
+            Tags=tags,
+            AKA=FileExport.convert_markup(self, self.characters[crId].aka),
+            Notes=self.convert_markup(self.characters[crId].notes),
+            Bio=self.convert_markup(self.characters[crId].bio),
+            Goals=self.convert_markup(self.characters[crId].goals),
+            FullName=FileExport.convert_markup(
+                self, self.characters[crId].fullName),
+            Status=characterStatus,
+        )
+
+    def get_locationSubst(self, lcId):
+
+        if self.locations[lcId].tags is not None:
+            tags = ', '.join(self.locations[lcId].tags)
+
+        else:
+            tags = ''
+
+        return dict(
+            ID=lcId,
+            Title=self.locations[lcId].title,
+            Desc=self.convert_markup(self.locations[lcId].desc),
+            Tags=tags,
+            AKA=FileExport.convert_markup(self, self.locations[lcId].aka),
+        )
+
+    def get_itemSubst(self, itId):
+
+        if self.items[itId].tags is not None:
+            tags = ', '.join(self.items[itId].tags)
+
+        else:
+            tags = ''
+
+        return dict(
+            ID=itId,
+            Title=self.items[itId].title,
+            Desc=self.convert_markup(self.items[itId].desc),
+            Tags=tags,
+            AKA=FileExport.convert_markup(self, self.items[itId].aka),
+        )
+
+    def write(self):
+        lines = []
+        wordsTotal = 0
+        lettersTotal = 0
+        chapterNumber = 0
+        sceneNumber = 0
+
+        template = Template(self.fileHeader)
+        lines.append(template.safe_substitute(self.get_projectTemplateSubst()))
+
+        for chId in self.srtChapters:
+
+            if self.chapters[chId].isUnused:
+
+                if self.unusedChapterTemplate != '':
+                    template = Template(self.unusedChapterTemplate)
+
+                else:
+                    continue
+
+            elif self.chapters[chId].chType != 0:
+
+                if self.infoChapterTemplate != '':
+                    template = Template(self.infoChapterTemplate)
+
+                else:
+                    continue
+
+            elif self.chapters[chId].chLevel == 1 and self.partTemplate != '':
+                template = Template(self.partTemplate)
+
+            else:
+                template = Template(self.chapterTemplate)
+                chapterNumber += 1
+
+            lines.append(template.safe_substitute(
+                self.get_chapterSubst(chId, chapterNumber)))
+            firstSceneInChapter = True
+
+            for scId in self.chapters[chId].srtScenes:
+                wordsTotal += self.scenes[scId].wordCount
+                lettersTotal += self.scenes[scId].letterCount
+
+                if self.scenes[scId].isUnused or self.chapters[chId].isUnused or self.scenes[scId].doNotExport:
+
+                    if self.unusedSceneTemplate != '':
+                        template = Template(self.unusedSceneTemplate)
+
+                    else:
+                        continue
+
+                elif self.chapters[chId].chType != 0:
+
+                    if self.infoSceneTemplate != '':
+                        template = Template(self.infoSceneTemplate)
+
+                    else:
+                        continue
+
+                else:
+                    sceneNumber += 1
+                    template = Template(self.sceneTemplate)
+
+                if not (firstSceneInChapter or self.scenes[scId].appendToPrev):
+                    lines.append(self.sceneDivider)
+
+                lines.append(template.safe_substitute(self.get_sceneSubst(
+                    scId, sceneNumber, wordsTotal, lettersTotal)))
+
+                firstSceneInChapter = False
+
+            if self.chapters[chId].isUnused and self.unusedChapterEndTemplate != '':
+                lines.append(self.unusedChapterEndTemplate)
+
+            elif self.chapters[chId].chType != 0 and self.infoChapterEndTemplate != '':
+                lines.append(self.infoChapterEndTemplate)
+
+            else:
+                lines.append(self.chapterEndTemplate)
+
+        for crId in self.characters:
+            template = Template(self.characterTemplate)
+            lines.append(template.safe_substitute(
+                self.get_characterSubst(crId)))
+
+        for lcId in self.locations:
+            template = Template(self.locationTemplate)
+            lines.append(template.safe_substitute(
+                self.get_locationSubst(lcId)))
+
+        for itId in self.items:
+            template = Template(self.itemTemplate)
+            lines.append(template.safe_substitute(self.get_itemSubst(itId)))
+
+        lines.append(self.fileFooter)
+        text = ''.join(lines)
+
+        try:
+            with open(self.filePath, 'w', encoding='utf-8') as f:
+                f.write(text)
+
+        except:
+            return 'ERROR: Cannot write "' + self.filePath + '".'
+
+        return 'SUCCESS: Content written to "' + self.filePath + '".'
 
 
-from urllib.parse import quote
+class CsvFile(FileExport):
+    """csv file representation.
+    * Records are separated by line breaks.
+    * Data fields are delimited by the _SEPARATOR character.
+    """
+
+    EXTENSION = '.csv'
+    # overwrites Novel._FILE_EXTENSION
+
+    _SEPARATOR = '|'
+    # delimits data fields within a record.
+
+    _LINEBREAK = '\t'
+    # substitutes embedded line breaks.
+
+    _LIST_SEPARATOR = ','
+    # delimits items listed within a data field
+
+    def convert_markup(self, text):
+        """Convert yw7 raw markup to odt. Return an xml string."""
+
+        try:
+            text = text.rstrip().replace('\n', self._LINEBREAK)
+
+        except AttributeError:
+            text = ''
+
+        return text
+
+    def get_structure(self):
+        """This file format has no comparable structure."""
+        return None
 
 
-
-class CsvSceneList(Novel):
+class CsvSceneList(CsvFile):
     """csv file representation of an yWriter project's scenes table. 
 
     Represents a csv file with a record per scene.
@@ -1133,60 +1570,44 @@ class CsvSceneList(Novel):
     * Data fields are delimited by the _SEPARATOR character.
     """
 
-    _FILE_EXTENSION = 'csv'
-    # overwrites Novel._FILE_EXTENSION
-
-    _SEPARATOR = '|'     # delimits data fields within a record.
-    _LINEBREAK = '\t'    # substitutes embedded line breaks.
+    SUFFIX = '_scenelist'
 
     _SCENE_RATINGS = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
     # '1' is assigned N/A (empty table cell).
 
-    _ACTION_MARKER = 'Action'
-    _REACTION_MARKER = 'Reaction'
+    fileHeader = '''Scene link|''' +\
+        '''Scene title|Scene description|Tags|Scene notes|''' +\
+        '''A/R|Goal|Conflict|Outcome|''' +\
+        '''Scene|Words total|$FieldTitle1|$FieldTitle2|$FieldTitle3|$FieldTitle4|''' +\
+        '''Word count|Letter count|Status|''' +\
+        '''Characters|Locations|Items
+'''
 
-    _TABLE_HEADER = ('Scene link'
-                     + _SEPARATOR
-                     + 'Scene title'
-                     + _SEPARATOR
-                     + 'Scene description'
-                     + _SEPARATOR
-                     + 'Tags'
-                     + _SEPARATOR
-                     + 'Scene notes'
-                     + _SEPARATOR
-                     + 'A/R'
-                     + _SEPARATOR
-                     + 'Goal'
-                     + _SEPARATOR
-                     + 'Conflict'
-                     + _SEPARATOR
-                     + 'Outcome'
-                     + _SEPARATOR
-                     + 'Scene'
-                     + _SEPARATOR
-                     + 'Words total'
-                     + _SEPARATOR
-                     + 'Field 1'
-                     + _SEPARATOR
-                     + 'Field 2'
-                     + _SEPARATOR
-                     + 'Field 3'
-                     + _SEPARATOR
-                     + 'Field 4'
-                     + _SEPARATOR
-                     + 'Word count'
-                     + _SEPARATOR
-                     + 'Letter count'
-                     + _SEPARATOR
-                     + 'Status'
-                     + _SEPARATOR
-                     + 'Characters'
-                     + _SEPARATOR
-                     + 'Locations'
-                     + _SEPARATOR
-                     + 'Items'
-                     + '\n')
+    sceneTemplate = '''=HYPERLINK("file:///$ProjectPath/${ProjectName}_manuscript.odt#ScID:$ID%7Cregion";"ScID:$ID")|''' +\
+        '''$Title|$Desc|$Tags|$Notes|''' +\
+        '''$ReactionScene|$Goal|$Conflict|$Outcome|''' +\
+        '''$SceneNumber|$WordsTotal|$Field1|$Field2|$Field3|$Field4|''' +\
+        '''$WordCount|$LetterCount|$Status|''' +\
+        '''$Characters|$Locations|$Items
+'''
+
+    def get_sceneSubst(self, scId, sceneNumber, wordsTotal, lettersTotal):
+        sceneSubst = CsvFile.get_sceneSubst(
+            self, scId, sceneNumber, wordsTotal, lettersTotal)
+
+        if self.scenes[scId].field1 == '1':
+            sceneSubst['Field1'] = ''
+
+        if self.scenes[scId].field2 == '1':
+            sceneSubst['Field2'] = ''
+
+        if self.scenes[scId].field3 == '1':
+            sceneSubst['Field3'] = ''
+
+        if self.scenes[scId].field4 == '1':
+            sceneSubst['Field4'] = ''
+
+        return sceneSubst
 
     def read(self):
         """Parse the csv file located at filePath, 
@@ -1200,7 +1621,7 @@ class CsvSceneList(Novel):
         except(FileNotFoundError):
             return 'ERROR: "' + self._filePath + '" not found.'
 
-        cellsInLine = len(self._TABLE_HEADER.split(self._SEPARATOR))
+        cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
         for line in lines:
             cell = line.rstrip().split(self._SEPARATOR)
@@ -1219,13 +1640,13 @@ class CsvSceneList(Novel):
                 self.scenes[scId].desc = cell[i].replace(
                     self._LINEBREAK, '\n')
                 i += 1
-                self.scenes[scId].tags = cell[i].split(';')
+                self.scenes[scId].tags = cell[i].split(self._LIST_SEPARATOR)
                 i += 1
                 self.scenes[scId].sceneNotes = cell[i].replace(
                     self._LINEBREAK, '\n')
                 i += 1
 
-                if self._REACTION_MARKER.lower() in cell[i].lower():
+                if Scene.REACTION_MARKER.lower() in cell[i].lower():
                     self.scenes[scId].isReactionScene = True
 
                 else:
@@ -1294,7 +1715,7 @@ class CsvSceneList(Novel):
 
                 i += 1
                 ''' Cannot write back character IDs, because self.characters is None
-                charaNames = cell[i].split(';')
+                charaNames = cell[i].split(self._LIST_SEPARATOR)
                 self.scenes[scId].characters = []
 
                 for charaName in charaNames:
@@ -1306,7 +1727,7 @@ class CsvSceneList(Novel):
                 '''
                 i += 1
                 ''' Cannot write back location IDs, because self.locations is None
-                locaNames = cell[i].split(';')
+                locaNames = cell[i].split(self._LIST_SEPARATOR)
                 self.scenes[scId].locations = []
 
                 for locaName in locaNames:
@@ -1318,7 +1739,7 @@ class CsvSceneList(Novel):
                 '''
                 i += 1
                 ''' Cannot write back item IDs, because self.items is None
-                itemNames = cell[i].split(';')
+                itemNames = cell[i].split(self._LIST_SEPARATOR)
                 self.scenes[scId].items = []
 
                 for itemName in itemNames:
@@ -1331,236 +1752,10 @@ class CsvSceneList(Novel):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
-    def merge(self, novel):
-        """Copy selected novel attributes.
-        """
 
-        if novel.srtChapters != []:
-            self.srtChapters = novel.srtChapters
 
-        if novel.scenes is not None:
-            self.scenes = novel.scenes
 
-        if novel.chapters is not None:
-            self.chapters = novel.chapters
-
-        if novel.fieldTitle1 is not None:
-            self.fieldTitle1 = novel.fieldTitle1
-
-        else:
-            self.fieldTitle1 = 'Field 1'
-
-        if novel.fieldTitle2 is not None:
-            self.fieldTitle2 = novel.fieldTitle2
-
-        else:
-            self.fieldTitle2 = 'Field 2'
-
-        if novel.fieldTitle3 is not None:
-            self.fieldTitle3 = novel.fieldTitle3
-
-        else:
-            self.fieldTitle3 = 'Field 3'
-
-        if novel.fieldTitle4 is not None:
-            self.fieldTitle4 = novel.fieldTitle4
-
-        else:
-            self.fieldTitle4 = 'Field 4'
-
-        self.characters = novel.characters
-        self.locations = novel.locations
-        self.items = novel.items
-
-    def write(self):
-        """Generate a csv file containing a row per scene
-        Return a message beginning with SUCCESS or ERROR.
-        """
-        odtPath = quote(os.path.realpath(self.filePath).replace(
-            '\\', '/'), '/:').replace(SCENELIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
-
-        # first record: the table's column headings
-
-        table = [self._TABLE_HEADER.replace(
-            'Field 1', self.fieldTitle1).replace(
-            'Field 2', self.fieldTitle2).replace(
-            'Field 3', self.fieldTitle3).replace(
-            'Field 4', self.fieldTitle4)]
-
-        # Add a record for each used scene in a regular chapter
-
-        sceneCount = 0
-        wordCount = 0
-
-        for chId in self.srtChapters:
-
-            if self.chapters[chId].isUnused:
-                continue
-
-            if self.chapters[chId].chType != 0:
-                continue
-
-            for scId in self.chapters[chId].srtScenes:
-
-                if self.scenes[scId].isUnused:
-                    continue
-
-                if self.scenes[scId].doNotExport:
-                    continue
-
-                if self.scenes[scId].isReactionScene:
-                    pacingType = self._REACTION_MARKER
-
-                else:
-                    pacingType = self._ACTION_MARKER
-
-                sceneCount += 1
-                wordCount += self.scenes[scId].wordCount
-
-                if self.scenes[scId].desc is None:
-                    self.scenes[scId].desc = ''
-
-                if self.scenes[scId].tags is None:
-                    self.scenes[scId].tags = ['']
-
-                if self.scenes[scId].sceneNotes is None:
-                    self.scenes[scId].sceneNotes = ''
-
-                if self.scenes[scId].isReactionScene is None:
-                    self.scenes[scId].isReactionScene = False
-
-                if self.scenes[scId].goal is None:
-                    self.scenes[scId].goal = ''
-
-                if self.scenes[scId].conflict is None:
-                    self.scenes[scId].conflict = ''
-
-                if self.scenes[scId].outcome is None:
-                    self.scenes[scId].outcome = ''
-
-                if self.scenes[scId].field1 is None:
-                    self.scenes[scId].field1 = ''
-
-                if self.scenes[scId].field2 is None:
-                    self.scenes[scId].field2 = ''
-
-                if self.scenes[scId].field3 is None:
-                    self.scenes[scId].field3 = ''
-
-                if self.scenes[scId].field4 is None:
-                    self.scenes[scId].field4 = ''
-
-                rating1 = ''
-                if self.scenes[scId].field1 != '1':
-                    rating1 = self.scenes[scId].field1
-
-                rating2 = ''
-                if self.scenes[scId].field2 != '1':
-                    rating2 = self.scenes[scId].field2
-
-                rating3 = ''
-                if self.scenes[scId].field3 != '1':
-                    rating3 = self.scenes[scId].field3
-
-                rating4 = ''
-                if self.scenes[scId].field4 != '1':
-                    rating4 = self.scenes[scId].field4
-
-                charas = ''
-
-                if self.scenes[scId].characters is not None:
-
-                    for crId in self.scenes[scId].characters:
-
-                        if charas != '':
-                            charas += '; '
-
-                        charas += self.characters[crId].title
-
-                locas = ''
-
-                if self.scenes[scId].locations is not None:
-
-                    for lcId in self.scenes[scId].locations:
-
-                        if locas != '':
-                            locas += '; '
-
-                        locas += self.locations[lcId].title
-
-                items = ''
-
-                if self.scenes[scId].items is not None:
-
-                    for itId in self.scenes[scId].items:
-
-                        if items != '':
-                            items += '; '
-
-                        items += self.items[itId].title
-
-                table.append('=HYPERLINK("file:///'
-                             + odtPath + '#ScID:' + scId + '%7Cregion";"ScID:' + scId + '")'
-                             + self._SEPARATOR
-                             + self.scenes[scId].title
-                             + self._SEPARATOR
-                             + self.scenes[scId].desc.rstrip().replace('\n', self._LINEBREAK)
-                             + self._SEPARATOR
-                             + ';'.join(self.scenes[scId].tags)
-                             + self._SEPARATOR
-                             + self.scenes[scId].sceneNotes.rstrip().replace('\n', self._LINEBREAK)
-                             + self._SEPARATOR
-                             + pacingType
-                             + self._SEPARATOR
-                             + self.scenes[scId].goal
-                             + self._SEPARATOR
-                             + self.scenes[scId].conflict
-                             + self._SEPARATOR
-                             + self.scenes[scId].outcome
-                             + self._SEPARATOR
-                             + str(sceneCount)
-                             + self._SEPARATOR
-                             + str(wordCount)
-                             + self._SEPARATOR
-                             + rating1
-                             + self._SEPARATOR
-                             + rating2
-                             + self._SEPARATOR
-                             + rating3
-                             + self._SEPARATOR
-                             + rating4
-                             + self._SEPARATOR
-                             + str(self.scenes[scId].wordCount)
-                             + self._SEPARATOR
-                             + str(self.scenes[scId].letterCount)
-                             + self._SEPARATOR
-                             + Scene.STATUS[self.scenes[scId].status]
-                             + self._SEPARATOR
-                             + charas
-                             + self._SEPARATOR
-                             + locas
-                             + self._SEPARATOR
-                             + items
-                             + '\n')
-
-        try:
-            with open(self._filePath, 'w', encoding='utf-8') as f:
-                f.writelines(table)
-
-        except(PermissionError):
-            return 'ERROR: ' + self._filePath + '" is write protected.'
-
-        return 'SUCCESS: "' + self._filePath + '" saved.'
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
-        return None
-
-
-
-
-
-class CsvPlotList(Novel):
+class CsvPlotList(CsvFile):
     """csv file representation of an yWriter project's scenes table. 
 
     Represents a csv file with a record per scene.
@@ -1568,8 +1763,8 @@ class CsvPlotList(Novel):
     * Data fields are delimited by the _SEPARATOR character.
     """
 
-    _FILE_EXTENSION = 'csv'
-    # overwrites Novel._FILE_EXTENSION
+    EXTENSION = '.csv'
+    SUFFIX = '_plotlist'
 
     _SEPARATOR = '|'     # delimits data fields within a record.
     _LINEBREAK = '\t'    # substitutes embedded line breaks.
@@ -1584,31 +1779,77 @@ class CsvPlotList(Novel):
     _NOT_APPLICABLE = 'N/A'
     # Scene field column header for fields not being assigned to a storyline
 
-    _TABLE_HEADER = ('ID'
-                     + _SEPARATOR
-                     + 'Plot section'
-                     + _SEPARATOR
-                     + 'Plot event'
-                     + _SEPARATOR
-                     + 'Plot event title'
-                     + _SEPARATOR
-                     + 'Details'
-                     + _SEPARATOR
-                     + 'Scene'
-                     + _SEPARATOR
-                     + 'Words total'
-                     + _SEPARATOR
-                     + _NOT_APPLICABLE
-                     + _SEPARATOR
-                     + _NOT_APPLICABLE
-                     + _SEPARATOR
-                     + _NOT_APPLICABLE
-                     + _SEPARATOR
-                     + _NOT_APPLICABLE
-                     + '\n')
-
     _CHAR_STATE = ['', 'N/A', 'unhappy', 'dissatisfied',
                    'vague', 'satisfied', 'happy', '', '', '', '']
+
+    fileHeader = '''ID|''' +\
+        '''Plot section|Plot event|Plot event title|Details|''' +\
+        '''Scene|Words total|$FieldTitle1|$FieldTitle2|$FieldTitle3|$FieldTitle4
+'''
+
+    infoChapterTemplate = '''ChID:$ID|$Title|||$Desc||||||
+'''
+
+    sceneTemplate = '''=HYPERLINK("file:///$ProjectPath/${ProjectName}_manuscript.odt#ScID:$ID%7Cregion";"ScID:$ID")|''' +\
+        '''|$Tags|$Title|$Notes|''' +\
+        '''$SceneNumber|$WordsTotal|$Field1|$Field2|$Field3|$Field4
+'''
+
+    def get_projectTemplateSubst(self):
+        projectTemplateSubst = CsvFile.get_projectTemplateSubst(self)
+
+        charList = []
+
+        for crId in self.characters:
+            charList.append(self.characters[crId].title)
+
+        if self.fieldTitle1 in charList or self._STORYLINE_MARKER in self.fieldTitle1.lower():
+            self.arc1 = True
+
+        else:
+            self.arc1 = False
+            projectTemplateSubst['FieldTitle1'] = self._NOT_APPLICABLE
+
+        if self.fieldTitle2 in charList or self._STORYLINE_MARKER in self.fieldTitle2.lower():
+            self.arc2 = True
+
+        else:
+            self.arc2 = False
+            projectTemplateSubst['FieldTitle2'] = self._NOT_APPLICABLE
+
+        if self.fieldTitle3 in charList or self._STORYLINE_MARKER in self.fieldTitle3.lower():
+            self.arc3 = True
+
+        else:
+            self.arc3 = False
+            projectTemplateSubst['FieldTitle3'] = self._NOT_APPLICABLE
+
+        if self.fieldTitle4 in charList or self._STORYLINE_MARKER in self.fieldTitle4.lower():
+            self.arc4 = True
+
+        else:
+            self.arc4 = False
+            projectTemplateSubst['FieldTitle4'] = self._NOT_APPLICABLE
+
+        return projectTemplateSubst
+
+    def get_sceneSubst(self, scId, sceneNumber, wordsTotal, lettersTotal):
+        sceneSubst = CsvFile.get_sceneSubst(
+            self, scId, sceneNumber, wordsTotal, lettersTotal)
+
+        if self.scenes[scId].field1 == '1' or not self.arc1:
+            sceneSubst['Field1'] = ''
+
+        if self.scenes[scId].field2 == '1' or not self.arc1:
+            sceneSubst['Field2'] = ''
+
+        if self.scenes[scId].field3 == '1' or not self.arc3:
+            sceneSubst['Field3'] = ''
+
+        if self.scenes[scId].field4 == '1' or not self.arc4:
+            sceneSubst['Field4'] = ''
+
+        return sceneSubst
 
     def read(self):
         """Parse the csv file located at filePath, fetching 
@@ -1622,7 +1863,7 @@ class CsvPlotList(Novel):
         except(FileNotFoundError):
             return 'ERROR: "' + self._filePath + '" not found.'
 
-        cellsInLine = len(self._TABLE_HEADER.split(self._SEPARATOR))
+        cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
         tableHeader = lines[0].rstrip().split(self._SEPARATOR)
 
@@ -1642,7 +1883,7 @@ class CsvPlotList(Novel):
             if 'ScID:' in cell[0]:
                 scId = re.search('ScID\:([0-9]+)', cell[0]).group(1)
                 self.scenes[scId] = Scene()
-                self.scenes[scId].tags = cell[2].split(';')
+                self.scenes[scId].tags = cell[2].split(self._LIST_SEPARATOR)
                 self.scenes[scId].title = cell[3]
                 self.scenes[scId].sceneNotes = cell[4].replace(
                     self._LINEBREAK, '\n')
@@ -1687,206 +1928,10 @@ class CsvPlotList(Novel):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
-    def merge(self, novel):
-        """Copy selected novel attributes.
-        """
-
-        if novel.srtChapters != []:
-            self.srtChapters = novel.srtChapters
-
-        if novel.scenes is not None:
-            self.scenes = novel.scenes
-
-        if novel.chapters is not None:
-            self.chapters = novel.chapters
-
-        if novel.fieldTitle1 is not None:
-            self.fieldTitle1 = novel.fieldTitle1
-
-        else:
-            self.fieldTitle1 = self._NOT_APPLICABLE
-
-        if novel.fieldTitle2 is not None:
-            self.fieldTitle2 = novel.fieldTitle2
-
-        else:
-            self.fieldTitle2 = self._NOT_APPLICABLE
-
-        if novel.fieldTitle3 is not None:
-            self.fieldTitle3 = novel.fieldTitle3
-
-        else:
-            self.fieldTitle3 = self._NOT_APPLICABLE
-
-        if novel.fieldTitle4 is not None:
-            self.fieldTitle4 = novel.fieldTitle4
-
-        else:
-            self.fieldTitle4 = self._NOT_APPLICABLE
-
-        self.characters = novel.characters
-        self.locations = novel.locations
-        self.items = novel.items
-
-    def write(self):
-        """Generate a csv file showing the novel's plot structure.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-
-        odtPath = quote(os.path.realpath(self.filePath).replace(
-            '\\', '/'), '/:').replace(PLOTLIST_SUFFIX + '.csv', MANUSCRIPT_SUFFIX + '.odt')
-
-        # first record: the table's column headings
-
-        table = [self._TABLE_HEADER]
-
-        # Identify storyline arcs
-
-        charList = []
-
-        for crId in self.characters:
-            charList.append(self.characters[crId].title)
-
-        if self.fieldTitle1 in charList or self._STORYLINE_MARKER in self.fieldTitle1.lower():
-            table[0] = table[0].replace(self._NOT_APPLICABLE, self.fieldTitle1)
-            arc1 = True
-
-        else:
-            arc1 = False
-
-        if self.fieldTitle2 in charList or self._STORYLINE_MARKER in self.fieldTitle2.lower():
-            table[0] = table[0].replace(self._NOT_APPLICABLE, self.fieldTitle2)
-            arc2 = True
-
-        else:
-            arc2 = False
-
-        if self.fieldTitle3 in charList or self._STORYLINE_MARKER in self.fieldTitle3.lower():
-            table[0] = table[0].replace(self._NOT_APPLICABLE, self.fieldTitle3)
-            arc3 = True
-
-        else:
-            arc3 = False
-
-        if self.fieldTitle4 in charList or self._STORYLINE_MARKER in self.fieldTitle4.lower():
-            table[0] = table[0].replace(self._NOT_APPLICABLE, self.fieldTitle4)
-            arc4 = True
-
-        else:
-            arc4 = False
-
-        # Add a record for each used scene in a regular chapter
-        # and for each chapter marked "Other".
-
-        sceneCount = 0
-        wordCount = 0
-
-        for chId in self.srtChapters:
-
-            if self.chapters[chId].isUnused:
-                continue
-
-            if self.chapters[chId].chType == 1:
-                # Chapter marked "Other" precedes and describes a Plot section.
-                # Put chapter description to "details".
-
-                if self.chapters[chId].desc is None:
-                    self.chapters[chId].desc = ''
-
-                table.append('ChID:' + chId
-                             + self._SEPARATOR
-                             + self.chapters[chId].title
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self.chapters[chId].desc.rstrip().replace('\n', self._LINEBREAK)
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + self._SEPARATOR
-                             + '\n')
-
-            else:
-                for scId in self.chapters[chId].srtScenes:
-
-                    if self.scenes[scId].isUnused:
-                        continue
-
-                    if self.scenes[scId].doNotExport:
-                        continue
-
-                    sceneCount += 1
-                    wordCount += self.scenes[scId].wordCount
-
-                    # If the scene contains plot information:
-                    # a tag marks the plot event (e.g. inciting event, plot point, climax).
-                    # Put scene note text to "details".
-                    # Transfer scene ratings > 1 to storyline arc
-                    # states.
-
-                    if self.scenes[scId].sceneNotes is None:
-                        self.scenes[scId].sceneNotes = ''
-
-                    if self.scenes[scId].tags is None:
-                        self.scenes[scId].tags = ['']
-
-                    arcState1 = ''
-                    if arc1 and self.scenes[scId].field1 != '1':
-                        arcState1 = self.scenes[scId].field1
-
-                    arcState2 = ''
-                    if arc2 and self.scenes[scId].field2 != '1':
-                        arcState2 = self.scenes[scId].field2
-
-                    arcState3 = ''
-                    if arc3 and self.scenes[scId].field3 != '1':
-                        arcState3 = self.scenes[scId].field3
-
-                    arcState4 = ''
-                    if arc4 and self.scenes[scId].field4 != '1':
-                        arcState4 = self.scenes[scId].field4
-
-                    table.append('=HYPERLINK("file:///'
-                                 + odtPath + '#ScID:' + scId + '%7Cregion";"ScID:' + scId + '")'
-                                 + self._SEPARATOR
-                                 + self._SEPARATOR
-                                 + ';'.join(self.scenes[scId].tags)
-                                 + self._SEPARATOR
-                                 + self.scenes[scId].title
-                                 + self._SEPARATOR
-                                 + self.scenes[scId].sceneNotes.rstrip().replace('\n', self._LINEBREAK)
-                                 + self._SEPARATOR
-                                 + str(sceneCount)
-                                 + self._SEPARATOR
-                                 + str(wordCount)
-                                 + self._SEPARATOR
-                                 + arcState1
-                                 + self._SEPARATOR
-                                 + arcState2
-                                 + self._SEPARATOR
-                                 + arcState3
-                                 + self._SEPARATOR
-                                 + arcState4
-                                 + '\n')
-
-        try:
-            with open(self._filePath, 'w', encoding='utf-8') as f:
-                f.writelines(table)
-
-        except(PermissionError):
-            return 'ERROR: ' + self._filePath + '" is write protected.'
-
-        return 'SUCCESS: "' + self._filePath + '" saved.'
-
-    def get_structure(self):
-        return None
 
 
 
-
-class CsvCharList(Novel):
+class CsvCharList(CsvFile):
     """csv file representation of an yWriter project's characters table. 
 
     Represents a csv file with a record per character.
@@ -1894,32 +1939,13 @@ class CsvCharList(Novel):
     * Data fields are delimited by the _SEPARATOR character.
     """
 
-    _FILE_EXTENSION = 'csv'
-    # overwrites Novel._FILE_EXTENSION
+    SUFFIX = '_charlist'
 
-    _SEPARATOR = '|'     # delimits data fields within a record.
-    _LINEBREAK = '\t'    # substitutes embedded line breaks.
+    fileHeader = '''ID|Name|Full name|Aka|Description|Bio|Goals|Importance|Tags|Notes
+'''
 
-    _TABLE_HEADER = ('ID'
-                     + _SEPARATOR
-                     + 'Name'
-                     + _SEPARATOR
-                     + 'Full name'
-                     + _SEPARATOR
-                     + 'Aka'
-                     + _SEPARATOR
-                     + 'Description'
-                     + _SEPARATOR
-                     + 'Bio'
-                     + _SEPARATOR
-                     + 'Goals'
-                     + _SEPARATOR
-                     + 'Importance'
-                     + _SEPARATOR
-                     + 'Tags'
-                     + _SEPARATOR
-                     + 'Notes'
-                     + '\n')
+    characterTemplate = '''CrID:$ID|$Title|$FullName|$AKA|$Desc|$Bio|$Goals|$Status|$Tags|$Notes
+'''
 
     def read(self):
         """Parse the csv file located at filePath, 
@@ -1933,10 +1959,10 @@ class CsvCharList(Novel):
         except(FileNotFoundError):
             return 'ERROR: "' + self._filePath + '" not found.'
 
-        if lines[0] != self._TABLE_HEADER:
+        if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
 
-        cellsInLine = len(self._TABLE_HEADER.split(self._SEPARATOR))
+        cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
         for line in lines:
             cell = line.rstrip().split(self._SEPARATOR)
@@ -1955,7 +1981,7 @@ class CsvCharList(Novel):
                 self.characters[crId].bio = cell[5]
                 self.characters[crId].goals = cell[6]
 
-                if 'Major' in cell[7]:
+                if Character.MAJOR_MARKER in cell[7]:
                     self.characters[crId].isMajor = True
 
                 else:
@@ -1970,103 +1996,12 @@ class CsvCharList(Novel):
     def merge(self, novel):
         """Copy selected novel attributes.
         """
-
-        if novel.characters is not None:
-            self.characters = novel.characters
-
-    def write(self):
-        """Generate a csv file containing per character:
-        - character ID, 
-        - character name,
-        - character full name,
-        - character alternative name, 
-        - character description, 
-        - character bio,
-        - character goals,
-        - character importance,
-        - character tags,
-        - character notes.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-
-        def importance(isMajor):
-
-            if isMajor:
-                return 'Major'
-
-            else:
-                return 'Minor'
-
-        # first record: the table's column headings
-
-        table = [self._TABLE_HEADER]
-
-        # Add a record for each character
-
-        for crId in self.characters:
-
-            if self.characters[crId].fullName is None:
-                self.characters[crId].fullName = ''
-
-            if self.characters[crId].aka is None:
-                self.characters[crId].aka = ''
-
-            if self.characters[crId].desc is None:
-                self.characters[crId].desc = ''
-
-            if self.characters[crId].bio is None:
-                self.characters[crId].bio = ''
-
-            if self.characters[crId].goals is None:
-                self.characters[crId].goals = ''
-
-            if self.characters[crId].isMajor is None:
-                self.characters[crId].isMajor = False
-
-            if self.characters[crId].tags is None:
-                self.characters[crId].tags = ['']
-
-            if self.characters[crId].notes is None:
-                self.characters[crId].notes = ''
-
-            table.append('CrID:' + str(crId)
-                         + self._SEPARATOR
-                         + self.characters[crId].title
-                         + self._SEPARATOR
-                         + self.characters[crId].fullName
-                         + self._SEPARATOR
-                         + self.characters[crId].aka
-                         + self._SEPARATOR
-                         + self.characters[crId].desc.rstrip().replace('\n', self._LINEBREAK)
-                         + self._SEPARATOR
-                         + self.characters[crId].bio
-                         + self._SEPARATOR
-                         + self.characters[crId].goals
-                         + self._SEPARATOR
-                         + importance(self.characters[crId].isMajor)
-                         + self._SEPARATOR
-                         + ';'.join(self.characters[crId].tags)
-                         + self._SEPARATOR
-                         + self.characters[crId].notes.rstrip().replace('\n', self._LINEBREAK)
-                         + '\n')
-
-        try:
-            with open(self._filePath, 'w', encoding='utf-8') as f:
-                f.writelines(table)
-
-        except(PermissionError):
-            return 'ERROR: ' + self._filePath + '" is write protected.'
-
-        return 'SUCCESS: "' + self._filePath + '" saved.'
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
-        return None
+        self.characters = novel.characters
 
 
 
 
-class CsvLocList(Novel):
+class CsvLocList(CsvFile):
     """csv file representation of an yWriter project's locations table. 
 
     Represents a csv file with a record per location.
@@ -2074,22 +2009,13 @@ class CsvLocList(Novel):
     * Data fields are delimited by the _SEPARATOR location.
     """
 
-    _FILE_EXTENSION = 'csv'
-    # overwrites Novel._FILE_EXTENSION
+    SUFFIX = '_loclist'
 
-    _SEPARATOR = '|'     # delimits data fields within a record.
-    _LINEBREAK = '\t'    # substitutes embedded line breaks.
+    fileHeader = '''ID|Name|Description|Aka|Tags
+'''
 
-    _TABLE_HEADER = ('ID'
-                     + _SEPARATOR
-                     + 'Name'
-                     + _SEPARATOR
-                     + 'Description'
-                     + _SEPARATOR
-                     + 'Aka'
-                     + _SEPARATOR
-                     + 'Tags'
-                     + '\n')
+    locationTemplate = '''LcID:$ID|$Title|$Desc|$AKA|$Tags
+'''
 
     def read(self):
         """Parse the csv file located at filePath, 
@@ -2103,10 +2029,10 @@ class CsvLocList(Novel):
         except(FileNotFoundError):
             return 'ERROR: "' + self._filePath + '" not found.'
 
-        if lines[0] != self._TABLE_HEADER:
+        if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
 
-        cellsInLine = len(self._TABLE_HEADER.split(self._SEPARATOR))
+        cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
         for line in lines:
             cell = line.rstrip().split(self._SEPARATOR)
@@ -2128,65 +2054,12 @@ class CsvLocList(Novel):
     def merge(self, novel):
         """Copy selected novel attributes.
         """
-
-        if novel.locations is not None:
-            self.locations = novel.locations
-
-    def write(self):
-        """Generate a csv file containing per location:
-        - location ID, 
-        - location title,
-        - location description, 
-        - location alternative name, 
-        - location tags.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-
-        # first record: the table's column headings
-
-        table = [self._TABLE_HEADER]
-
-        # Add a record for each location
-
-        for lcId in self.locations:
-
-            if self.locations[lcId].desc is None:
-                self.locations[lcId].desc = ''
-
-            if self.locations[lcId].aka is None:
-                self.locations[lcId].aka = ''
-
-            if self.locations[lcId].tags is None:
-                self.locations[lcId].tags = ['']
-
-            table.append('LcID:' + str(lcId)
-                         + self._SEPARATOR
-                         + self.locations[lcId].title
-                         + self._SEPARATOR
-                         + self.locations[lcId].desc.rstrip().replace('\n', self._LINEBREAK)
-                         + self._SEPARATOR
-                         + self.locations[lcId].aka
-                         + self._SEPARATOR
-                         + ';'.join(self.locations[lcId].tags)
-                         + '\n')
-
-        try:
-            with open(self._filePath, 'w', encoding='utf-8') as f:
-                f.writelines(table)
-
-        except(PermissionError):
-            return 'ERROR: ' + self._filePath + '" is write protected.'
-
-        return 'SUCCESS: "' + self._filePath + '" saved.'
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
-        return None
+        self.locations = novel.locations
 
 
 
 
-class CsvItemList(Novel):
+class CsvItemList(CsvFile):
     """csv file representation of an yWriter project's items table. 
 
     Represents a csv file with a record per item.
@@ -2194,22 +2067,13 @@ class CsvItemList(Novel):
     * Data fields are delimited by the _SEPARATOR item.
     """
 
-    _FILE_EXTENSION = 'csv'
-    # overwrites Novel._FILE_EXTENSION
+    SUFFIX = '_itemlist'
 
-    _SEPARATOR = '|'     # delimits data fields within a record.
-    _LINEBREAK = '\t'    # substitutes embedded line breaks.
+    fileHeader = '''ID|Name|Description|Aka|Tags
+'''
 
-    _TABLE_HEADER = ('ID'
-                     + _SEPARATOR
-                     + 'Name'
-                     + _SEPARATOR
-                     + 'Description'
-                     + _SEPARATOR
-                     + 'Aka'
-                     + _SEPARATOR
-                     + 'Tags'
-                     + '\n')
+    itemTemplate = '''ItID:$ID|$Title|$Desc|$AKA|$Tags
+'''
 
     def read(self):
         """Parse the csv file located at filePath, 
@@ -2223,10 +2087,10 @@ class CsvItemList(Novel):
         except(FileNotFoundError):
             return 'ERROR: "' + self._filePath + '" not found.'
 
-        if lines[0] != self._TABLE_HEADER:
+        if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
 
-        cellsInLine = len(self._TABLE_HEADER.split(self._SEPARATOR))
+        cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
         for line in lines:
             cell = line.rstrip().split(self._SEPARATOR)
@@ -2248,61 +2112,7 @@ class CsvItemList(Novel):
     def merge(self, novel):
         """Copy selected novel attributes.
         """
-
-        if novel.items is not None:
-            self.items = novel.items
-
-    def write(self):
-        """Generate a csv file containing per item:
-        - item ID, 
-        - item title,
-        - item description, 
-        - item alternative name, 
-        - item tags.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-
-        # first record: the table's column headings
-
-        table = [self._TABLE_HEADER]
-
-        # Add a record for each item
-
-        for itId in self.items:
-
-            if self.items[itId].desc is None:
-                self.items[itId].desc = ''
-
-            if self.items[itId].aka is None:
-                self.items[itId].aka = ''
-
-            if self.items[itId].tags is None:
-                self.items[itId].tags = ['']
-
-            table.append('ItID:' + str(itId)
-                         + self._SEPARATOR
-                         + self.items[itId].title
-                         + self._SEPARATOR
-                         + self.items[itId].desc.rstrip().replace('\n',
-                                                                  self._LINEBREAK)
-                         + self._SEPARATOR
-                         + self.items[itId].aka
-                         + self._SEPARATOR
-                         + ';'.join(self.items[itId].tags)
-                         + '\n')
-
-        try:
-            with open(self._filePath, 'w', encoding='utf-8') as f:
-                f.writelines(table)
-
-        except(PermissionError):
-            return 'ERROR: ' + self._filePath + '" is write protected.'
-
-        return 'SUCCESS: "' + self._filePath + '" saved.'
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
-        return None
+        self.items = novel.items
 from tkinter import *
 from tkinter import messagebox
 
@@ -2409,17 +2219,17 @@ class YwFile(Novel):
         """Accept only filenames with the correct extension. """
 
         if filePath.lower().endswith('.yw7'):
-            self._FILE_EXTENSION = '.yw7'
+            self.EXTENSION = '.yw7'
             self._ENCODING = 'utf-8'
             self._filePath = filePath
 
         elif filePath.lower().endswith('.yw6'):
-            self._FILE_EXTENSION = '.yw6'
+            self.EXTENSION = '.yw6'
             self._ENCODING = 'utf-8'
             self._filePath = filePath
 
         elif filePath.lower().endswith('.yw5'):
-            self._FILE_EXTENSION = '.yw5'
+            self.EXTENSION = '.yw5'
             self._ENCODING = 'iso-8859-1'
             self._filePath = filePath
 
@@ -2688,6 +2498,30 @@ class YwFile(Novel):
             else:
                 self.scenes[scId].appendToPrev = False
 
+            if scn.find('SpecificDateTime') is not None:
+                dateTime = scn.find('SpecificDateTime').text.split(' ')
+                self.scenes[scId].date = dateTime[0]
+                self.scenes[scId].time = dateTime[1]
+
+            else:
+                if scn.find('Day') is not None:
+                    self.scenes[scId].day = scn.find('Day').text
+
+                if scn.find('Hour') is not None:
+                    self.scenes[scId].hour = scn.find('Hour').text
+
+                if scn.find('Minute') is not None:
+                    self.scenes[scId].minute = scn.find('Minute').text
+
+            if scn.find('LastsDays') is not None:
+                self.scenes[scId].lastsDays = scn.find('LastsDays').text
+
+            if scn.find('LastsHours') is not None:
+                self.scenes[scId].lastsHours = scn.find('LastsHours').text
+
+            if scn.find('LastsMinutes') is not None:
+                self.scenes[scId].lastsMinutes = scn.find('LastsMinutes').text
+
             if scn.find('ReactionScene') is not None:
                 self.scenes[scId].isReactionScene = True
 
@@ -2736,80 +2570,229 @@ class YwFile(Novel):
         return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
 
     def merge(self, novel):
-        """Copy selected novel attributes.
+        """Merge attributes.
         """
-
         # Merge locations.
 
-        if novel.locations != {}:
+        for lcId in novel.locations:
 
-            for lcId in novel.locations:
+            if not lcId in self.locations:
+                self.locations[lcId] = Object()
 
-                if novel.locations[lcId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.locations[lcId].title = novel.locations[lcId].title
+            if novel.locations[lcId].title:
+                # avoids deleting the title, if it is empty by accident
+                self.locations[lcId].title = novel.locations[lcId].title
 
-                if novel.locations[lcId].desc is not None:
-                    self.locations[lcId].desc = novel.locations[lcId].desc
+            if novel.locations[lcId].desc is not None:
+                self.locations[lcId].desc = novel.locations[lcId].desc
 
-                if novel.locations[lcId].aka is not None:
-                    self.locations[lcId].aka = novel.locations[lcId].aka
+            if novel.locations[lcId].aka is not None:
+                self.locations[lcId].aka = novel.locations[lcId].aka
 
-                if novel.locations[lcId].tags is not None:
-                    self.locations[lcId].tags = novel.locations[lcId].tags
+            if novel.locations[lcId].tags is not None:
+                self.locations[lcId].tags = novel.locations[lcId].tags
 
         # Merge items.
 
-        if novel.items != {}:
+        for itId in novel.items:
 
-            for itId in novel.items:
+            if not itId in self.items:
+                self.items[itId] = Object()
 
-                if novel.items[itId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.items[itId].title = novel.items[itId].title
+            if novel.items[itId].title:
+                # avoids deleting the title, if it is empty by accident
+                self.items[itId].title = novel.items[itId].title
 
-                if novel.items[itId].desc is not None:
-                    self.items[itId].desc = novel.items[itId].desc
+            if novel.items[itId].desc is not None:
+                self.items[itId].desc = novel.items[itId].desc
 
-                if novel.items[itId].aka is not None:
-                    self.items[itId].aka = novel.items[itId].aka
+            if novel.items[itId].aka is not None:
+                self.items[itId].aka = novel.items[itId].aka
 
-                if novel.items[itId].tags is not None:
-                    self.items[itId].tags = novel.items[itId].tags
+            if novel.items[itId].tags is not None:
+                self.items[itId].tags = novel.items[itId].tags
 
         # Merge characters.
 
-        if novel.characters != {}:
+        for crId in novel.characters:
 
-            for crId in novel.characters:
+            if not crId in self.characters:
+                self.characters[crId] = Character()
 
-                if novel.characters[crId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.characters[crId].title = novel.characters[crId].title
+            if novel.characters[crId].title:
+                # avoids deleting the title, if it is empty by accident
+                self.characters[crId].title = novel.characters[crId].title
 
-                if novel.characters[crId].desc is not None:
-                    self.characters[crId].desc = novel.characters[crId].desc
+            if novel.characters[crId].desc is not None:
+                self.characters[crId].desc = novel.characters[crId].desc
 
-                if novel.characters[crId].aka is not None:
-                    self.characters[crId].aka = novel.characters[crId].aka
+            if novel.characters[crId].aka is not None:
+                self.characters[crId].aka = novel.characters[crId].aka
 
-                if novel.characters[crId].tags is not None:
-                    self.characters[crId].tags = novel.characters[crId].tags
+            if novel.characters[crId].tags is not None:
+                self.characters[crId].tags = novel.characters[crId].tags
 
-                if novel.characters[crId].notes is not None:
-                    self.characters[crId].notes = novel.characters[crId].notes
+            if novel.characters[crId].notes is not None:
+                self.characters[crId].notes = novel.characters[crId].notes
 
-                if novel.characters[crId].bio is not None:
-                    self.characters[crId].bio = novel.characters[crId].bio
+            if novel.characters[crId].bio is not None:
+                self.characters[crId].bio = novel.characters[crId].bio
 
-                if novel.characters[crId].goals is not None:
-                    self.characters[crId].goals = novel.characters[crId].goals
+            if novel.characters[crId].goals is not None:
+                self.characters[crId].goals = novel.characters[crId].goals
 
-                if novel.characters[crId].fullName is not None:
-                    self.characters[crId].fullName = novel.characters[crId].fullName
+            if novel.characters[crId].fullName is not None:
+                self.characters[crId].fullName = novel.characters[crId].fullName
 
-                if novel.characters[crId].isMajor is not None:
-                    self.characters[crId].isMajor = novel.characters[crId].isMajor
+            if novel.characters[crId].isMajor is not None:
+                self.characters[crId].isMajor = novel.characters[crId].isMajor
+
+        # Merge scenes.
+
+        for scId in novel.scenes:
+
+            if not scId in self.scenes:
+                self.scenes[scId] = Scene()
+
+            if novel.scenes[scId].title:
+                # avoids deleting the title, if it is empty by accident
+                self.scenes[scId].title = novel.scenes[scId].title
+
+            if novel.scenes[scId].desc is not None:
+                self.scenes[scId].desc = novel.scenes[scId].desc
+
+            if novel.scenes[scId].sceneContent is not None:
+                self.scenes[scId].sceneContent = novel.scenes[scId].sceneContent
+
+            if novel.scenes[scId].isUnused is not None:
+                self.scenes[scId].isUnused = novel.scenes[scId].isUnused
+
+            if novel.scenes[scId].status is not None:
+                self.scenes[scId].status = novel.scenes[scId].status
+
+            if novel.scenes[scId].sceneNotes is not None:
+                self.scenes[scId].sceneNotes = novel.scenes[scId].sceneNotes
+
+            if novel.scenes[scId].tags is not None:
+                self.scenes[scId].tags = novel.scenes[scId].tags
+
+            if novel.scenes[scId].field1 is not None:
+                self.scenes[scId].field1 = novel.scenes[scId].field1
+
+            if novel.scenes[scId].field2 is not None:
+                self.scenes[scId].field2 = novel.scenes[scId].field2
+
+            if novel.scenes[scId].field3 is not None:
+                self.scenes[scId].field3 = novel.scenes[scId].field3
+
+            if novel.scenes[scId].field4 is not None:
+                self.scenes[scId].field4 = novel.scenes[scId].field4
+
+            if novel.scenes[scId].appendToPrev is not None:
+                self.scenes[scId].appendToPrev = novel.scenes[scId].appendToPrev
+
+            if novel.scenes[scId].date is not None:
+                self.scenes[scId].date = novel.scenes[scId].date
+
+            if novel.scenes[scId].time is not None:
+                self.scenes[scId].time = novel.scenes[scId].time
+
+            if novel.scenes[scId].minute is not None:
+                self.scenes[scId].minute = novel.scenes[scId].minute
+
+            if novel.scenes[scId].hour is not None:
+                self.scenes[scId].hour = novel.scenes[scId].hour
+
+            if novel.scenes[scId].day is not None:
+                self.scenes[scId].day = novel.scenes[scId].day
+
+            if novel.scenes[scId].lastsMinutes is not None:
+                self.scenes[scId].lastsMinutes = novel.scenes[scId].lastsMinutes
+
+            if novel.scenes[scId].lastsHours is not None:
+                self.scenes[scId].lastsHours = novel.scenes[scId].lastsHours
+
+            if novel.scenes[scId].lastsDays is not None:
+                self.scenes[scId].lastsDays = novel.scenes[scId].lastsDays
+
+            if novel.scenes[scId].isReactionScene is not None:
+                self.scenes[scId].isReactionScene = novel.scenes[scId].isReactionScene
+
+            if novel.scenes[scId].isSubPlot is not None:
+                self.scenes[scId].isSubPlot = novel.scenes[scId].isSubPlot
+
+            if novel.scenes[scId].goal is not None:
+                self.scenes[scId].goal = novel.scenes[scId].goal
+
+            if novel.scenes[scId].conflict is not None:
+                self.scenes[scId].conflict = novel.scenes[scId].conflict
+
+            if novel.scenes[scId].outcome is not None:
+                self.scenes[scId].outcome = novel.scenes[scId].outcome
+
+            if novel.scenes[scId].characters is not None:
+                self.scenes[scId].characters = []
+
+                for crId in novel.scenes[scId].characters:
+
+                    if crId in self.characters:
+                        self.scenes[scId].characters.append(crId)
+
+            if novel.scenes[scId].locations is not None:
+                self.scenes[scId].locations = []
+
+                for lcId in novel.scenes[scId].locations:
+
+                    if lcId in self.locations:
+                        self.scenes[scId].locations.append(lcId)
+
+            if novel.scenes[scId].items is not None:
+                self.scenes[scId].items = []
+
+                for itId in novel.scenes[scId].items:
+
+                    if itId in self.items:
+                        self.scenes[scId].append(itId)
+
+        # Merge chapters.
+
+        scenesAssigned = []
+
+        for chId in novel.chapters:
+
+            if not chId in self.chapters:
+                self.chapters[chId] = Chapter()
+
+            if novel.chapters[chId].title:
+                # avoids deleting the title, if it is empty by accident
+                self.chapters[chId].title = novel.chapters[chId].title
+
+            if novel.chapters[chId].desc is not None:
+                self.chapters[chId].desc = novel.chapters[chId].desc
+
+            if novel.chapters[chId].chLevel is not None:
+                self.chapters[chId].chLevel = novel.chapters[chId].chLevel
+
+            if novel.chapters[chId].chType is not None:
+                self.chapters[chId].chType = novel.chapters[chId].chType
+
+            if novel.chapters[chId].isUnused is not None:
+                self.chapters[chId].isUnused = novel.chapters[chId].isUnused
+
+            if novel.chapters[chId].suppressChapterTitle is not None:
+                self.chapters[chId].suppressChapterTitle = novel.chapters[chId].suppressChapterTitle
+
+            if novel.chapters[chId].isTrash is not None:
+                self.chapters[chId].isTrash = novel.chapters[chId].isTrash
+
+            if novel.chapters[chId].srtScenes is not None:
+                self.chapters[chId].srtScenes = []
+
+                for scId in novel.chapters[chId].srtScenes:
+
+                    if (scId in self.scenes) and not (scId in scenesAssigned):
+                        self.chapters[chId].srtScenes.append(scId)
+                        scenesAssigned.append(scId)
 
         # Merge attributes at novel level.
 
@@ -2835,129 +2818,13 @@ class YwFile(Novel):
         if novel.fieldTitle4 is not None:
             self.fieldTitle4 = novel.fieldTitle4
 
-        '''Do not modify these items yet:
-        
         if novel.srtChapters != []:
-            self.srtChapters = novel.srtChapters
-            
-        '''
+            self.srtChapters = []
 
-        # Merge attributes at chapter level.
+            for chId in novel.srtChapters:
 
-        if novel.chapters != {}:
-
-            for chId in novel.chapters:
-
-                if novel.chapters[chId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.chapters[chId].title = novel.chapters[chId].title
-
-                if novel.chapters[chId].desc is not None:
-                    self.chapters[chId].desc = novel.chapters[chId].desc
-
-                if novel.chapters[chId].chLevel is not None:
-                    self.chapters[chId].chLevel = novel.chapters[chId].chLevel
-
-                if novel.chapters[chId].chType is not None:
-                    self.chapters[chId].chType = novel.chapters[chId].chType
-
-                if novel.chapters[chId].isUnused is not None:
-                    self.chapters[chId].isUnused = novel.chapters[chId].isUnused
-
-                if novel.chapters[chId].suppressChapterTitle is not None:
-                    self.chapters[chId].suppressChapterTitle = novel.chapters[chId].suppressChapterTitle
-
-                if novel.chapters[chId].isTrash is not None:
-                    self.chapters[chId].isTrash = novel.chapters[chId].isTrash
-
-                '''Do not modify these items yet:
-                
-                if novel.chapters[chId].srtScenes != []:
-                    self.chapters[chId].srtScenes = novel.chapters[chId].srtScenes
-
-                '''
-
-        # Merge attributes at scene level.
-
-        if novel.scenes != {}:
-
-            for scId in novel.scenes:
-
-                if novel.scenes[scId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.scenes[scId].title = novel.scenes[scId].title
-
-                if novel.scenes[scId].desc is not None:
-                    self.scenes[scId].desc = novel.scenes[scId].desc
-
-                if novel.scenes[scId].sceneContent is not None:
-                    self.scenes[scId].sceneContent = novel.scenes[scId].sceneContent
-
-                if novel.scenes[scId].isUnused is not None:
-                    self.scenes[scId].isUnused = novel.scenes[scId].isUnused
-
-                if novel.scenes[scId].status is not None:
-                    self.scenes[scId].status = novel.scenes[scId].status
-
-                if novel.scenes[scId].sceneNotes is not None:
-                    self.scenes[scId].sceneNotes = novel.scenes[scId].sceneNotes
-
-                if novel.scenes[scId].tags is not None:
-                    self.scenes[scId].tags = novel.scenes[scId].tags
-
-                if novel.scenes[scId].field1 is not None:
-                    self.scenes[scId].field1 = novel.scenes[scId].field1
-
-                if novel.scenes[scId].field2 is not None:
-                    self.scenes[scId].field2 = novel.scenes[scId].field2
-
-                if novel.scenes[scId].field3 is not None:
-                    self.scenes[scId].field3 = novel.scenes[scId].field3
-
-                if novel.scenes[scId].field4 is not None:
-                    self.scenes[scId].field4 = novel.scenes[scId].field4
-
-                if novel.scenes[scId].appendToPrev is not None:
-                    self.scenes[scId].appendToPrev = novel.scenes[scId].appendToPrev
-
-                if novel.scenes[scId].isReactionScene is not None:
-                    self.scenes[scId].isReactionScene = novel.scenes[scId].isReactionScene
-
-                if novel.scenes[scId].isSubPlot is not None:
-                    self.scenes[scId].isSubPlot = novel.scenes[scId].isSubPlot
-
-                if novel.scenes[scId].goal is not None:
-                    self.scenes[scId].goal = novel.scenes[scId].goal
-
-                if novel.scenes[scId].conflict is not None:
-                    self.scenes[scId].conflict = novel.scenes[scId].conflict
-
-                if novel.scenes[scId].outcome is not None:
-                    self.scenes[scId].outcome = novel.scenes[scId].outcome
-
-                if novel.scenes[scId].characters is not None:
-                    self.scenes[scId].characters = []
-
-                    for crId in novel.scenes[scId].characters:
-
-                        if crId in self.characters:
-                            self.scenes[scId].characters.append(crId)
-
-                if novel.scenes[scId].locations is not None:
-                    self.scenes[scId].locations = []
-
-                    for lcId in novel.scenes[scId].locations:
-
-                        if lcId in self.locations:
-                            self.scenes[scId].locations.append(lcId)
-
-                if novel.scenes[scId].items is not None:
-                    self.scenes[scId].items = []
-
-                    for itId in novel.scenes[scId].items:
-
-                        if itId in self.items:
-                            self.scenes[scId].append(crId)
+                if chId in self.chapters:
+                    self.srtChapters.append(chId)
 
     def write(self):
         """Open the yWriter xml file located at filePath and 
@@ -3291,6 +3158,95 @@ class YwFile(Novel):
                 elif scn.find('AppendToPrev') is not None:
                     scn.remove(scn.find('AppendToPrev'))
 
+                # Date/time information
+
+                if (self.scenes[scId].date is not None) and (self.scenes[scId].time is not None):
+                    dateTime = self.scenes[scId].date + \
+                        ' ' + self.scenes[scId].time
+
+                    if scn.find('SpecificDateTime') is not None:
+                        scn.find('SpecificDateTime').text = dateTime
+
+                    else:
+                        ET.SubElement(scn, 'SpecificDateTime').text = dateTime
+                        ET.SubElement(scn, 'SpecificDateMode').text = '-1'
+
+                        if scn.find('Day') is not None:
+                            scn.remove(scn.find('Day'))
+
+                        if scn.find('Hour') is not None:
+                            scn.remove(scn.find('Hour'))
+
+                        if scn.find('Minute') is not None:
+                            scn.remove(scn.find('Minute'))
+
+                elif (self.scenes[scId].day is not None) or (self.scenes[scId].hour is not None) or (self.scenes[scId].minute is not None):
+
+                    if scn.find('SpecificDateTime') is not None:
+                        scn.remove(scn.find('SpecificDateTime'))
+
+                    if scn.find('SpecificDateMode') is not None:
+                        scn.remove(scn.find('SpecificDateMode'))
+
+                    if self.scenes[scId].day is not None:
+
+                        if scn.find('Day') is not None:
+                            scn.find('Day').text = self.scenes[scId].day
+
+                        else:
+                            ET.SubElement(
+                                scn, 'Day').text = self.scenes[scId].day
+
+                    if self.scenes[scId].hour is not None:
+
+                        if scn.find('Hour') is not None:
+                            scn.find('Hour').text = self.scenes[scId].hour
+
+                        else:
+                            ET.SubElement(
+                                scn, 'Hour').text = self.scenes[scId].hour
+
+                    if self.scenes[scId].minute is not None:
+
+                        if scn.find('Minute') is not None:
+                            scn.find('Minute').text = self.scenes[scId].minute
+
+                        else:
+                            ET.SubElement(
+                                scn, 'Minute').text = self.scenes[scId].minute
+
+                if self.scenes[scId].lastsDays is not None:
+
+                    if scn.find('LastsDays') is not None:
+                        scn.find(
+                            'LastsDays').text = self.scenes[scId].lastsDays
+
+                    else:
+                        ET.SubElement(
+                            scn, 'LastsDays').text = self.scenes[scId].lastsDays
+
+                if self.scenes[scId].lastsHours is not None:
+
+                    if scn.find('LastsHours') is not None:
+                        scn.find(
+                            'LastsHours').text = self.scenes[scId].lastsHours
+
+                    else:
+                        ET.SubElement(
+                            scn, 'LastsHours').text = self.scenes[scId].lastsHours
+
+                if self.scenes[scId].lastsMinutes is not None:
+
+                    if scn.find('LastsMinutes') is not None:
+                        scn.find(
+                            'LastsMinutes').text = self.scenes[scId].lastsMinutes
+
+                    else:
+                        ET.SubElement(
+                            scn, 'LastsMinutes').text = self.scenes[scId].lastsMinutes
+
+                # Plot related information
+
                 if self.scenes[scId].isReactionScene:
 
                     if scn.find('ReactionScene') is None:
@@ -3400,250 +3356,8 @@ class YwFile(Novel):
 
 
 
-class YwNewFile(Novel):
+class YwNewFile(YwFile):
     """yWriter xml project file representation."""
-
-    def __init__(self, filePath):
-        Novel.__init__(self, filePath)
-        self._cdataTags = ['Title', 'AuthorName', 'Bio', 'Desc',
-                           'FieldTitle1', 'FieldTitle2', 'FieldTitle3',
-                           'FieldTitle4', 'LaTeXHeaderFile', 'Tags',
-                           'AKA', 'ImageFile', 'FullName', 'Goals',
-                           'Notes', 'RTFFile', 'SceneContent',
-                           'Outcome', 'Goal', 'Conflict']
-        # Names of yWriter xml elements containing CDATA.
-        # ElementTree.write omits CDATA tags, so they have to be inserted
-        # afterwards.
-
-    @property
-    def filePath(self):
-        return self._filePath
-
-    @filePath.setter
-    def filePath(self, filePath):
-        """Accept only filenames with the correct extension. """
-
-        if filePath.lower().endswith('.yw7'):
-            self._FILE_EXTENSION = '.yw7'
-            self._ENCODING = 'utf-8'
-            self._filePath = filePath
-
-    def merge(self, novel):
-        """Copy selected novel attributes.
-        """
-
-        # Merge locations.
-
-        if novel.locations != {}:
-
-            for lcId in novel.locations:
-
-                if novel.locations[lcId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.locations[lcId].title = novel.locations[lcId].title
-
-                if novel.locations[lcId].desc is not None:
-                    self.locations[lcId].desc = novel.locations[lcId].desc
-
-                if novel.locations[lcId].aka is not None:
-                    self.locations[lcId].aka = novel.locations[lcId].aka
-
-                if novel.locations[lcId].tags is not None:
-                    self.locations[lcId].tags = novel.locations[lcId].tags
-
-        # Merge items.
-
-        if novel.items != {}:
-
-            for itId in novel.items:
-
-                if novel.items[itId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.items[itId].title = novel.items[itId].title
-
-                if novel.items[itId].desc is not None:
-                    self.items[itId].desc = novel.items[itId].desc
-
-                if novel.items[itId].aka is not None:
-                    self.items[itId].aka = novel.items[itId].aka
-
-                if novel.items[itId].tags is not None:
-                    self.items[itId].tags = novel.items[itId].tags
-
-        # Merge characters.
-
-        if novel.characters != {}:
-
-            for crId in novel.characters:
-
-                if novel.characters[crId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.characters[crId].title = novel.characters[crId].title
-
-                if novel.characters[crId].desc is not None:
-                    self.characters[crId].desc = novel.characters[crId].desc
-
-                if novel.characters[crId].aka is not None:
-                    self.characters[crId].aka = novel.characters[crId].aka
-
-                if novel.characters[crId].tags is not None:
-                    self.characters[crId].tags = novel.characters[crId].tags
-
-                if novel.characters[crId].notes is not None:
-                    self.characters[crId].notes = novel.characters[crId].notes
-
-                if novel.characters[crId].bio is not None:
-                    self.characters[crId].bio = novel.characters[crId].bio
-
-                if novel.characters[crId].goals is not None:
-                    self.characters[crId].goals = novel.characters[crId].goals
-
-                if novel.characters[crId].fullName is not None:
-                    self.characters[crId].fullName = novel.characters[crId].fullName
-
-                if novel.characters[crId].isMajor is not None:
-                    self.characters[crId].isMajor = novel.characters[crId].isMajor
-
-        # Merge attributes at novel level.
-
-        if novel.title:
-            # avoids deleting the title, if it is empty by accident
-            self.title = novel.title
-
-        if novel.desc is not None:
-            self.desc = novel.desc
-
-        if novel.author is not None:
-            self.author = novel.author
-
-        if novel.fieldTitle1 is not None:
-            self.fieldTitle1 = novel.fieldTitle1
-
-        if novel.fieldTitle2 is not None:
-            self.fieldTitle2 = novel.fieldTitle2
-
-        if novel.fieldTitle3 is not None:
-            self.fieldTitle3 = novel.fieldTitle3
-
-        if novel.fieldTitle4 is not None:
-            self.fieldTitle4 = novel.fieldTitle4
-
-        self.srtChapters = novel.srtChapters
-
-        # Merge attributes at chapter level.
-
-        if novel.chapters != {}:
-
-            for chId in novel.chapters:
-                self.chapters[chId] = Chapter()
-
-                if novel.chapters[chId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.chapters[chId].title = novel.chapters[chId].title
-
-                if novel.chapters[chId].desc is not None:
-                    self.chapters[chId].desc = novel.chapters[chId].desc
-
-                if novel.chapters[chId].chLevel is not None:
-                    self.chapters[chId].chLevel = novel.chapters[chId].chLevel
-
-                if novel.chapters[chId].chType is not None:
-                    self.chapters[chId].chType = novel.chapters[chId].chType
-
-                if novel.chapters[chId].isUnused is not None:
-                    self.chapters[chId].isUnused = novel.chapters[chId].isUnused
-
-                if novel.chapters[chId].suppressChapterTitle is not None:
-                    self.chapters[chId].suppressChapterTitle = novel.chapters[chId].suppressChapterTitle
-
-                if novel.chapters[chId].isTrash is not None:
-                    self.chapters[chId].isTrash = novel.chapters[chId].isTrash
-
-                if novel.chapters[chId].srtScenes != []:
-                    self.chapters[chId].srtScenes = novel.chapters[chId].srtScenes
-
-        # Merge attributes at scene level.
-
-        if novel.scenes != {}:
-
-            for scId in novel.scenes:
-                self.scenes[scId] = Scene()
-
-                if novel.scenes[scId].title:
-                    # avoids deleting the title, if it is empty by accident
-                    self.scenes[scId].title = novel.scenes[scId].title
-
-                if novel.scenes[scId].desc is not None:
-                    self.scenes[scId].desc = novel.scenes[scId].desc
-
-                if novel.scenes[scId].sceneContent is not None:
-                    self.scenes[scId].sceneContent = novel.scenes[scId].sceneContent
-
-                if novel.scenes[scId].isUnused is not None:
-                    self.scenes[scId].isUnused = novel.scenes[scId].isUnused
-
-                if novel.scenes[scId].status is not None:
-                    self.scenes[scId].status = novel.scenes[scId].status
-
-                if novel.scenes[scId].sceneNotes is not None:
-                    self.scenes[scId].sceneNotes = novel.scenes[scId].sceneNotes
-
-                if novel.scenes[scId].tags is not None:
-                    self.scenes[scId].tags = novel.scenes[scId].tags
-
-                if novel.scenes[scId].field1 is not None:
-                    self.scenes[scId].field1 = novel.scenes[scId].field1
-
-                if novel.scenes[scId].field2 is not None:
-                    self.scenes[scId].field2 = novel.scenes[scId].field2
-
-                if novel.scenes[scId].field3 is not None:
-                    self.scenes[scId].field3 = novel.scenes[scId].field3
-
-                if novel.scenes[scId].field4 is not None:
-                    self.scenes[scId].field4 = novel.scenes[scId].field4
-
-                if novel.scenes[scId].appendToPrev is not None:
-                    self.scenes[scId].appendToPrev = novel.scenes[scId].appendToPrev
-
-                if novel.scenes[scId].isReactionScene is not None:
-                    self.scenes[scId].isReactionScene = novel.scenes[scId].isReactionScene
-
-                if novel.scenes[scId].isSubPlot is not None:
-                    self.scenes[scId].isSubPlot = novel.scenes[scId].isSubPlot
-
-                if novel.scenes[scId].goal is not None:
-                    self.scenes[scId].goal = novel.scenes[scId].goal
-
-                if novel.scenes[scId].conflict is not None:
-                    self.scenes[scId].conflict = novel.scenes[scId].conflict
-
-                if novel.scenes[scId].outcome is not None:
-                    self.scenes[scId].outcome = novel.scenes[scId].outcome
-
-                if novel.scenes[scId].characters is not None:
-                    self.scenes[scId].characters = []
-
-                    for crId in novel.scenes[scId].characters:
-
-                        if crId in self.characters:
-                            self.scenes[scId].characters.append(crId)
-
-                if novel.scenes[scId].locations is not None:
-                    self.scenes[scId].locations = []
-
-                    for lcId in novel.scenes[scId].locations:
-
-                        if lcId in self.locations:
-                            self.scenes[scId].locations.append(lcId)
-
-                if novel.scenes[scId].items is not None:
-                    self.scenes[scId].items = []
-
-                    for itId in novel.scenes[scId].items:
-
-                        if itId in self.items:
-                            self.scenes[scId].append(crId)
 
     def write(self):
         """Open the yWriter xml file located at filePath and 
@@ -3819,6 +3533,40 @@ class YwNewFile(Novel):
             if self.scenes[scId].appendToPrev:
                 ET.SubElement(scn, 'AppendToPrev').text = '-1'
 
+            # Date/time information
+
+            if (self.scenes[scId].date is not None) and (self.scenes[scId].time is not None):
+                dateTime = ' '.join(
+                    self.scenes[scId].date, self.scenes[scId].time)
+                ET.SubElement(scn, 'SpecificDateTime').text = dateTime
+                ET.SubElement(scn, 'SpecificDateMode').text = '-1'
+
+            elif (self.scenes[scId].day is not None) or (self.scenes[scId].hour is not None) or (self.scenes[scId].minute is not None):
+
+                if self.scenes[scId].day is not None:
+                    ET.SubElement(scn, 'Day').text = self.scenes[scId].day
+
+                if self.scenes[scId].hour is not None:
+                    ET.SubElement(scn, 'Hour').text = self.scenes[scId].hour
+
+                if self.scenes[scId].minute is not None:
+                    ET.SubElement(
+                        scn, 'Minute').text = self.scenes[scId].minute
+
+            if self.scenes[scId].lastsDays is not None:
+                ET.SubElement(
+                    scn, 'LastsDays').text = self.scenes[scId].lastsDays
+
+            if self.scenes[scId].lastsHours is not None:
+                ET.SubElement(
+                    scn, 'LastsHours').text = self.scenes[scId].lastsHours
+
+            if self.scenes[scId].lastsMinutes is not None:
+                ET.SubElement(
+                    scn, 'LastsMinutes').text = self.scenes[scId].lastsMinutes
+
+            # Plot related information
+
             if self.scenes[scId].isReactionScene:
                 ET.SubElement(scn, 'ReactionScene').text = '-1'
 
@@ -3919,15 +3667,6 @@ class YwNewFile(Novel):
             return message
 
         return 'SUCCESS: project data written to "' + self._filePath + '".'
-
-    def is_locked(self):
-        """Test whether a .lock file placed by yWriter exists.
-        """
-        if os.path.isfile(self._filePath + '.lock'):
-            return True
-
-        else:
-            return False
 
 
 class YwCnv():
@@ -4073,11 +3812,7 @@ class YwCnvGui(YwCnv):
             - _chapters for a html file containing chapter summaries.
     """
 
-    def __init__(self, sourcePath,
-                 document,
-                 extension,
-                 silentMode=True,
-                 suffix=''):
+    def __init__(self, sourcePath, document, silentMode=True):
         """Run the converter with a GUI. """
 
         # Prepare the graphical user interface.
@@ -4099,7 +3834,7 @@ class YwCnvGui(YwCnv):
         # Run the converter.
 
         self.silentMode = silentMode
-        self.convert(sourcePath, document, extension, suffix)
+        self.convert(sourcePath, document)
 
         # Visualize the outcome.
 
@@ -4116,10 +3851,7 @@ class YwCnvGui(YwCnv):
             self.root.quitButton.pack(padx=5, pady=5)
             self.root.mainloop()
 
-    def convert(self, sourcePath,
-                document,
-                extension,
-                suffix):
+    def convert(self, sourcePath, document):
         """Determine the direction and invoke the converter. """
 
         # The conversion's direction depends on the sourcePath argument.
@@ -4134,9 +3866,9 @@ class YwCnvGui(YwCnv):
 
                 # Generate the target file path.
 
-                document.filePath = fileName + suffix + '.' + extension
+                document.filePath = fileName + document.SUFFIX + document.EXTENSION
                 self.appInfo.config(
-                    text='Export yWriter scenes content to ' + extension)
+                    text='Export yWriter scenes content to ' + document.EXTENSION)
                 self.processInfo.config(text='Project: "' + sourcePath + '"')
 
                 # Instantiate an YwFile object and pass it along with
@@ -4146,7 +3878,7 @@ class YwCnvGui(YwCnv):
                 self.processInfo.config(
                     text=self.yw_to_document(ywFile, document))
 
-            elif (suffix == '') and (extension == 'html'):
+            elif (document.SUFFIX == '') and (document.EXTENSIION == '.html'):
                 document.filePath = sourcePath
                 ywPath = sourcePath.split('.html')[0] + '.yw7'
                 ywFile = YwNewFile(ywPath)
@@ -4163,18 +3895,18 @@ class YwCnvGui(YwCnv):
                     self.processInfo.config(
                         text=self.document_to_yw(document, ywFile))
 
-            elif sourcePath.endswith(suffix + '.' + extension):
+            elif sourcePath.endswith(document.SUFFIX + document.EXTENSIION):
                 document.filePath = sourcePath
 
                 # Determine the project file path.
 
-                ywPath = sourcePath.split(suffix)[0] + '.yw7'
+                ywPath = sourcePath.split(document.SUFFIX)[0] + '.yw7'
 
                 if not os.path.isfile(ywPath):
-                    ywPath = sourcePath.split(suffix)[0] + '.yw6'
+                    ywPath = sourcePath.split(document.SUFFIX)[0] + '.yw6'
 
                     if not os.path.isfile(ywPath):
-                        ywPath = sourcePath.split(suffix)[0] + '.yw5'
+                        ywPath = sourcePath.split(document.SUFFIX)[0] + '.yw5'
 
                         if not os.path.isfile(ywPath):
                             ywPath = None
@@ -4183,7 +3915,7 @@ class YwCnvGui(YwCnv):
 
                 if ywPath:
                     self.appInfo.config(
-                        text='Import yWriter scenes content from ' + extension)
+                        text='Import yWriter scenes content from ' + document.EXTENSION)
                     self.processInfo.config(
                         text='Project: "' + ywPath + '"')
 
@@ -4219,15 +3951,9 @@ class YwCnvGui(YwCnv):
 class Converter(YwCnvGui):
     """Deletes temporary html or csv file after conversion. """
 
-    def convert(self, sourcePath,
-                document,
-                extension,
-                suffix):
+    def convert(self, sourcePath, document):
 
-        YwCnvGui.convert(self, sourcePath,
-                         document,
-                         extension,
-                         suffix)
+        YwCnvGui.convert(self, sourcePath, document)
 
         # If an Office file exists, delete the temporary file.
 
@@ -4251,49 +3977,31 @@ class Converter(YwCnvGui):
 def run(sourcePath):
     sourcePath = unquote(sourcePath.replace('file:///', ''))
 
-    if sourcePath.endswith(PROOF_SUFFIX + '.html'):
-        suffix = PROOF_SUFFIX
-        extension = 'html'
+    if sourcePath.endswith(HtmlProof.SUFFIX + HtmlProof.EXTENSION):
         sourceDoc = HtmlProof(sourcePath)
 
-    elif sourcePath.endswith(MANUSCRIPT_SUFFIX + '.html'):
-        suffix = MANUSCRIPT_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlManuscript.SUFFIX + HtmlManuscript.EXTENSION):
         sourceDoc = HtmlManuscript(sourcePath)
 
-    elif sourcePath.endswith(SCENEDESC_SUFFIX + '.html'):
-        suffix = SCENEDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlSceneDesc.SUFFIX + HtmlSceneDesc.EXTENSION):
         sourceDoc = HtmlSceneDesc(sourcePath)
 
-    elif sourcePath.endswith(CHAPTERDESC_SUFFIX + '.html'):
-        suffix = CHAPTERDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlChapterDesc.SUFFIX + HtmlChapterDesc.EXTENSION):
         sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith(PARTDESC_SUFFIX + '.html'):
-        suffix = PARTDESC_SUFFIX
-        extension = 'html'
-        sourceDoc = HtmlChapterDesc(sourcePath)
+    elif sourcePath.endswith(HtmlPartDesc.SUFFIX + HtmlPartDesc.EXTENSION):
+        sourceDoc = HtmlPartDesc(sourcePath)
 
-    elif sourcePath.endswith(CHARDESC_SUFFIX + '.html'):
-        suffix = CHARDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlCharacters.SUFFIX + HtmlCharacters.EXTENSION):
         sourceDoc = HtmlCharacters(sourcePath)
 
-    elif sourcePath.endswith(LOCDESC_SUFFIX + '.html'):
-        suffix = LOCDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlLocations.SUFFIX + HtmlLocations.EXTENSION):
         sourceDoc = HtmlLocations(sourcePath)
 
-    elif sourcePath.endswith(ITEMDESC_SUFFIX + '.html'):
-        suffix = ITEMDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlItems.SUFFIX + HtmlItems.EXTENSION):
         sourceDoc = HtmlItems(sourcePath)
 
     elif sourcePath.endswith('.html'):
-        suffix = ''
-        extension = 'html'
         result = read_html_file(sourcePath)
 
         if 'SUCCESS' in result[0]:
@@ -4305,42 +4013,27 @@ def run(sourcePath):
                 sourceDoc = HtmlImport(sourcePath)
 
         else:
-            suffix = ''
-            extension = ''
             sourceDoc = None
 
-    elif sourcePath.endswith(SCENELIST_SUFFIX + '.csv'):
-        suffix = SCENELIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvSceneList.SUFFIX + CsvSceneList.EXTENSION):
         sourceDoc = CsvSceneList(sourcePath)
 
-    elif sourcePath.endswith(PLOTLIST_SUFFIX + '.csv'):
-        suffix = PLOTLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvPlotList.SUFFIX + CsvPlotList.EXTENSION):
         sourceDoc = CsvPlotList(sourcePath)
 
-    elif sourcePath.endswith(CHARLIST_SUFFIX + '.csv'):
-        suffix = CHARLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvCharList.SUFFIX + CsvCharList.EXTENSION):
         sourceDoc = CsvCharList(sourcePath)
 
-    elif sourcePath.endswith(LOCLIST_SUFFIX + '.csv'):
-        suffix = LOCLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvLocList.SUFFIX + CsvLocList.EXTENSION):
         sourceDoc = CsvLocList(sourcePath)
 
-    elif sourcePath.endswith(ITEMLIST_SUFFIX + '.csv'):
-        suffix = ITEMLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvItemList.SUFFIX + CsvItemList.EXTENSION):
         sourceDoc = CsvItemList(sourcePath)
 
     else:
-        suffix = ''
-        extension = ''
         sourceDoc = None
 
-    converter = Converter(sourcePath, sourceDoc,
-                          extension, False, suffix)
+    converter = Converter(sourcePath, sourceDoc, False)
 
 
 if __name__ == '__main__':
