@@ -3,7 +3,7 @@
 Input file format: yWriter
 Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
-Version 0.23.1
+Version 0.23.2
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -4905,7 +4905,7 @@ class YwCnvGui(YwCnv):
                     self.processInfo.config(
                         text=self.document_to_yw(document, ywFile))
 
-            elif sourcePath.endswith(document.SUFFIX + document.EXTENSIION):
+            elif sourcePath.endswith(document.SUFFIX + document.EXTENSION):
                 document.filePath = sourcePath
 
                 # Determine the project file path.
