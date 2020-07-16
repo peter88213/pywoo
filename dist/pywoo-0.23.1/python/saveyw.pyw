@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.23.0
+Version 0.23.1
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -492,7 +492,7 @@ class HtmlFile(Novel, HTMLParser):
     """HTML file representation of an yWriter project's part.
     """
 
-    EXTENSION = 'html'
+    EXTENSION = '.html'
 
     def __init__(self, filePath):
         Novel.__init__(self, filePath)
