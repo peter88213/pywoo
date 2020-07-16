@@ -19,7 +19,7 @@ Sub export_yw
 
 	document   = ThisComponent.CurrentController.Frame
 	dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
-	document_path = LCase(ThisComponent.getURL())
+	document_path = ThisComponent.getURL()
 
 	On Error Goto DontSave
 
