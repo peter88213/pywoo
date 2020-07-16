@@ -75,55 +75,55 @@ def run(sourcePath, suffix):
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if suffix == PROOF_SUFFIX:
+    if suffix == OdtProof.SUFFIX:
         extension = 'odt'
         targetDoc = OdtProof(fileName + suffix + '.odt')
 
-    elif suffix == MANUSCRIPT_SUFFIX:
+    elif suffix == OdtManuscript.SUFFIX:
         extension = 'odt'
         targetDoc = OdtManuscript(fileName + suffix + '.odt')
 
-    elif suffix == SCENEDESC_SUFFIX:
+    elif suffix == OdtSceneDesc.SUFFIX:
         extension = 'odt'
         targetDoc = OdtSceneDesc(fileName + suffix + '.odt')
 
-    elif suffix == CHAPTERDESC_SUFFIX:
+    elif suffix == OdtChapterDesc.SUFFIX:
         extension = 'odt'
         targetDoc = OdtChapterDesc(fileName + suffix + '.odt')
 
-    elif suffix == PARTDESC_SUFFIX:
+    elif suffix == OdtPartDesc.SUFFIX:
         extension = 'odt'
         targetDoc = OdtPartDesc(fileName + suffix + '.odt')
 
-    elif suffix == CHARDESC_SUFFIX:
+    elif suffix == OdtCharacters.SUFFIX:
         extension = 'odt'
         targetDoc = OdtCharacters(fileName + suffix + '.odt')
 
-    elif suffix == LOCDESC_SUFFIX:
+    elif suffix == OdtLocations.SUFFIX:
         extension = 'odt'
         targetDoc = OdtLocations(fileName + suffix + '.odt')
 
-    elif suffix == ITEMDESC_SUFFIX:
+    elif suffix == OdtItems.SUFFIX:
         extension = 'odt'
         targetDoc = OdtItems(fileName + suffix + '.odt')
 
-    elif suffix == SCENELIST_SUFFIX:
+    elif suffix == CsvSceneList.SUFFIX:
         extension = 'csv'
         targetDoc = CsvSceneList(fileName + suffix + '.csv')
 
-    elif suffix == PLOTLIST_SUFFIX:
+    elif suffix == CsvPlotList.SUFFIX:
         extension = 'csv'
         targetDoc = CsvPlotList(fileName + suffix + '.csv')
 
-    elif suffix == CHARLIST_SUFFIX:
+    elif suffix == CsvCharList.SUFFIX:
         extension = 'csv'
         targetDoc = CsvCharList(fileName + suffix + '.csv')
 
-    elif suffix == LOCLIST_SUFFIX:
+    elif suffix == CsvLocList.SUFFIX:
         extension = 'csv'
         targetDoc = CsvLocList(fileName + suffix + '.csv')
 
-    elif suffix == ITEMLIST_SUFFIX:
+    elif suffix == CsvItemList.SUFFIX:
         extension = 'csv'
         targetDoc = CsvItemList(fileName + suffix + '.csv')
 

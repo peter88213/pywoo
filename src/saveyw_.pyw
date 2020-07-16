@@ -18,6 +18,7 @@ from pywriter.html.html_proof import HtmlProof
 from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
 from pywriter.html.html_chapterdesc import HtmlChapterDesc
+from pywriter.html.html_partdesc import HtmlPartDesc
 from pywriter.html.html_characters import HtmlCharacters
 from pywriter.html.html_locations import HtmlLocations
 from pywriter.html.html_items import HtmlItems
@@ -67,18 +68,18 @@ class Converter(YwCnvGui):
 def run(sourcePath):
     sourcePath = unquote(sourcePath.replace('file:///', ''))
 
-    if sourcePath.endswith(PROOF_SUFFIX + '.html'):
-        suffix = PROOF_SUFFIX
+    if sourcePath.endswith(HtmlProof.SUFFIX + HtmlProof):
+        suffix = HtmlProof.SUFFIX
         extension = 'html'
         sourceDoc = HtmlProof(sourcePath)
 
-    elif sourcePath.endswith(MANUSCRIPT_SUFFIX + '.html'):
-        suffix = MANUSCRIPT_SUFFIX
+    elif sourcePath.endswith(HtmlManuscript.SUFFIX + HtmlManuscript):
+        suffix = HtmlManuscript.SUFFIX
         extension = 'html'
         sourceDoc = HtmlManuscript(sourcePath)
 
-    elif sourcePath.endswith(SCENEDESC_SUFFIX + '.html'):
-        suffix = SCENEDESC_SUFFIX
+    elif sourcePath.endswith(HtmlSceneDesc.SUFFIX + HtmlSceneDesc):
+        suffix = HtmlSceneDesc.SUFFIX
         extension = 'html'
         sourceDoc = HtmlSceneDesc(sourcePath)
 
@@ -87,10 +88,10 @@ def run(sourcePath):
         extension = 'html'
         sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith(PARTDESC_SUFFIX + '.html'):
-        suffix = PARTDESC_SUFFIX
+    elif sourcePath.endswith(HtmlPartDesc.SUFFIX + '.html'):
+        suffix = HtmlPartDesc.SUFFIX
         extension = 'html'
-        sourceDoc = HtmlChapterDesc(sourcePath)
+        sourceDoc = HtmlPartDesc(sourcePath)
 
     elif sourcePath.endswith(CHARDESC_SUFFIX + '.html'):
         suffix = CHARDESC_SUFFIX
