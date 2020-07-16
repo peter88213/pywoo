@@ -13,7 +13,6 @@ import os
 
 from urllib.parse import unquote
 
-from pywriter.globals import *
 from pywriter.html.html_proof import HtmlProof
 from pywriter.html.html_manuscript import HtmlManuscript
 from pywriter.html.html_scenedesc import HtmlSceneDesc
@@ -36,15 +35,9 @@ from pywriter.html.html_form import *
 class Converter(YwCnvGui):
     """Deletes temporary html or csv file after conversion. """
 
-    def convert(self, sourcePath,
-                document,
-                extension,
-                suffix):
+    def convert(self, sourcePath, document):
 
-        YwCnvGui.convert(self, sourcePath,
-                         document,
-                         extension,
-                         suffix)
+        YwCnvGui.convert(self, sourcePath, document)
 
         # If an Office file exists, delete the temporary file.
 
@@ -68,49 +61,31 @@ class Converter(YwCnvGui):
 def run(sourcePath):
     sourcePath = unquote(sourcePath.replace('file:///', ''))
 
-    if sourcePath.endswith(HtmlProof.SUFFIX + HtmlProof):
-        suffix = HtmlProof.SUFFIX
-        extension = 'html'
+    if sourcePath.endswith(HtmlProof.SUFFIX + HtmlProof.EXTENSION):
         sourceDoc = HtmlProof(sourcePath)
 
-    elif sourcePath.endswith(HtmlManuscript.SUFFIX + HtmlManuscript):
-        suffix = HtmlManuscript.SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlManuscript.SUFFIX + HtmlManuscript.EXTENSION):
         sourceDoc = HtmlManuscript(sourcePath)
 
-    elif sourcePath.endswith(HtmlSceneDesc.SUFFIX + HtmlSceneDesc):
-        suffix = HtmlSceneDesc.SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlSceneDesc.SUFFIX + HtmlSceneDesc.EXTENSION):
         sourceDoc = HtmlSceneDesc(sourcePath)
 
-    elif sourcePath.endswith(CHAPTERDESC_SUFFIX + '.html'):
-        suffix = CHAPTERDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlChapterDesc.SUFFIX + HtmlChapterDesc.EXTENSION):
         sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith(HtmlPartDesc.SUFFIX + '.html'):
-        suffix = HtmlPartDesc.SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlPartDesc.SUFFIX + HtmlPartDesc.EXTENSION):
         sourceDoc = HtmlPartDesc(sourcePath)
 
-    elif sourcePath.endswith(CHARDESC_SUFFIX + '.html'):
-        suffix = CHARDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlCharacters.SUFFIX + HtmlCharacters.EXTENSION):
         sourceDoc = HtmlCharacters(sourcePath)
 
-    elif sourcePath.endswith(LOCDESC_SUFFIX + '.html'):
-        suffix = LOCDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlLocations.SUFFIX + HtmlLocations.EXTENSION):
         sourceDoc = HtmlLocations(sourcePath)
 
-    elif sourcePath.endswith(ITEMDESC_SUFFIX + '.html'):
-        suffix = ITEMDESC_SUFFIX
-        extension = 'html'
+    elif sourcePath.endswith(HtmlItems.SUFFIX + HtmlItems.EXTENSION):
         sourceDoc = HtmlItems(sourcePath)
 
     elif sourcePath.endswith('.html'):
-        suffix = ''
-        extension = 'html'
         result = read_html_file(sourcePath)
 
         if 'SUCCESS' in result[0]:
@@ -122,42 +97,27 @@ def run(sourcePath):
                 sourceDoc = HtmlImport(sourcePath)
 
         else:
-            suffix = ''
-            extension = ''
             sourceDoc = None
 
-    elif sourcePath.endswith(SCENELIST_SUFFIX + '.csv'):
-        suffix = SCENELIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvSceneList.SUFFIX + CsvSceneList.EXTENSION):
         sourceDoc = CsvSceneList(sourcePath)
 
-    elif sourcePath.endswith(PLOTLIST_SUFFIX + '.csv'):
-        suffix = PLOTLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvPlotList.SUFFIX + CsvPlotList.EXTENSION):
         sourceDoc = CsvPlotList(sourcePath)
 
-    elif sourcePath.endswith(CHARLIST_SUFFIX + '.csv'):
-        suffix = CHARLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvCharList.SUFFIX + CsvCharList.EXTENSION):
         sourceDoc = CsvCharList(sourcePath)
 
-    elif sourcePath.endswith(LOCLIST_SUFFIX + '.csv'):
-        suffix = LOCLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvLocList.SUFFIX + CsvLocList.EXTENSION):
         sourceDoc = CsvLocList(sourcePath)
 
-    elif sourcePath.endswith(ITEMLIST_SUFFIX + '.csv'):
-        suffix = ITEMLIST_SUFFIX
-        extension = 'csv'
+    elif sourcePath.endswith(CsvItemList.SUFFIX + CsvItemList.EXTENSION):
         sourceDoc = CsvItemList(sourcePath)
 
     else:
-        suffix = ''
-        extension = ''
         sourceDoc = None
 
-    converter = Converter(sourcePath, sourceDoc,
-                          extension, False, suffix)
+    converter = Converter(sourcePath, sourceDoc, False)
 
 
 if __name__ == '__main__':

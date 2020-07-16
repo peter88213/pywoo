@@ -13,7 +13,6 @@ import os
 import subprocess
 from tkinter import *
 
-from pywriter.globals import *
 from pywriter.odt.odt_proof import OdtProof
 from pywriter.odt.odt_manuscript import OdtManuscript
 from pywriter.odt.odt_scenedesc import OdtSceneDesc
@@ -39,15 +38,9 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
 class Converter(YwCnvGui):
     """Standalone yWriter 7 converter with a simple GUI. """
 
-    def convert(self, sourcePath,
-                document,
-                extension,
-                suffix):
+    def convert(self, sourcePath, document):
 
-        YwCnvGui.convert(self, sourcePath,
-                         document,
-                         extension,
-                         suffix)
+        YwCnvGui.convert(self, sourcePath, document)
 
         fileName, FileExtension = os.path.splitext(sourcePath)
 
@@ -76,63 +69,49 @@ def run(sourcePath, suffix):
     fileName, FileExtension = os.path.splitext(sourcePath)
 
     if suffix == OdtProof.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtProof(fileName + suffix + '.odt')
+        targetDoc = OdtProof(fileName + suffix + OdtProof.EXTENSION)
 
     elif suffix == OdtManuscript.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtManuscript(fileName + suffix + '.odt')
+        targetDoc = OdtManuscript(fileName + suffix + OdtManuscript.EXTENSION)
 
     elif suffix == OdtSceneDesc.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtSceneDesc(fileName + suffix + '.odt')
+        targetDoc = OdtSceneDesc(fileName + suffix + OdtSceneDesc.EXTENSION)
 
     elif suffix == OdtChapterDesc.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtChapterDesc(fileName + suffix + '.odt')
+        targetDoc = OdtChapterDesc(
+            fileName + suffix + OdtChapterDesc.EXTENSION)
 
     elif suffix == OdtPartDesc.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtPartDesc(fileName + suffix + '.odt')
+        targetDoc = OdtPartDesc(fileName + suffix + OdtPartDesc.EXTENSION)
 
     elif suffix == OdtCharacters.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtCharacters(fileName + suffix + '.odt')
+        targetDoc = OdtCharacters(fileName + suffix + OdtCharacters.EXTENSION)
 
     elif suffix == OdtLocations.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtLocations(fileName + suffix + '.odt')
+        targetDoc = OdtLocations(fileName + suffix + OdtLocations.EXTENSION)
 
     elif suffix == OdtItems.SUFFIX:
-        extension = 'odt'
-        targetDoc = OdtItems(fileName + suffix + '.odt')
+        targetDoc = OdtItems(fileName + suffix + OdtItems.EXTENSION)
 
     elif suffix == CsvSceneList.SUFFIX:
-        extension = 'csv'
-        targetDoc = CsvSceneList(fileName + suffix + '.csv')
+        targetDoc = CsvSceneList(fileName + suffix + CsvSceneList.EXTENSION)
 
     elif suffix == CsvPlotList.SUFFIX:
-        extension = 'csv'
-        targetDoc = CsvPlotList(fileName + suffix + '.csv')
+        targetDoc = CsvPlotList(fileName + suffix + CsvPlotList.EXTENSION)
 
     elif suffix == CsvCharList.SUFFIX:
-        extension = 'csv'
-        targetDoc = CsvCharList(fileName + suffix + '.csv')
+        targetDoc = CsvCharList(fileName + suffix + CsvCharList.EXTENSION)
 
     elif suffix == CsvLocList.SUFFIX:
-        extension = 'csv'
-        targetDoc = CsvLocList(fileName + suffix + '.csv')
+        targetDoc = CsvLocList(fileName + suffix + CsvLocList.EXTENSION)
 
     elif suffix == CsvItemList.SUFFIX:
-        extension = 'csv'
-        targetDoc = CsvItemList(fileName + suffix + '.csv')
+        targetDoc = CsvItemList(fileName + suffix + CsvItemList.EXTENSION)
 
     else:
-        extension = 'odt'
-        targetDoc = OdtExport(fileName + '.odt')
+        targetDoc = OdtExport(fileName + OdtExport.EXTENSION)
 
-    converter = Converter(sourcePath, targetDoc,
-                          extension, False, suffix)
+    converter = Converter(sourcePath, targetDoc, False)
 
 
 if __name__ == '__main__':
