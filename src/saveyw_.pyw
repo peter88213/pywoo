@@ -29,7 +29,7 @@ from pywriter.csv.csv_charlist import CsvCharList
 from pywriter.csv.csv_loclist import CsvLocList
 from pywriter.csv.csv_itemlist import CsvItemList
 from pywriter.converter.yw_cnv_gui import YwCnvGui
-from pywriter.html.html_form import *
+from pywriter.html.html_fop import read_html_file
 
 
 class Converter(YwCnvGui):
