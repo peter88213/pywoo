@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.23.4
+Version 0.23.5
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -1174,6 +1174,7 @@ class FileExport(Novel):
     unusedChapterTemplate = ''
     infoChapterTemplate = ''
     sceneTemplate = ''
+    appendedSceneTemplate = ''
     unusedSceneTemplate = ''
     infoSceneTemplate = ''
     sceneDivider = ''
@@ -1528,7 +1529,11 @@ class FileExport(Novel):
 
                 else:
                     sceneNumber += 1
+
                     template = Template(self.sceneTemplate)
+
+                    if self.scenes[scId].appendToPrev and self.appendedSceneTemplate != '':
+                        template = Template(self.appendedSceneTemplate)
 
                 if not (firstSceneInChapter or self.scenes[scId].appendToPrev):
                     lines.append(self.sceneDivider)

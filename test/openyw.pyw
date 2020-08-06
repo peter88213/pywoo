@@ -1811,6 +1811,7 @@ class FileExport(Novel):
     unusedChapterTemplate = ''
     infoChapterTemplate = ''
     sceneTemplate = ''
+    appendedSceneTemplate = ''
     unusedSceneTemplate = ''
     infoSceneTemplate = ''
     sceneDivider = ''
@@ -2165,7 +2166,11 @@ class FileExport(Novel):
 
                 else:
                     sceneNumber += 1
+
                     template = Template(self.sceneTemplate)
+
+                    if self.scenes[scId].appendToPrev and self.appendedSceneTemplate != '':
+                        template = Template(self.appendedSceneTemplate)
 
                 if not (firstSceneInChapter or self.scenes[scId].appendToPrev):
                     lines.append(self.sceneDivider)
@@ -2400,6 +2405,16 @@ class OdtManuscript(OdtFile):
 
     sceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
 <text:p text:style-name="Text_20_body"><office:annotation>
+<dc:creator>scene title</dc:creator>
+<text:p>- $Title</text:p>
+<text:p/>
+<text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→Summary</text:a> -</text:p>
+</office:annotation>$SceneContent</text:p>
+</text:section>
+'''
+
+    appendedSceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
+<text:p text:style-name="First_20_line_20_indent"><office:annotation>
 <dc:creator>scene title</dc:creator>
 <text:p>- $Title</text:p>
 <text:p/>
@@ -3163,6 +3178,12 @@ class OdtExport(OdtFile):
 '''
 
     sceneTemplate = '''<text:p text:style-name="Text_20_body"><office:annotation>
+<dc:creator>scene title</dc:creator>
+<text:p>- $Title</text:p>
+</office:annotation>$SceneContent</text:p>
+'''
+
+    appendedSceneTemplate = '''<text:p text:style-name="First_20_line_20_indent"><office:annotation>
 <dc:creator>scene title</dc:creator>
 <text:p>- $Title</text:p>
 </office:annotation>$SceneContent</text:p>
