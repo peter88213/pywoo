@@ -2,7 +2,7 @@
 
 Input file format: html (with visible or invisible chapter and scene tags).
 
-Version 0.24.2
+Version 0.25.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3149,7 +3149,7 @@ class Yw5TreeBuilder(YwTreeBuilder):
         Write scene contents to RTF files.
         Return a message beginning with SUCCESS or ERROR.
         """
-        rtfDir = os.path.split(ywProject.filePath)[0] + 'RTF5'
+        rtfDir = os.path.split(ywProject.filePath)[0] + '/RTF5'
 
         for chId in ywProject.chapters:
 
