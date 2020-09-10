@@ -1,6 +1,7 @@
-"""Convert html or csv to yWriter project. 
+"""Convert yWriter project to odt or csv. 
 
-Input file format: html (with visible or invisible chapter and scene tags).
+Input file format: yWriter
+Output file format: odt (with visible or invisible chapter and scene tags) or csv.
 
 Version @release
 
@@ -8,116 +9,64 @@ Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
-import sys
 import os
+import subprocess
+from tkinter import *
 
+from pywriter.converter.yw_cnv_gui import YwCnvGui
 from urllib.parse import unquote
 
-from pywriter.html.html_proof import HtmlProof
-from pywriter.html.html_manuscript import HtmlManuscript
-from pywriter.html.html_scenedesc import HtmlSceneDesc
-from pywriter.html.html_chapterdesc import HtmlChapterDesc
-from pywriter.html.html_partdesc import HtmlPartDesc
-from pywriter.html.html_characters import HtmlCharacters
-from pywriter.html.html_locations import HtmlLocations
-from pywriter.html.html_items import HtmlItems
-from pywriter.html.html_import import HtmlImport
-from pywriter.html.html_outline import HtmlOutline
-from pywriter.csv.csv_scenelist import CsvSceneList
-from pywriter.csv.csv_plotlist import CsvPlotList
-from pywriter.csv.csv_charlist import CsvCharList
-from pywriter.csv.csv_loclist import CsvLocList
-from pywriter.csv.csv_itemlist import CsvItemList
-from pywriter.converter.yw_cnv_gui import YwCnvGui
-from pywriter.html.html_fop import read_html_file
+OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
+              'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
+              'c:/Program Files/OpenOffice 4/program/swriter.exe',
+              'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
 
 class Converter(YwCnvGui):
-    """Deletes temporary html or csv file after conversion. """
 
-    def convert(self, sourcePath, document):
+    def convert(self, sourceFile, targetFile):
+        YwCnvGui.convert(self, sourceFile, targetFile)
+        self._newFile = None
 
-        YwCnvGui.convert(self, sourcePath, document)
+        if self._success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+            self._newFile = targetFile.filePath
+            self.root.editButton = Button(
+                text="Edit", command=self.edit)
+            self.root.editButton.config(height=1, width=10)
+            self.root.editButton.pack(padx=5, pady=5)
 
-        # If an Office file exists, delete the temporary file.
+        elif sourceFile.EXTENSION == '.html':
 
-        if sourcePath.endswith('.html'):
-
-            if os.path.isfile(sourcePath.replace('.html', '.odt')):
+            if os.path.isfile(sourceFile.filePath.replace('.html', '.odt')):
                 try:
-                    os.remove(sourcePath)
+                    os.remove(sourceFile.filePath)
                 except:
                     pass
 
-        elif sourcePath.endswith('.csv'):
+        elif sourceFile.EXTENSION == '.csv':
 
-            if os.path.isfile(sourcePath.replace('.csv', '.ods')):
+            if os.path.isfile(sourceFile.filePath.replace('.csv', '.ods')):
                 try:
-                    os.remove(sourcePath)
+                    os.remove(sourceFile.filePath)
                 except:
                     pass
 
+    def edit(self):
 
-def run(sourcePath):
-    sourcePath = unquote(sourcePath.replace('file:///', ''))
+        for office in OPENOFFICE:
 
-    if sourcePath.endswith(HtmlProof.SUFFIX + HtmlProof.EXTENSION):
-        sourceDoc = HtmlProof(sourcePath)
+            if os.path.isfile(office):
 
-    elif sourcePath.endswith(HtmlManuscript.SUFFIX + HtmlManuscript.EXTENSION):
-        sourceDoc = HtmlManuscript(sourcePath)
+                if self._newFile.endswith('.csv'):
+                    office = office.replace('swriter', 'scalc')
 
-    elif sourcePath.endswith(HtmlSceneDesc.SUFFIX + HtmlSceneDesc.EXTENSION):
-        sourceDoc = HtmlSceneDesc(sourcePath)
+                subprocess.Popen([os.path.normpath(office),
+                                  os.path.normpath(self._newFile)])
+                sys.exit(0)
 
-    elif sourcePath.endswith(HtmlChapterDesc.SUFFIX + HtmlChapterDesc.EXTENSION):
-        sourceDoc = HtmlChapterDesc(sourcePath)
 
-    elif sourcePath.endswith(HtmlPartDesc.SUFFIX + HtmlPartDesc.EXTENSION):
-        sourceDoc = HtmlPartDesc(sourcePath)
-
-    elif sourcePath.endswith(HtmlCharacters.SUFFIX + HtmlCharacters.EXTENSION):
-        sourceDoc = HtmlCharacters(sourcePath)
-
-    elif sourcePath.endswith(HtmlLocations.SUFFIX + HtmlLocations.EXTENSION):
-        sourceDoc = HtmlLocations(sourcePath)
-
-    elif sourcePath.endswith(HtmlItems.SUFFIX + HtmlItems.EXTENSION):
-        sourceDoc = HtmlItems(sourcePath)
-
-    elif sourcePath.endswith('.html'):
-        result = read_html_file(sourcePath)
-
-        if 'SUCCESS' in result[0]:
-
-            if "<h3" in result[1].lower():
-                sourceDoc = HtmlOutline(sourcePath)
-
-            else:
-                sourceDoc = HtmlImport(sourcePath)
-
-        else:
-            sourceDoc = None
-
-    elif sourcePath.endswith(CsvSceneList.SUFFIX + CsvSceneList.EXTENSION):
-        sourceDoc = CsvSceneList(sourcePath)
-
-    elif sourcePath.endswith(CsvPlotList.SUFFIX + CsvPlotList.EXTENSION):
-        sourceDoc = CsvPlotList(sourcePath)
-
-    elif sourcePath.endswith(CsvCharList.SUFFIX + CsvCharList.EXTENSION):
-        sourceDoc = CsvCharList(sourcePath)
-
-    elif sourcePath.endswith(CsvLocList.SUFFIX + CsvLocList.EXTENSION):
-        sourceDoc = CsvLocList(sourcePath)
-
-    elif sourcePath.endswith(CsvItemList.SUFFIX + CsvItemList.EXTENSION):
-        sourceDoc = CsvItemList(sourcePath)
-
-    else:
-        sourceDoc = None
-
-    converter = Converter(sourcePath, sourceDoc, False)
+def run(sourcePath, suffix, silentMode):
+    converter = Converter(sourcePath, suffix, silentMode)
 
 
 if __name__ == '__main__':
@@ -126,4 +75,16 @@ if __name__ == '__main__':
     except:
         sourcePath = ''
 
-    run(sourcePath)
+    fileName, FileExtension = os.path.splitext(sourcePath)
+
+    if FileExtension in ['.yw5', '.yw6', '.yw7']:
+        try:
+            suffix = sys.argv[2]
+        except:
+            suffix = ''
+
+    else:
+        sourcePath = unquote(sourcePath.replace('file:///', ''))
+        suffix = None
+
+    print(run(sourcePath, suffix, False))

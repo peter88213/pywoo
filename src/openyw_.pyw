@@ -13,21 +13,8 @@ import os
 import subprocess
 from tkinter import *
 
-from pywriter.odt.odt_proof import OdtProof
-from pywriter.odt.odt_manuscript import OdtManuscript
-from pywriter.odt.odt_scenedesc import OdtSceneDesc
-from pywriter.odt.odt_chapterdesc import OdtChapterDesc
-from pywriter.odt.odt_partdesc import OdtPartDesc
-from pywriter.csv.csv_scenelist import CsvSceneList
-from pywriter.csv.csv_plotlist import CsvPlotList
-from pywriter.csv.csv_charlist import CsvCharList
-from pywriter.csv.csv_loclist import CsvLocList
-from pywriter.csv.csv_itemlist import CsvItemList
-from pywriter.odt.odt_export import OdtExport
 from pywriter.converter.yw_cnv_gui import YwCnvGui
-from pywriter.odt.odt_characters import OdtCharacters
-from pywriter.odt.odt_items import OdtItems
-from pywriter.odt.odt_locations import OdtLocations
+from urllib.parse import unquote
 
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
@@ -36,22 +23,36 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
 
 
 class Converter(YwCnvGui):
-    """Standalone yWriter 7 converter with a simple GUI. """
 
-    def convert(self, sourcePath, document):
+    def convert(self, sourceFile, targetFile):
+        YwCnvGui.convert(self, sourceFile, targetFile)
+        self._newFile = None
 
-        YwCnvGui.convert(self, sourcePath, document)
-
-        fileName, FileExtension = os.path.splitext(sourcePath)
-
-        if self._success and FileExtension in ['.yw5', '.yw6', '.yw7']:
-            self._newFile = document.filePath
+        if self._success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+            self._newFile = targetFile.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
             self.root.editButton.config(height=1, width=10)
             self.root.editButton.pack(padx=5, pady=5)
 
+        elif sourceFile.EXTENSION == '.html':
+
+            if os.path.isfile(sourceFile.filePath.replace('.html', '.odt')):
+                try:
+                    os.remove(sourceFile.filePath)
+                except:
+                    pass
+
+        elif sourceFile.EXTENSION == '.csv':
+
+            if os.path.isfile(sourceFile.filePath.replace('.csv', '.ods')):
+                try:
+                    os.remove(sourceFile.filePath)
+                except:
+                    pass
+
     def edit(self):
+
         for office in OPENOFFICE:
 
             if os.path.isfile(office):
@@ -64,54 +65,8 @@ class Converter(YwCnvGui):
                 sys.exit(0)
 
 
-def run(sourcePath, suffix):
-
-    fileName, FileExtension = os.path.splitext(sourcePath)
-
-    if suffix == OdtProof.SUFFIX:
-        targetDoc = OdtProof(fileName + suffix + OdtProof.EXTENSION)
-
-    elif suffix == OdtManuscript.SUFFIX:
-        targetDoc = OdtManuscript(fileName + suffix + OdtManuscript.EXTENSION)
-
-    elif suffix == OdtSceneDesc.SUFFIX:
-        targetDoc = OdtSceneDesc(fileName + suffix + OdtSceneDesc.EXTENSION)
-
-    elif suffix == OdtChapterDesc.SUFFIX:
-        targetDoc = OdtChapterDesc(
-            fileName + suffix + OdtChapterDesc.EXTENSION)
-
-    elif suffix == OdtPartDesc.SUFFIX:
-        targetDoc = OdtPartDesc(fileName + suffix + OdtPartDesc.EXTENSION)
-
-    elif suffix == OdtCharacters.SUFFIX:
-        targetDoc = OdtCharacters(fileName + suffix + OdtCharacters.EXTENSION)
-
-    elif suffix == OdtLocations.SUFFIX:
-        targetDoc = OdtLocations(fileName + suffix + OdtLocations.EXTENSION)
-
-    elif suffix == OdtItems.SUFFIX:
-        targetDoc = OdtItems(fileName + suffix + OdtItems.EXTENSION)
-
-    elif suffix == CsvSceneList.SUFFIX:
-        targetDoc = CsvSceneList(fileName + suffix + CsvSceneList.EXTENSION)
-
-    elif suffix == CsvPlotList.SUFFIX:
-        targetDoc = CsvPlotList(fileName + suffix + CsvPlotList.EXTENSION)
-
-    elif suffix == CsvCharList.SUFFIX:
-        targetDoc = CsvCharList(fileName + suffix + CsvCharList.EXTENSION)
-
-    elif suffix == CsvLocList.SUFFIX:
-        targetDoc = CsvLocList(fileName + suffix + CsvLocList.EXTENSION)
-
-    elif suffix == CsvItemList.SUFFIX:
-        targetDoc = CsvItemList(fileName + suffix + CsvItemList.EXTENSION)
-
-    else:
-        targetDoc = OdtExport(fileName + OdtExport.EXTENSION)
-
-    converter = Converter(sourcePath, targetDoc, False)
+def run(sourcePath, suffix, silentMode):
+    converter = Converter(sourcePath, suffix, silentMode)
 
 
 if __name__ == '__main__':
@@ -128,7 +83,8 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-        print(run(sourcePath, suffix))
-
     else:
-        print('ERROR: File is not an yWriter project.')
+        sourcePath = unquote(sourcePath.replace('file:///', ''))
+        suffix = None
+
+    print(run(sourcePath, suffix, False))
