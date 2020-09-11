@@ -95,7 +95,7 @@ Sub export_yw
 		file_no = FreeFile
 		Open batch_file For Output As #file_no
 		Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
-		Print #file_no, &quot;saveyw.pyw %1&quot;
+		Print #file_no, &quot;pywoo.pyw %1&quot;
 		Close #file_no
 	End If
 	

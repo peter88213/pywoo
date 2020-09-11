@@ -1,7 +1,4 @@
-"""Convert yWriter project to odt or csv. 
-
-Input file format: yWriter
-Output file format: odt (with visible or invisible chapter and scene tags) or csv.
+"""Convert yWriter project to odt or csv and vice versa. 
 
 Version @release
 
@@ -70,16 +67,20 @@ def run(sourcePath, suffix, silentMode):
 
 
 if __name__ == '__main__':
+
     try:
         sourcePath = sys.argv[1]
+
     except:
         sourcePath = ''
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
     if FileExtension in ['.yw5', '.yw6', '.yw7']:
+
         try:
             suffix = sys.argv[2]
+
         except:
             suffix = ''
 
