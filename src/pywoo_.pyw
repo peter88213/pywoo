@@ -25,7 +25,7 @@ class Converter(YwCnvGui):
         YwCnvGui.convert(self, sourceFile, targetFile)
         self._newFile = None
 
-        if self._success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+        if self.success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
             self._newFile = targetFile.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -88,4 +88,4 @@ if __name__ == '__main__':
         sourcePath = unquote(sourcePath.replace('file:///', ''))
         suffix = None
 
-    print(run(sourcePath, suffix, False))
+    run(sourcePath, suffix, False)
