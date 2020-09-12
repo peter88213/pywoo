@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.26.beta
+Version 0.26.beta2
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -19,23 +19,15 @@ class YwCnv():
 
     # Methods
 
-    yw_to_document : str
+    convert : str
         Arguments
-            ywFile : YwFile
+            sourceFile : Novel
                 an object representing the source file.
-            documentFile : Novel
-                a Novel subclass instance representing the target file.
-        Read yWriter file, parse xml and create a document file.
-        Return a message beginning with SUCCESS or ERROR.    
-
-    document_to_yw : str
-        Arguments
-            documentFile : Novel
-                a Novel subclass instance representing the source file.
-            ywFile : YwFile
+            targetFile : Novel
                 an object representing the target file.
-        Read document file, convert its content to xml, and replace yWriter file.
+        Read sourceFile, merge the contents to targetFile and write targetFile.
         Return a message beginning with SUCCESS or ERROR.
+        At least one sourcefile or targetFile object should be a yWriter project.
 
     confirm_overwrite : bool
         Arguments
@@ -46,68 +38,32 @@ class YwCnv():
         This method is to be overwritten by subclasses with an user interface.
     """
 
-    def yw_to_document(self, ywFile, documentFile):
-        """Read yWriter file and convert xml to a document file."""
-        if ywFile.is_locked():
-            return 'ERROR: yWriter seems to be open. Please close first.'
-
-        if ywFile.filePath is None:
-            return 'ERROR: "' + ywFile.filePath + '" is not an yWriter project.'
-
-        message = ywFile.read()
-
-        if message.startswith('ERROR'):
-            return message
-
-        if documentFile.file_exists():
-
-            if not self.confirm_overwrite(documentFile.filePath):
-                return 'Program abort by user.'
-
-        documentFile.merge(ywFile)
-        return documentFile.write()
-
-    def document_to_yw(self, documentFile, ywFile):
+    def convert(self, sourceFile, targetFile):
         """Read document file, convert its content to xml, and replace yWriter file."""
-        if ywFile.is_locked():
-            return 'ERROR: yWriter seems to be open. Please close first.'
 
-        if ywFile.filePath is None:
-            return 'ERROR: "' + ywFile.filePath + '" is not an yWriter project.'
+        if sourceFile.filePath is None:
+            return 'ERROR: "' + sourceFile.filePath + '" is not of the supported type.'
 
-        if ywFile.file_exists() and not self.confirm_overwrite(ywFile.filePath):
+        if not sourceFile.file_exists():
+            return 'ERROR: "' + sourceFile.filePath + '" not found.'
+
+        if targetFile.filePath is None:
+            return 'ERROR: "' + targetFile.filePath + '" is not of the supported type.'
+
+        if targetFile.file_exists() and not self.confirm_overwrite(targetFile.filePath):
             return 'Program abort by user.'
 
-        if documentFile.filePath is None:
-            return 'ERROR: Document is not of the supported type.'
-
-        if not documentFile.file_exists():
-            return 'ERROR: "' + documentFile.filePath + '" not found.'
-
-        message = documentFile.read()
+        message = sourceFile.read()
 
         if message.startswith('ERROR'):
             return message
 
-        if ywFile.file_exists():
-            message = ywFile.read()
-            # initialize ywFile data
+        message = targetFile.merge(sourceFile)
 
-            if message.startswith('ERROR'):
-                return message
+        if message.startswith('ERROR'):
+            return message
 
-        prjStructure = documentFile.get_structure()
-
-        if prjStructure is not None:
-
-            if prjStructure == '':
-                return 'ERROR: Source file contains no yWriter project structure information.'
-
-            if prjStructure != ywFile.get_structure():
-                return 'ERROR: Structure mismatch - yWriter project not modified.'
-
-        ywFile.merge(documentFile)
-        return ywFile.write()
+        return targetFile.write()
 
     def confirm_overwrite(self, fileName):
         """To be overwritten by subclasses with UI."""
@@ -1587,6 +1543,9 @@ class YwFile(Novel):
         Return a message beginning with SUCCESS or ERROR.
         """
 
+        if self.is_locked():
+            return 'ERROR: yWriter seems to be open. Please close first.'
+
         message = self.ywTreeReader.read_element_tree(self)
 
         if message.startswith('ERROR'):
@@ -1932,6 +1891,24 @@ class YwFile(Novel):
     def merge(self, novel):
         """Merge attributes.
         """
+
+        if self.file_exists():
+            message = self.read()
+            # initialize data
+
+            if message.startswith('ERROR'):
+                return message
+
+        prjStructure = novel.get_structure()
+
+        if prjStructure is not None:
+
+            if prjStructure == '':
+                return 'ERROR: Source file contains no yWriter project structure information.'
+
+            if prjStructure != self.get_structure():
+                return 'ERROR: Structure mismatch.'
+
         # Merge locations.
 
         for lcId in novel.locations:
@@ -2198,11 +2175,16 @@ class YwFile(Novel):
                 if chId in self.chapters:
                     self.srtChapters.append(chId)
 
+        return 'SUCCESS'
+
     def write(self):
         """Open the yWriter xml file located at filePath and 
         replace a set of attributes not being None.
         Return a message beginning with SUCCESS or ERROR.
         """
+
+        if self.is_locked():
+            return 'ERROR: yWriter seems to be open. Please close first.'
 
         message = self.ywTreeBuilder.build_element_tree(self)
 
@@ -3345,7 +3327,7 @@ class OdtTemplate():
    <style:text-properties fo:color="#808080" fo:font-size="10pt"/>
   </style:style>
   <style:style style:name="yWriter_20_mark_20_notes" style:display-name="yWriter mark notes" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
-   <style:text-properties fo:color="#00BFFF" fo:font-size="10pt"/>
+   <style:text-properties fo:color="#0000FF" fo:font-size="10pt"/>
   </style:style>
   <style:style style:name="yWriter_20_mark_20_todo" style:display-name="yWriter mark todo" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
    <style:text-properties fo:color="#B22222" fo:font-size="10pt"/>
@@ -4138,6 +4120,8 @@ class FileExport(Novel):
 
         if novel.items is not None:
             self.items = novel.items
+
+        return 'SUCCESS'
 
     def get_projectTemplateSubst(self):
         projectTemplateSubst = dict(
@@ -6423,20 +6407,12 @@ class YwCnvGui(YwCnv):
             Either an yWriter file or a file of any supported type. 
             The file type determines the conversion's direction.    
 
-        document : Novel
-            instance of any Novel subclass representing the 
-            source or target document. 
-
-        extension : str
-            File extension determining the source or target 
-            document's file type. The extension is needed because 
-            there can be ambiguous Novel subclasses 
-            (e.g. OfficeFile).
-            Examples: 
-            - md
-            - docx
-            - odt
-            - html
+        suffix : str
+            Optional file name suffix used for ambiguous html files.
+            Examples:
+            - _manuscript for a html file containing scene contents.
+            - _scenes for a html file containing scene summaries.
+            - _chapters for a html file containing chapter summaries.
 
         silentMode : bool
             True by default. Intended for automated tests. 
@@ -6445,12 +6421,27 @@ class YwCnvGui(YwCnv):
             files is forced. 
             Calling scripts shall set silentMode = False.
 
-        suffix : str
-            Optional file name suffix used for ambiguous html files.
-            Examples:
-            - _manuscript for a html file containing scene contents.
-            - _scenes for a html file containing scene summaries.
-            - _chapters for a html file containing chapter summaries.
+    # Methods
+
+    convert : str
+        Arguments
+            sourceFile : Novel
+                an object representing the source file.
+            targetFile : Novel
+                an object representing the target file.
+        Read sourceFile, merge the contents to targetFile and write targetFile.
+        Return a message beginning with SUCCESS or ERROR.
+        At least one sourcefile or targetFile object should be a yWriter project.
+
+    confirm_overwrite : bool
+        Arguments
+            fileName : str
+                Path to the file to be overwritten
+        Ask for permission to overwrite the target file.
+
+    edit
+        Open the target file.
+        To be overwritten by subclasses.
     """
 
     def __init__(self, sourcePath, suffix=None, silentMode=True):
@@ -6470,7 +6461,7 @@ class YwCnvGui(YwCnv):
         self.processInfo = Label(self.root, text='')
         self.processInfo.pack(padx=5, pady=5)
 
-        self._success = False
+        self.success = False
 
         # Run the converter.
 
@@ -6492,7 +6483,7 @@ class YwCnvGui(YwCnv):
 
         if not self.silentMode:
 
-            if self._success:
+            if self.success:
                 self.successInfo.config(bg='green')
 
             else:
@@ -6519,7 +6510,7 @@ class YwCnvGui(YwCnv):
                 self.processInfo.config(
                     text='Project: "' + sourceFile.filePath + '"')
                 self.processInfo.config(
-                    text=self.yw_to_document(sourceFile, targetFile))
+                    text=YwCnv.convert(self, sourceFile, targetFile))
 
             elif isinstance(targetFile, Yw7NewFile):
 
@@ -6533,7 +6524,7 @@ class YwCnvGui(YwCnv):
                     self.processInfo.config(
                         text='New project: "' + targetFile.filePath + '"')
                     self.processInfo.config(
-                        text=self.document_to_yw(sourceFile, targetFile))
+                        text=YwCnv.convert(self, sourceFile, targetFile))
 
             else:
 
@@ -6542,12 +6533,12 @@ class YwCnvGui(YwCnv):
                 self.processInfo.config(
                     text='Project: "' + targetFile.filePath + '"')
                 self.processInfo.config(
-                    text=self.document_to_yw(sourceFile, targetFile))
+                    text=YwCnv.convert(self, sourceFile, targetFile))
 
             # Visualize the outcome.
 
             if self.processInfo.cget('text').startswith('SUCCESS'):
-                self._success = True
+                self.success = True
 
     def confirm_overwrite(self, filePath):
         """ Invoked by the parent if a file already exists. """
@@ -6574,7 +6565,7 @@ class Converter(YwCnvGui):
         YwCnvGui.convert(self, sourceFile, targetFile)
         self._newFile = None
 
-        if self._success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+        if self.success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
             self._newFile = targetFile.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -6637,4 +6628,4 @@ if __name__ == '__main__':
         sourcePath = unquote(sourcePath.replace('file:///', ''))
         suffix = None
 
-    print(run(sourcePath, suffix, False))
+    run(sourcePath, suffix, False)
