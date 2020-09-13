@@ -10,7 +10,7 @@ import os
 import subprocess
 from tkinter import *
 
-from pywriter.converter.yw_cnv_gui import YwCnvGui
+from pywriter.converter.yw_cnv_tk import YwCnvTk
 from urllib.parse import unquote
 
 OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
@@ -19,10 +19,10 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
 
-class Converter(YwCnvGui):
+class Converter(YwCnvTk):
 
     def convert(self, sourceFile, targetFile):
-        YwCnvGui.convert(self, sourceFile, targetFile)
+        YwCnvTk.convert(self, sourceFile, targetFile)
         self._newFile = None
 
         if self.success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:

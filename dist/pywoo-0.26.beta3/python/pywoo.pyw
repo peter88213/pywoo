@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.26.beta2
+Version 0.26.beta3
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -6397,8 +6397,8 @@ class FileFactory():
 TITLE = 'yWriter import/export'
 
 
-class YwCnvGui(YwCnv):
-    """Standalone yWriter converter with a simple GUI. 
+class YwCnvTk(YwCnv):
+    """Standalone yWriter converter with a simple tkinter GUI. 
 
     # Arguments
 
@@ -6559,10 +6559,10 @@ OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
               'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
 
-class Converter(YwCnvGui):
+class Converter(YwCnvTk):
 
     def convert(self, sourceFile, targetFile):
-        YwCnvGui.convert(self, sourceFile, targetFile)
+        YwCnvTk.convert(self, sourceFile, targetFile)
         self._newFile = None
 
         if self.success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
