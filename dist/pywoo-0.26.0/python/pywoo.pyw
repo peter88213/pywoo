@@ -1,73 +1,15 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.26.beta5
+Version 0.26.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
 import os
-import subprocess
+from urllib.parse import unquote
 from tkinter import *
 
-from tkinter import messagebox
-
-
-
-class YwCnv():
-    """Converter for yWriter project files.
-
-    # Methods
-
-    convert : str
-        Arguments
-            sourceFile : Novel
-                an object representing the source file.
-            targetFile : Novel
-                an object representing the target file.
-        Read sourceFile, merge the contents to targetFile and write targetFile.
-        Return a message beginning with SUCCESS or ERROR.
-        At least one sourcefile or targetFile object should be a yWriter project.
-
-    confirm_overwrite : bool
-        Arguments
-            fileName : str
-                Path to the file to be overwritten
-        Ask for permission to overwrite the target file.
-        Returns True by default.
-        This method is to be overwritten by subclasses with an user interface.
-    """
-
-    def convert(self, sourceFile, targetFile):
-        """Read document file, convert its content to xml, and replace yWriter file."""
-
-        if sourceFile.filePath is None:
-            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" is not of the supported type.'
-
-        if not sourceFile.file_exists():
-            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" not found.'
-
-        if targetFile.filePath is None:
-            return 'ERROR: "' + os.path.normpath(targetFile.filePath) + '" is not of the supported type.'
-
-        if targetFile.file_exists() and not self.confirm_overwrite(targetFile.filePath):
-            return 'Program abort by user.'
-
-        message = sourceFile.read()
-
-        if message.startswith('ERROR'):
-            return message
-
-        message = targetFile.merge(sourceFile)
-
-        if message.startswith('ERROR'):
-            return message
-
-        return targetFile.write()
-
-    def confirm_overwrite(self, fileName):
-        """To be overwritten by subclasses with UI."""
-        return True
 
 
 
@@ -242,9 +184,9 @@ class Novel():
             lines.append('ChID:' + str(chId) + '\n')
 
             for scId in self.chapters[chId].srtScenes:
-                lines.append('  ScID:' + str(scId) + '\n')
+                lines.append('  ScID:' + str(scId))
 
-        return ''.join(lines)
+        return '\n'.join(lines)
 
 
 class Chapter():
@@ -301,7 +243,7 @@ class Chapter():
         # True: This chapter is the yw7 project's "trash bin".
         # False: This chapter is not a "trash bin".
 
-        self.doNotExport = None
+        self.suppressChapterBreak = None
         # bool
         # xml: <Fields><Field_SuppressChapterBreak> 0
 
@@ -725,14 +667,14 @@ class YwFile(Novel):
 
                 if chFields.find('Field_SuppressChapterBreak') is not None:
 
-                    if chFields.find('Field_SuppressChapterTitle').text == '0':
-                        self.chapters[chId].doNotExport = True
+                    if chFields.find('Field_SuppressChapterBreak').text == '1':
+                        self.chapters[chId].suppressChapterBreak = True
 
                     else:
-                        self.chapters[chId].doNotExport = False
+                        self.chapters[chId].suppressChapterBreak = False
 
                 else:
-                    self.chapters[chId].doNotExport = False
+                    self.chapters[chId].suppressChapterBreak = False
 
             self.chapters[chId].srtScenes = []
 
@@ -917,15 +859,8 @@ class YwFile(Novel):
             if message.startswith('ERROR'):
                 return message
 
-        prjStructure = novel.get_structure()
-
-        if prjStructure is not None:
-
-            if prjStructure == '':
-                return 'ERROR: Source file contains no yWriter project structure information.'
-
-            if prjStructure != self.get_structure():
-                return 'ERROR: Structure mismatch.'
+        if novel.get_structure() == '':
+            return 'ERROR: Source file contains nothing to write to a yWriter project.'
 
         # Merge locations.
 
@@ -1148,6 +1083,9 @@ class YwFile(Novel):
 
             if novel.chapters[chId].suppressChapterTitle is not None:
                 self.chapters[chId].suppressChapterTitle = novel.chapters[chId].suppressChapterTitle
+
+            if novel.chapters[chId].suppressChapterBreak is not None:
+                self.chapters[chId].suppressChapterBreak = novel.chapters[chId].suppressChapterBreak
 
             if novel.chapters[chId].isTrash is not None:
                 self.chapters[chId].isTrash = novel.chapters[chId].isTrash
@@ -4032,14 +3970,17 @@ class FileExport(Novel):
     notesChapterTemplate = ''
     todoChapterTemplate = ''
     unusedChapterTemplate = ''
+    notExportedChapterTemplate = ''
     sceneTemplate = ''
     appendedSceneTemplate = ''
     notesSceneTemplate = ''
     todoSceneTemplate = ''
     unusedSceneTemplate = ''
+    notExportedSceneTemplate = ''
     sceneDivider = ''
     chapterEndTemplate = ''
     unusedChapterEndTemplate = ''
+    notExportedChapterEndTemplate = ''
     notesChapterEndTemplate = ''
     characterTemplate = ''
     locationTemplate = ''
@@ -4345,6 +4286,21 @@ class FileExport(Novel):
             # The order counts; be aware that "Todo" and "Notes" chapters are
             # always unused.
 
+            # Has the chapter only scenes not to be exported?
+
+            sceneCount = 0
+            notExportCount = 0
+            doNotExportChapter = False
+
+            for scId in self.chapters[chId].srtScenes:
+                sceneCount += 1
+
+                if self.scenes[scId].doNotExport:
+                    notExportCount += 1
+
+            if sceneCount > 0 and notExportCount == sceneCount:
+                doNotExportChapter = True
+
             if self.chapters[chId].chType == 2:
 
                 if self.todoChapterTemplate != '':
@@ -4367,6 +4323,14 @@ class FileExport(Novel):
 
                 if self.unusedChapterTemplate != '':
                     template = Template(self.unusedChapterTemplate)
+
+                else:
+                    continue
+
+            elif doNotExportChapter:
+
+                if self.notExportedChapterTemplate != '':
+                    template = Template(self.notExportedChapterTemplate)
 
                 else:
                     continue
@@ -4407,10 +4371,18 @@ class FileExport(Novel):
                     else:
                         continue
 
-                elif self.scenes[scId].isUnused or self.chapters[chId].isUnused or self.scenes[scId].doNotExport:
+                elif self.scenes[scId].isUnused or self.chapters[chId].isUnused:
 
                     if self.unusedSceneTemplate != '':
                         template = Template(self.unusedSceneTemplate)
+
+                    else:
+                        continue
+
+                elif self.scenes[scId].doNotExport or doNotExportChapter:
+
+                    if self.notExportedSceneTemplate != '':
+                        template = Template(self.notExportedSceneTemplate)
 
                     else:
                         continue
@@ -4420,7 +4392,7 @@ class FileExport(Novel):
 
                     template = Template(self.sceneTemplate)
 
-                    if self.scenes[scId].appendToPrev and self.appendedSceneTemplate != '':
+                    if not firstSceneInChapter and self.scenes[scId].appendToPrev and self.appendedSceneTemplate != '':
                         template = Template(self.appendedSceneTemplate)
 
                 if not (firstSceneInChapter or self.scenes[scId].appendToPrev):
@@ -4431,26 +4403,21 @@ class FileExport(Novel):
 
                 firstSceneInChapter = False
 
-            if self.chapters[chId].chType == 2:
-
-                if self.todoChapterEndTemplate != '':
-                    lines.append(self.todoChapterEndTemplate)
-
-                else:
-                    continue
+            if self.chapters[chId].chType == 2 and self.todoChapterEndTemplate != '':
+                lines.append(self.todoChapterEndTemplate)
 
             elif self.chapters[chId].chType == 1 or self.chapters[chId].oldType == 1:
 
                 if self.notesChapterEndTemplate != '':
                     lines.append(self.notesChapterEndTemplate)
 
-                else:
-                    continue
-
             elif self.chapters[chId].isUnused and self.unusedChapterEndTemplate != '':
                 lines.append(self.unusedChapterEndTemplate)
 
-            else:
+            elif doNotExportChapter and self.notExportedChapterEndTemplate != '':
+                lines.append(self.notExportedChapterEndTemplate)
+
+            elif self.chapterEndTemplate != '':
                 lines.append(self.chapterEndTemplate)
 
         for crId in self.characters:
@@ -4938,7 +4905,7 @@ class OdtLocations(OdtFile):
 '''
 
     locationTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title$AKA</text:h>
-<text:section text:style-name="Sect1" text:name="ItID:$ID">
+<text:section text:style-name="Sect1" text:name="LcID:$ID">
 <text:p text:style-name="Text_20_body">$Desc</text:p>
 </text:section>
 '''
@@ -5212,9 +5179,6 @@ class HtmlManuscript(HtmlFile):
         if self._scId is not None:
             self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """This file format has no comparable structure."""
-
 
 
 class HtmlSceneDesc(HtmlFile):
@@ -5250,9 +5214,6 @@ class HtmlSceneDesc(HtmlFile):
         if self._scId is not None:
             self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """This file format has no comparable structure."""
-
 
 
 class HtmlChapterDesc(HtmlFile):
@@ -5281,9 +5242,6 @@ class HtmlChapterDesc(HtmlFile):
         """
         if self._chId is not None:
             self._lines.append(data.rstrip().lstrip())
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
 
 
 
@@ -5360,7 +5318,14 @@ class HtmlCharacters(HtmlFile):
             self._lines.append(data.rstrip().lstrip())
 
     def get_structure(self):
-        """This file format has no comparable structure."""
+        """returns a string showing the order characters.
+        """
+        lines = []
+
+        for crId in self.characters:
+            lines.append('  CrID:' + str(crId))
+
+        return '\n'.join(lines)
 
 
 
@@ -5409,7 +5374,14 @@ class HtmlLocations(HtmlFile):
             self._lines.append(data.rstrip().lstrip())
 
     def get_structure(self):
-        """This file format has no comparable structure."""
+        """returns a string showing the order items.
+        """
+        lines = []
+
+        for lcId in self.locations:
+            lines.append('  LcID:' + str(lcId))
+
+        return '\n'.join(lines)
 
 
 
@@ -5457,7 +5429,14 @@ class HtmlItems(HtmlFile):
             self._lines.append(data.rstrip().lstrip())
 
     def get_structure(self):
-        """This file format has no comparable structure."""
+        """returns a string showing the order items.
+        """
+        lines = []
+
+        for itId in self.items:
+            lines.append('  ItID:' + str(itId))
+
+        return '\n'.join(lines)
 
 
 
@@ -5557,9 +5536,6 @@ class HtmlImport(HtmlFile):
         else:
             self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """This file format has no comparable structure."""
-
 
 
 class HtmlOutline(HtmlFile):
@@ -5647,9 +5623,6 @@ class HtmlOutline(HtmlFile):
         """
         self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """This file format has no comparable structure."""
-
 
 
 
@@ -5702,10 +5675,6 @@ class CsvFile(FileExport):
             text = ''
 
         return text
-
-    def get_structure(self):
-        """This file format has no comparable structure."""
-        return None
 
 
 class CsvSceneList(CsvFile):
@@ -5894,6 +5863,16 @@ class CsvSceneList(CsvFile):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
+    def get_structure(self):
+        """returns a string showing the order of scenes.
+        """
+        lines = []
+
+        for scId in self.scenes:
+            lines.append('  ScID:' + str(scId))
+
+        return '\n'.join(lines)
+
 
 
 
@@ -6068,6 +6047,16 @@ class CsvPlotList(CsvFile):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
+    def get_structure(self):
+        """returns a string showing the order of scenes.
+        """
+        lines = []
+
+        for scId in self.scenes:
+            lines.append('  ScID:' + str(scId))
+
+        return '\n'.join(lines)
+
 
 
 
@@ -6136,6 +6125,17 @@ class CsvCharList(CsvFile):
         """Copy selected novel attributes.
         """
         self.characters = novel.characters
+        return 'SUCCESS'
+
+    def get_structure(self):
+        """returns a string showing the order characters.
+        """
+        lines = []
+
+        for crId in self.characters:
+            lines.append('  CrID:' + str(crId))
+
+        return '\n'.join(lines)
 
 
 
@@ -6194,6 +6194,17 @@ class CsvLocList(CsvFile):
         """Copy selected novel attributes.
         """
         self.locations = novel.locations
+        return 'SUCCESS'
+
+    def get_structure(self):
+        """returns a string showing the order items.
+        """
+        lines = []
+
+        for lcId in self.locations:
+            lines.append('  LcID:' + str(lcId))
+
+        return '\n'.join(lines)
 
 
 
@@ -6252,6 +6263,17 @@ class CsvItemList(CsvFile):
         """Copy selected novel attributes.
         """
         self.items = novel.items
+        return 'SUCCESS'
+
+    def get_structure(self):
+        """returns a string showing the order items.
+        """
+        lines = []
+
+        for itId in self.items:
+            lines.append('  ItID:' + str(itId))
+
+        return '\n'.join(lines)
 
 
 
@@ -6259,6 +6281,8 @@ class FileFactory():
     """A simple factory class that instantiates a source file object
     and a target file object for conversion.
     """
+
+    YW_EXTENSIONS = ['.yw5', '.yw6', '.yw7']
 
     def get_file_objects(self, sourcePath, suffix=None):
         fileName, fileExtension = os.path.splitext(sourcePath)
@@ -6425,6 +6449,66 @@ class FileFactory():
                 return ['ERROR: No yWriter project to write.', None, None]
 
         return ('SUCCESS', sourceFile, targetFile)
+import subprocess
+
+from tkinter import messagebox
+
+
+
+class YwCnv():
+    """Converter for yWriter project files.
+
+    # Methods
+
+    convert : str
+        Arguments
+            sourceFile : Novel
+                an object representing the source file.
+            targetFile : Novel
+                an object representing the target file.
+        Read sourceFile, merge the contents to targetFile and write targetFile.
+        Return a message beginning with SUCCESS or ERROR.
+        At least one sourcefile or targetFile object should be a yWriter project.
+
+    confirm_overwrite : bool
+        Arguments
+            fileName : str
+                Path to the file to be overwritten
+        Ask for permission to overwrite the target file.
+        Returns True by default.
+        This method is to be overwritten by subclasses with an user interface.
+    """
+
+    def convert(self, sourceFile, targetFile):
+        """Read document file, convert its content to xml, and replace yWriter file."""
+
+        if sourceFile.filePath is None:
+            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" is not of the supported type.'
+
+        if not sourceFile.file_exists():
+            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" not found.'
+
+        if targetFile.filePath is None:
+            return 'ERROR: "' + os.path.normpath(targetFile.filePath) + '" is not of the supported type.'
+
+        if targetFile.file_exists() and not self.confirm_overwrite(targetFile.filePath):
+            return 'Program abort by user.'
+
+        message = sourceFile.read()
+
+        if message.startswith('ERROR'):
+            return message
+
+        message = targetFile.merge(sourceFile)
+
+        if message.startswith('ERROR'):
+            return message
+
+        return targetFile.write()
+
+    def confirm_overwrite(self, fileName):
+        """To be overwritten by subclasses with UI."""
+        return True
 
 
 TITLE = 'yWriter import/export'
@@ -6537,7 +6621,7 @@ class YwCnvTk(YwCnv):
                 text='ERROR: File "' + os.path.normpath(sourceFile.filePath) + '" not found.')
 
         else:
-            if sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+            if sourceFile.EXTENSION in FileFactory.YW_EXTENSIONS:
 
                 self.appInfo.config(
                     text='Input: ' + sourceFile.DESCRIPTION + ' "' + os.path.normpath(sourceFile.filePath) + '"\nOutput: ' + targetFile.DESCRIPTION + ' "' + os.path.normpath(targetFile.filePath) + '"')
@@ -6581,21 +6665,19 @@ class YwCnvTk(YwCnv):
 
     def edit(self):
         pass
-from urllib.parse import unquote
-
-OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
-              'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
-              'c:/Program Files/OpenOffice 4/program/swriter.exe',
-              'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
 
-class Converter(YwCnvTk):
+class YwCnvOO(YwCnvTk):
+    """yWriter converter with a simple tkinter GUI. 
+    Handles temporary files created by OpenOffice.
+    Can call OpenOffice to edit the conversion result.
+    """
 
     def convert(self, sourceFile, targetFile):
         YwCnvTk.convert(self, sourceFile, targetFile)
         self._newFile = None
 
-        if self.success and sourceFile.EXTENSION in ['.yw5', '.yw6', '.yw7']:
+        if self.success and sourceFile.EXTENSION in FileFactory.YW_EXTENSIONS:
             self._newFile = targetFile.filePath
             self.root.editButton = Button(
                 text="Edit", command=self.edit)
@@ -6605,6 +6687,7 @@ class Converter(YwCnvTk):
         elif sourceFile.EXTENSION == '.html':
 
             if os.path.isfile(sourceFile.filePath.replace('.html', '.odt')):
+
                 try:
                     os.remove(sourceFile.filePath)
                 except:
@@ -6613,12 +6696,18 @@ class Converter(YwCnvTk):
         elif sourceFile.EXTENSION == '.csv':
 
             if os.path.isfile(sourceFile.filePath.replace('.csv', '.ods')):
+
                 try:
                     os.remove(sourceFile.filePath)
                 except:
                     pass
 
     def edit(self):
+
+        OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
+                      'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
+                      'c:/Program Files/OpenOffice 4/program/swriter.exe',
+                      'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
 
         for office in OPENOFFICE:
 
@@ -6633,7 +6722,7 @@ class Converter(YwCnvTk):
 
 
 def run(sourcePath, suffix, silentMode):
-    converter = Converter(sourcePath, suffix, silentMode)
+    converter = YwCnvOO(sourcePath, suffix, silentMode)
 
 
 if __name__ == '__main__':
@@ -6646,7 +6735,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if FileExtension in ['.yw5', '.yw6', '.yw7']:
+    if FileExtension in FileFactory.YW_EXTENSIONS:
 
         try:
             suffix = sys.argv[2]

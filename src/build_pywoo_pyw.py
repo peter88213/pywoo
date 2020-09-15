@@ -1,6 +1,6 @@
-""" Build python script for the OpenOffice "yWriter import7export" script.
+""" Build python script for the OpenOffice "convert yWriter" script.
         
-In order to distributea single script without dependencies, 
+In order to distribute single scripts without dependencies, 
 this script "inlines" all modules imported from the pywriter package.
 
 For further information see https://github.com/peter88213/PyWriter
@@ -11,11 +11,23 @@ import inliner
 
 SRC = '../src/'
 BUILD = '../test/'
+SOURCE_FILE = 'pywoo_.pyw'
+TARGET_FILE = BUILD + 'pywoo.pyw'
 
 
 def main():
     os.chdir(SRC)
-    inliner.run('pywoo_.pyw', BUILD + 'pywoo.pyw', 'pywriter')
+
+    try:
+        os.remove(TARGET_FILE)
+
+    except:
+        pass
+
+    inliner.run(SOURCE_FILE,
+                TARGET_FILE, 'openoffice', '../src/')
+    inliner.run(TARGET_FILE,
+                TARGET_FILE, 'pywriter', '../../PyWriter/src/')
     print('Done.')
 
 
