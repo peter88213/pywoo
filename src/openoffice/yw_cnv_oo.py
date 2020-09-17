@@ -65,8 +65,6 @@ class YwCnvOO(YwCnvTk):
             if message.startswith('SUCCESS'):
                 self.success = True
 
-        self.delete_tempfile(sourceFile)
-
     def import_to_yw(self, sourceFile, targetFile):
         """Method for conversion from other to yw.
         """
@@ -75,28 +73,6 @@ class YwCnvOO(YwCnvTk):
 
         if message.startswith('SUCCESS'):
             self.success = True
-
-        self.delete_tempfile(sourceFile)
-
-    def delete_tempfile(self, sourceFile):
-
-        if sourceFile.EXTENSION == '.html':
-
-            if os.path.isfile(sourceFile.filePath.replace('.html', '.odt')):
-
-                try:
-                    os.remove(sourceFile.filePath)
-                except:
-                    pass
-
-        elif sourceFile.EXTENSION == '.csv':
-
-            if os.path.isfile(sourceFile.filePath.replace('.csv', '.ods')):
-
-                try:
-                    os.remove(sourceFile.filePath)
-                except:
-                    pass
 
     def edit(self, newFile):
 

@@ -17,18 +17,54 @@ from openoffice.yw_cnv_oo import YwCnvOO
 def run(sourcePath, suffix, silentMode):
     converter = YwCnvOO(sourcePath, suffix, silentMode)
 
+    if converter.success:
+        delete_tempfile(sourcePath)
+        return True
+
+    else:
+        return False
+
+
+def delete_tempfile(filePath):
+    """If an Office file exists, delete the temporary file."""
+
+    if filePath.endswith('.html'):
+
+        if os.path.isfile(filePath.replace('.html', '.odt')):
+
+            try:
+                os.remove(filePath)
+
+            except:
+                pass
+
+    elif filePath.endswith('.csv'):
+
+        if os.path.isfile(filePath.replace('.csv', '.ods')):
+
+            try:
+                os.remove(filePath)
+
+            except:
+                pass
+
 
 if __name__ == '__main__':
 
     try:
-        sourcePath = sys.argv[1]
+        sourcePath = unquote(sys.argv[1].replace('file:///', ''))
 
     except:
         sourcePath = ''
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if FileExtension in YwCnvOO.YW_EXTENSIONS:
+    if not FileExtension in YwCnvOO.YW_EXTENSIONS:
+        # Source file is not a yWriter project
+        suffix = None
+
+    else:
+        # Source file is a yWriter project; suffix matters
 
         try:
             suffix = sys.argv[2]
@@ -36,8 +72,4 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-    else:
-        sourcePath = unquote(sourcePath.replace('file:///', ''))
-        suffix = None
-
-    run(sourcePath, suffix, False)
+    result = run(sourcePath, suffix, False)
