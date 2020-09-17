@@ -7,10 +7,10 @@ For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
 import os
-from urllib.parse import unquote
-from tkinter import *
+import sys
 
-from pywriter.converter.file_factory import FileFactory
+from urllib.parse import unquote
+
 from openoffice.yw_cnv_oo import YwCnvOO
 
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if FileExtension in FileFactory.YW_EXTENSIONS:
+    if FileExtension in YwCnvOO.YW_EXTENSIONS:
 
         try:
             suffix = sys.argv[2]
