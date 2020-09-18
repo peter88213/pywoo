@@ -9,14 +9,14 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import inliner
 
-SRC = '../src/'
+SRC = '../src/extension/'
 BUILD = '../test/'
-SOURCE_FILE = 'pywoo_.pyw'
+SOURCE_FILE = SRC + 'pywoo_.pyw'
 TARGET_FILE = BUILD + 'pywoo.pyw'
 
 
 def main():
-    os.chdir(SRC)
+    # os.chdir(SRC)
 
     try:
         os.remove(TARGET_FILE)

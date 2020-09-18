@@ -16,7 +16,7 @@
 		<mkdir dir="${test}" />
 		<delete file="${test}/pywoo.pyw" />
 			<exec executable="python" failonerror="true">
-			    <arg value="${src}/build_pywoo_pyw.py"/>
+			    <arg value="${src}/build_extension.py"/>
 			</exec>
 	</target>
 
