@@ -10,43 +10,7 @@ import os
 import sys
 
 from urllib.parse import unquote
-
-from openoffice.yw_cnv_oo import YwCnvOO
-
-
-def run(sourcePath, suffix, silentMode):
-    converter = YwCnvOO(sourcePath, suffix, silentMode)
-
-    if converter.success:
-        delete_tempfile(sourcePath)
-        return True
-
-    else:
-        return False
-
-
-def delete_tempfile(filePath):
-    """If an Office file exists, delete the temporary file."""
-
-    if filePath.endswith('.html'):
-
-        if os.path.isfile(filePath.replace('.html', '.odt')):
-
-            try:
-                os.remove(filePath)
-
-            except:
-                pass
-
-    elif filePath.endswith('.csv'):
-
-        if os.path.isfile(filePath.replace('.csv', '.ods')):
-
-            try:
-                os.remove(filePath)
-
-            except:
-                pass
+from openoffice.yw_cnv_oo import YwCnvOo
 
 
 if __name__ == '__main__':
@@ -59,7 +23,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in YwCnvOO.YW_EXTENSIONS:
+    if not FileExtension in YwCnvOo.YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 
@@ -72,4 +36,4 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-    result = run(sourcePath, suffix, False)
+    converter = YwCnvOo(sourcePath, suffix, False)

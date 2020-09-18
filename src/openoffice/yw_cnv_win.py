@@ -1,19 +1,17 @@
-"""Import and export yWriter data (OpenOffice 3/4 variant).
+"""Import and export yWriter data (OpenOffice 3/4 variant for Windows Explorer).
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
-import os
-import sys
-import subprocess
-
 from pywriter.converter.ui_tk import UiTk
 from pywriter.converter.yw_cnv_tk import YwCnvTk
 from pywriter.converter.file_factory import FileFactory
 
+from openoffice.yw_cnv_oo import YwCnvOo
 
-class YwCnvOo(YwCnvTk):
+
+class YwCnvWin(YwCnvOo):
     """yWriter converter with a simple tkinter GUI. 
     Handles temporary files created by OpenOffice.
     Can call OpenOffice to edit the conversion result.
@@ -43,22 +41,4 @@ class YwCnvOo(YwCnvTk):
 
         if self.success:
             self._newFile = targetFile.filePath
-            self.edit()
-
-    def edit(self):
-
-        OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files/OpenOffice 4/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
-
-        for office in OPENOFFICE:
-
-            if os.path.isfile(office):
-
-                if self._newFile.endswith('.csv'):
-                    office = office.replace('swriter', 'scalc')
-
-                subprocess.Popen([os.path.normpath(office),
-                                  os.path.normpath(self._newFile)])
-                sys.exit(0)
+            self.userInterface.show_edit_button(self.edit)
