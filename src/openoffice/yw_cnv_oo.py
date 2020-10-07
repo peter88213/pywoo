@@ -24,8 +24,7 @@ class YwCnvOo(YwCnvTk):
         self._newFile = None
         self.fileFactory = None
 
-    def run(self, sourcePath, suffix=None):
-        YwCnvTk.run(self, sourcePath, suffix)
+    def finish(self, sourcePath):
 
         if self.success:
             self.delete_tempfile(sourcePath)

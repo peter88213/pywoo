@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.27.0
+Version 0.27.1
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -6508,6 +6508,8 @@ class YwCnvUi(YwCnv):
         else:
             self.import_to_yw(sourceFile, targetFile)
 
+        self.finish(sourcePath)
+
     def export_from_yw(self, sourceFile, targetFile):
         """Template method for conversion from yw to other.
         """
@@ -6574,6 +6576,9 @@ class YwCnvUi(YwCnv):
 
                 except:
                     pass
+
+    def finish(self, sourcePath):
+        """Hook for actions to take place after the conversion."""
 
 from tkinter import *
 from tkinter import messagebox
@@ -6648,10 +6653,7 @@ class YwCnvTk(YwCnvUi):
         self.success = False
         self.fileFactory = None
 
-    def run(self, sourcePath, suffix=None):
-        """Create source and target objects and run conversion.
-        """
-        YwCnvUi.run(self, sourcePath, suffix)
+    def finish(self, sourcePath):
         self.userInterface.finish()
 import subprocess
 
@@ -6669,8 +6671,7 @@ class YwCnvOo(YwCnvTk):
         self._newFile = None
         self.fileFactory = None
 
-    def run(self, sourcePath, suffix=None):
-        YwCnvTk.run(self, sourcePath, suffix)
+    def finish(self, sourcePath):
 
         if self.success:
             self.delete_tempfile(sourcePath)
