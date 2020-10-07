@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.26.4
+Version 0.27.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -10,124 +10,25 @@ import os
 import sys
 
 from urllib.parse import unquote
-import subprocess
 
 
 
-class Ui():
-    """Superclass for UI facades, implementing a 'silent mode'."""
-
-    def __init__(self, title):
-        self.infoWhatText = ''
-        self.infoHowText = ''
-
-    def ask_yes_no(self, text):
-        return True
-
-    def set_info_what(self, message):
-        """What's the converter going to do?"""
-        self.infoWhatText = message
-
-    def set_info_how(self, message):
-        """How's the converter doing?"""
-        self.infoHowText = message
-
-from tkinter import *
-from tkinter import messagebox
+from abc import abstractmethod
 
 
-class UiTk(Ui):
-    """UI subclass implementing a Tkinter facade."""
-
-    def __init__(self, title):
-        """Prepare the graphical user interface. """
-
-        self.root = Tk()
-        self.root.geometry("800x360")
-        self.root.title(title)
-        self.header = Label(self.root, text=__doc__)
-        self.header.pack(padx=5, pady=5)
-        self.appInfo = Label(self.root, text='')
-        self.appInfo.pack(padx=5, pady=5)
-        self.successInfo = Label(self.root)
-        self.successInfo.pack(fill=X, expand=1, padx=50, pady=5)
-        self.processInfo = Label(self.root, text='')
-        self.processInfo.pack(padx=5, pady=5)
-
-        self.infoWhatText = ''
-        self.infoHowText = ''
-
-    def ask_yes_no(self, text):
-        return messagebox.askyesno('WARNING', text)
-
-    def set_info_what(self, message):
-        """What's the converter going to do?"""
-
-        self.infoWhatText = message
-        self.appInfo.config(text=message)
-
-    def set_info_how(self, message):
-        """How's the converter doing?"""
-
-        self.infoHowText = message
-        self.processInfo.config(text=message)
-
-        if message.startswith('SUCCESS'):
-            self.successInfo.config(bg='green')
-
-        else:
-            self.successInfo.config(bg='red')
-
-    def show_edit_button(self, edit_cmd):
-        self.root.editButton = Button(text="Edit", command=edit_cmd)
-        self.root.editButton.config(height=1, width=10)
-        self.root.editButton.pack(padx=5, pady=5)
-
-    def finish(self):
-        self.root.quitButton = Button(text="Quit", command=quit)
-        self.root.quitButton.config(height=1, width=10)
-        self.root.quitButton.pack(padx=5, pady=5)
-        self.root.mainloop()
-
-
-
-class YwCnv():
-    """Converter for yWriter project files.
+class FileFactory():
+    """Abstract factory class that instantiates a source file object
+    and a target file object for conversion.
     """
 
-    def convert(self, sourceFile, targetFile):
-        """Read document file, convert its content to xml, and replace yWriter file.
-        Return a message beginning with SUCCESS or ERROR.
+    @abstractmethod
+    def get_file_objects(self, sourcePath, suffix=None):
+        """Abstract method to be overwritten by subclasses.
+        Returns:
+        * A message string starting with 'SUCCESS' or 'ERROR'
+        * sourceFile: a Novel subclass instance
+        * targetFile: a Novel subclass instance
         """
-
-        if sourceFile.filePath is None:
-            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" is not of the supported type.'
-
-        if not sourceFile.file_exists():
-            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" not found.'
-
-        if targetFile.filePath is None:
-            return 'ERROR: "' + os.path.normpath(targetFile.filePath) + '" is not of the supported type.'
-
-        if targetFile.file_exists() and not self.confirm_overwrite(targetFile.filePath):
-            return 'Program abort by user.'
-
-        message = sourceFile.read()
-
-        if message.startswith('ERROR'):
-            return message
-
-        message = targetFile.merge(sourceFile)
-
-        if message.startswith('ERROR'):
-            return message
-
-        return targetFile.write()
-
-    def confirm_overwrite(self, fileName):
-        """Hook for subclasses with UI."""
-        return True
-
 
 
 
@@ -290,31 +191,15 @@ class Novel():
         else:
             return False
 
-    def get_structure(self):
-        """returns a string showing the order of chapters and scenes 
-        as a tree. The result can be used to compare two Novel objects 
-        by their structure.
-        """
-        lines = []
-
-        for chId in self.srtChapters:
-            lines.append('ChID:' + str(chId) + '\n')
-
-            for scId in self.chapters[chId].srtScenes:
-                lines.append('  ScID:' + str(scId))
-
-        return '\n'.join(lines)
-
 
 class Chapter():
     """yWriter chapter representation.
     # xml: <CHAPTERS><CHAPTER>
     """
 
-    stripChapterFromTitle = False
-    # bool
-    # True: Remove 'Chapter ' from the chapter title upon import.
-    # False: Do not modify the chapter title.
+    chapterTitlePrefix = "Chapter "
+    # str
+    # Can be changed at runtime for non-English projects.
 
     def __init__(self):
         self.title = None
@@ -371,11 +256,12 @@ class Chapter():
         # corresponds to the chapter's order of the scenes.
 
     def get_title(self):
-        """Fix auto-chapter titles for non-English """
+        """Fix auto-chapter titles if necessary 
+        """
         text = self.title
 
-        if self.stripChapterFromTitle:
-            text = text.replace('Chapter ', '')
+        if text:
+            text = text.replace('Chapter ', self.chapterTitlePrefix)
 
         return text
 
@@ -2711,7 +2597,7 @@ from shutil import rmtree
 from datetime import datetime
 
 
-class OdtTemplate():
+class OdtBuilder():
 
     TEMPDIR = 'temp_odt'
 
@@ -4238,7 +4124,7 @@ class FileExport(Novel):
         chapterSubst = dict(
             ID=chId,
             ChapterNumber=chapterNumber,
-            Title=self.chapters[chId].title,
+            Title=self.chapters[chId].get_title(),
             Desc=self.convert_from_yw(self.chapters[chId].desc),
             ProjectName=self.projectName,
             ProjectPath=self.projectPath,
@@ -4601,7 +4487,7 @@ class FileExport(Novel):
         return 'SUCCESS: "' + os.path.normpath(self.filePath) + '" written.'
 
 
-class OdtFile(FileExport, OdtTemplate):
+class OdtFile(FileExport, OdtBuilder):
     """OpenDocument xml project file representation."""
 
     EXTENSION = '.odt'
@@ -4725,7 +4611,7 @@ class OdtProof(OdtFile):
     DESCRIPTION = 'Tagged manuscript for proofing'
     SUFFIX = '_proof'
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4784,7 +4670,7 @@ class OdtProof(OdtFile):
     todoChapterEndTemplate = '''<text:p text:style-name="yWriter_20_mark_20_todo">[/ChID (ToDo)]</text:p>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtManuscript(OdtFile):
@@ -4793,7 +4679,7 @@ class OdtManuscript(OdtFile):
     DESCRIPTION = 'Editable manuscript'
     SUFFIX = '_manuscript'
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4831,7 +4717,7 @@ class OdtManuscript(OdtFile):
     chapterEndTemplate = '''</text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
     def get_chapterSubst(self, chId, chapterNumber):
         chapterSubst = OdtFile.get_chapterSubst(self, chId, chapterNumber)
@@ -4848,7 +4734,7 @@ class OdtSceneDesc(OdtFile):
     DESCRIPTION = 'Scene descriptions'
     SUFFIX = '_scenes'
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4886,7 +4772,7 @@ class OdtSceneDesc(OdtFile):
     chapterEndTemplate = '''</text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtChapterDesc(OdtFile):
@@ -4895,7 +4781,7 @@ class OdtChapterDesc(OdtFile):
     DESCRIPTION = 'Chapter descriptions'
     SUFFIX = '_chapters'
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4908,7 +4794,7 @@ class OdtChapterDesc(OdtFile):
 </text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtPartDesc(OdtFile):
@@ -4917,7 +4803,7 @@ class OdtPartDesc(OdtFile):
     DESCRIPTION = 'Part descriptions'
     SUFFIX = '_parts'
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4927,7 +4813,7 @@ class OdtPartDesc(OdtFile):
 </text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtExport(OdtFile):
@@ -4936,7 +4822,7 @@ class OdtExport(OdtFile):
 
     """OpenDocument xml project file representation."""
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -4961,7 +4847,7 @@ class OdtExport(OdtFile):
     sceneDivider = '''<text:p text:style-name="Heading_20_4">* * *</text:p>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
     def get_chapterSubst(self, chId, chapterNumber):
         chapterSubst = OdtFile.get_chapterSubst(self, chId, chapterNumber)
@@ -4989,7 +4875,7 @@ class OdtCharacters(OdtFile):
 
         return characterSubst
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -5010,7 +4896,7 @@ class OdtCharacters(OdtFile):
 </text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtItems(OdtFile):
@@ -5027,7 +4913,7 @@ class OdtItems(OdtFile):
 
         return itemSubst
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -5037,7 +4923,7 @@ class OdtItems(OdtFile):
 </text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 class OdtLocations(OdtFile):
@@ -5054,7 +4940,7 @@ class OdtLocations(OdtFile):
 
         return locationSubst
 
-    fileHeader = OdtTemplate.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+    fileHeader = OdtBuilder.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
@@ -5064,7 +4950,7 @@ class OdtLocations(OdtFile):
 </text:section>
 '''
 
-    fileFooter = OdtTemplate.CONTENT_XML_FOOTER
+    fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
 
 
@@ -5471,16 +5357,6 @@ class HtmlCharacters(HtmlFile):
         if self._section is not None:
             self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """returns a string showing the order characters.
-        """
-        lines = []
-
-        for crId in self.characters:
-            lines.append('  CrID:' + str(crId))
-
-        return '\n'.join(lines)
-
 
 
 
@@ -5527,16 +5403,6 @@ class HtmlLocations(HtmlFile):
         if self._lcId is not None:
             self._lines.append(data.rstrip().lstrip())
 
-    def get_structure(self):
-        """returns a string showing the order items.
-        """
-        lines = []
-
-        for lcId in self.locations:
-            lines.append('  LcID:' + str(lcId))
-
-        return '\n'.join(lines)
-
 
 
 class HtmlItems(HtmlFile):
@@ -5581,16 +5447,6 @@ class HtmlItems(HtmlFile):
         """
         if self._itId is not None:
             self._lines.append(data.rstrip().lstrip())
-
-    def get_structure(self):
-        """returns a string showing the order items.
-        """
-        lines = []
-
-        for itId in self.items:
-            lines.append('  ItID:' + str(itId))
-
-        return '\n'.join(lines)
 
 
 
@@ -6017,16 +5873,6 @@ class CsvSceneList(CsvFile):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
-    def get_structure(self):
-        """returns a string showing the order of scenes.
-        """
-        lines = []
-
-        for scId in self.scenes:
-            lines.append('  ScID:' + str(scId))
-
-        return '\n'.join(lines)
-
 
 
 
@@ -6201,16 +6047,6 @@ class CsvPlotList(CsvFile):
 
         return 'SUCCESS: Data read from "' + self._filePath + '".'
 
-    def get_structure(self):
-        """returns a string showing the order of scenes.
-        """
-        lines = []
-
-        for scId in self.scenes:
-            lines.append('  ScID:' + str(scId))
-
-        return '\n'.join(lines)
-
 
 
 
@@ -6281,16 +6117,6 @@ class CsvCharList(CsvFile):
         self.characters = novel.characters
         return 'SUCCESS'
 
-    def get_structure(self):
-        """returns a string showing the order characters.
-        """
-        lines = []
-
-        for crId in self.characters:
-            lines.append('  CrID:' + str(crId))
-
-        return '\n'.join(lines)
-
 
 
 
@@ -6349,16 +6175,6 @@ class CsvLocList(CsvFile):
         """
         self.locations = novel.locations
         return 'SUCCESS'
-
-    def get_structure(self):
-        """returns a string showing the order items.
-        """
-        lines = []
-
-        for lcId in self.locations:
-            lines.append('  LcID:' + str(lcId))
-
-        return '\n'.join(lines)
 
 
 
@@ -6419,24 +6235,20 @@ class CsvItemList(CsvFile):
         self.items = novel.items
         return 'SUCCESS'
 
-    def get_structure(self):
-        """returns a string showing the order items.
-        """
-        lines = []
-
-        for itId in self.items:
-            lines.append('  ItID:' + str(itId))
-
-        return '\n'.join(lines)
 
 
-
-class FileFactory():
-    """A simple factory class that instantiates a source file object
+class UniversalFileFactory(FileFactory):
+    """A factory class that instantiates a source file object
     and a target file object for conversion.
+    All filetypes are covered.
     """
 
     def get_file_objects(self, sourcePath, suffix=None):
+        """Returns:
+        * A message starting with 'SUCCESS' or 'ERROR'
+        * sourceFile: a Novel subclass instance
+        * targetFile: a Novel subclass instance
+        """
         fileName, fileExtension = os.path.splitext(sourcePath)
         isYwProject = False
 
@@ -6605,6 +6417,64 @@ class FileFactory():
         return ('SUCCESS', sourceFile, targetFile)
 
 
+
+class Ui():
+    """Superclass for UI facades, implementing a 'silent mode'."""
+
+    def __init__(self, title):
+        self.infoWhatText = ''
+        self.infoHowText = ''
+
+    def ask_yes_no(self, text):
+        return True
+
+    def set_info_what(self, message):
+        """What's the converter going to do?"""
+        self.infoWhatText = message
+
+    def set_info_how(self, message):
+        """How's the converter doing?"""
+        self.infoHowText = message
+
+
+class YwCnv():
+    """Converter for yWriter project files.
+    """
+
+    def convert(self, sourceFile, targetFile):
+        """Read document file, convert its content to xml, and replace yWriter file.
+        Return a message beginning with SUCCESS or ERROR.
+        """
+
+        if sourceFile.filePath is None:
+            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" is not of the supported type.'
+
+        if not sourceFile.file_exists():
+            return 'ERROR: "' + os.path.normpath(sourceFile.filePath) + '" not found.'
+
+        if targetFile.filePath is None:
+            return 'ERROR: "' + os.path.normpath(targetFile.filePath) + '" is not of the supported type.'
+
+        if targetFile.file_exists() and not self.confirm_overwrite(targetFile.filePath):
+            return 'Program abort by user.'
+
+        message = sourceFile.read()
+
+        if message.startswith('ERROR'):
+            return message
+
+        message = targetFile.merge(sourceFile)
+
+        if message.startswith('ERROR'):
+            return message
+
+        return targetFile.write()
+
+    def confirm_overwrite(self, fileName):
+        """Hook for subclasses with UI."""
+        return True
+
+
 class YwCnvUi(YwCnv):
     """Standalone yWriter converter with a simple tkinter GUI. 
     """
@@ -6612,16 +6482,13 @@ class YwCnvUi(YwCnv):
     YW_EXTENSIONS = ['.yw5', '.yw6', '.yw7']
 
     def __init__(self):
-        """Set defaults.
-        """
-        self.fileFactory = FileFactory()
         self.userInterface = Ui('yWriter import/export')
         self.success = False
+        self.fileFactory = None
 
-    def run_conversion(self, sourcePath, suffix=None):
+    def run(self, sourcePath, suffix=None):
         """Create source and target objects and run conversion.
         """
-        self.success = False
         message, sourceFile, targetFile = self.fileFactory.get_file_objects(
             sourcePath, suffix)
 
@@ -6708,13 +6575,69 @@ class YwCnvUi(YwCnv):
                 except:
                     pass
 
+from tkinter import *
+from tkinter import messagebox
+
+
+class UiTk(Ui):
+    """UI subclass implementing a Tkinter facade."""
+
+    def __init__(self, title):
+        """Prepare the graphical user interface. """
+
+        self.root = Tk()
+        self.root.geometry("800x360")
+        self.root.title(title)
+        self.header = Label(self.root, text=__doc__)
+        self.header.pack(padx=5, pady=5)
+        self.appInfo = Label(self.root, text='')
+        self.appInfo.pack(padx=5, pady=5)
+        self.successInfo = Label(self.root)
+        self.successInfo.pack(fill=X, expand=1, padx=50, pady=5)
+        self.processInfo = Label(self.root, text='')
+        self.processInfo.pack(padx=5, pady=5)
+
+        self.infoWhatText = ''
+        self.infoHowText = ''
+
+    def ask_yes_no(self, text):
+        return messagebox.askyesno('WARNING', text)
+
+    def set_info_what(self, message):
+        """What's the converter going to do?"""
+
+        self.infoWhatText = message
+        self.appInfo.config(text=message)
+
+    def set_info_how(self, message):
+        """How's the converter doing?"""
+
+        self.infoHowText = message
+        self.processInfo.config(text=message)
+
+        if message.startswith('SUCCESS'):
+            self.successInfo.config(bg='green')
+
+        else:
+            self.successInfo.config(bg='red')
+
+    def show_edit_button(self, edit_cmd):
+        self.root.editButton = Button(text="Edit", command=edit_cmd)
+        self.root.editButton.config(height=1, width=10)
+        self.root.editButton.pack(padx=5, pady=5)
+
+    def finish(self):
+        self.root.quitButton = Button(text="Quit", command=quit)
+        self.root.quitButton.config(height=1, width=10)
+        self.root.quitButton.pack(padx=5, pady=5)
+        self.root.mainloop()
+
 
 class YwCnvTk(YwCnvUi):
     """Standalone yWriter converter with a simple tkinter GUI. 
     """
 
-    def __init__(self, sourcePath, suffix=None, silentMode=False):
-        """Run the converter with a GUI. """
+    def __init__(self, silentMode=False):
 
         if silentMode:
             self.userInterface = Ui('')
@@ -6722,13 +6645,16 @@ class YwCnvTk(YwCnvUi):
         else:
             self.userInterface = UiTk('yWriter import/export')
 
-        self.fileFactory = FileFactory()
-
-        # Run the converter.
-
         self.success = False
-        self.run_conversion(sourcePath, suffix)
+        self.fileFactory = None
+
+    def run(self, sourcePath, suffix=None):
+        """Create source and target objects and run conversion.
+        """
+        YwCnvUi.run(self, sourcePath, suffix)
         self.userInterface.finish()
+import subprocess
+
 
 
 class YwCnvOo(YwCnvTk):
@@ -6737,31 +6663,19 @@ class YwCnvOo(YwCnvTk):
     Can call OpenOffice to edit the conversion result.
     """
 
-    def __init__(self, sourcePath, suffix=None, silentMode=False):
-        """Run the converter with a GUI. """
-
+    def __init__(self, silentMode=False):
         self.userInterface = UiTk('yWriter import/export')
-        self.fileFactory = FileFactory()
-
-        # Run the converter.
-
         self.success = False
         self._newFile = None
-        self.run_conversion(sourcePath, suffix)
+        self.fileFactory = None
+
+    def run(self, sourcePath, suffix=None):
+        YwCnvTk.run(self, sourcePath, suffix)
 
         if self.success:
             self.delete_tempfile(sourcePath)
 
         self.userInterface.finish()
-
-    def export_from_yw(self, sourceFile, targetFile):
-        """Method for conversion from yw to other.
-        """
-        YwCnvTk.export_from_yw(self, sourceFile, targetFile)
-
-        if self.success:
-            self._newFile = targetFile.filePath
-            self.edit()
 
     def edit(self):
 
@@ -6782,6 +6696,26 @@ class YwCnvOo(YwCnvTk):
                 sys.exit(0)
 
 
+class Converter(YwCnvOo):
+    """yWriter converter with a simple tkinter GUI. 
+    Handles temporary files created by OpenOffice.
+    Calls OpenOffice to edit the conversion result.
+    """
+
+    def __init__(self, silentMode=False):
+        YwCnvOo.__init__(self, silentMode)
+        self.fileFactory = UniversalFileFactory()
+
+    def export_from_yw(self, sourceFile, targetFile):
+        """Method for conversion from yw to other.
+        """
+        YwCnvTk.export_from_yw(self, sourceFile, targetFile)
+
+        if self.success:
+            self._newFile = targetFile.filePath
+            self.edit()
+
+
 if __name__ == '__main__':
 
     try:
@@ -6792,7 +6726,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in YwCnvOo.YW_EXTENSIONS:
+    if not FileExtension in Converter.YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 
@@ -6805,4 +6739,4 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-    converter = YwCnvOo(sourcePath, suffix, False)
+    Converter().run(sourcePath, suffix)

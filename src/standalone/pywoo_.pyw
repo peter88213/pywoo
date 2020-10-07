@@ -10,7 +10,29 @@ import os
 import sys
 
 from urllib.parse import unquote
-from openoffice.yw_cnv_win import YwCnvWin
+from pywriter.converter.export_file_factory import ExportFileFactory
+from pywriter.converter.yw_cnv_tk import YwCnvTk
+from openoffice.yw_cnv_oo import YwCnvOo
+
+
+class Converter(YwCnvOo):
+    """yWriter converter with a simple tkinter GUI. 
+    Handles temporary files created by OpenOffice.
+    Can call OpenOffice to edit the conversion result.
+    """
+
+    def __init__(self, silentMode=False):
+        YwCnvOo.__init__(self, silentMode)
+        self.fileFactory = ExportFileFactory()
+
+    def export_from_yw(self, sourceFile, targetFile):
+        """Method for conversion from yw to other.
+        """
+        YwCnvTk.export_from_yw(self, sourceFile, targetFile)
+
+        if self.success:
+            self._newFile = targetFile.filePath
+            self.userInterface.show_edit_button(self.edit)
 
 
 if __name__ == '__main__':
@@ -23,7 +45,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in YwCnvWin.YW_EXTENSIONS:
+    if not FileExtension in Converter.YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 
@@ -36,4 +58,4 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-    converter = YwCnvWin(sourcePath, suffix, False)
+    Converter().run(sourcePath, suffix)

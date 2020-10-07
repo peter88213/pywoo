@@ -10,7 +10,6 @@ import subprocess
 
 from pywriter.converter.ui_tk import UiTk
 from pywriter.converter.yw_cnv_tk import YwCnvTk
-from pywriter.converter.file_factory import FileFactory
 
 
 class YwCnvOo(YwCnvTk):
@@ -19,31 +18,19 @@ class YwCnvOo(YwCnvTk):
     Can call OpenOffice to edit the conversion result.
     """
 
-    def __init__(self, sourcePath, suffix=None, silentMode=False):
-        """Run the converter with a GUI. """
-
+    def __init__(self, silentMode=False):
         self.userInterface = UiTk('yWriter import/export')
-        self.fileFactory = FileFactory()
-
-        # Run the converter.
-
         self.success = False
         self._newFile = None
-        self.run_conversion(sourcePath, suffix)
+        self.fileFactory = None
+
+    def run(self, sourcePath, suffix=None):
+        YwCnvTk.run(self, sourcePath, suffix)
 
         if self.success:
             self.delete_tempfile(sourcePath)
 
         self.userInterface.finish()
-
-    def export_from_yw(self, sourceFile, targetFile):
-        """Method for conversion from yw to other.
-        """
-        YwCnvTk.export_from_yw(self, sourceFile, targetFile)
-
-        if self.success:
-            self._newFile = targetFile.filePath
-            self.edit()
 
     def edit(self):
 
