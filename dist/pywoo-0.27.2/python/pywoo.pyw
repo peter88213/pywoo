@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.27.1
+Version 0.27.2
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -6435,6 +6435,11 @@ class Ui():
     def set_info_how(self, message):
         """How's the converter doing?"""
         self.infoHowText = message
+
+    def finish(self):
+        """To be overwritten by subclasses requiring
+        special action to finish user interaction.
+        """
 
 
 class YwCnv():
