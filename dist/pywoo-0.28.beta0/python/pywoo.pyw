@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.27.3
+Version 0.28.beta0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -4713,8 +4713,8 @@ class OdtManuscript(OdtFile):
 </text:section>
 '''
 
-    sceneDivider = '''<text:p text:style-name="Heading_20_4">* * *</text:p>
-'''
+    sceneDivider = '<text:p ></text:p>'
+    #sceneDivider = '<text:p text:style-name="Heading_20_4">* * *</text:p>'
 
     chapterEndTemplate = '''</text:section>
 '''
@@ -4846,8 +4846,8 @@ class OdtExport(OdtFile):
 </office:annotation>$SceneContent</text:p>
 '''
 
-    sceneDivider = '''<text:p text:style-name="Heading_20_4">* * *</text:p>
-'''
+    sceneDivider = '<text:p ></text:p>'
+    #sceneDivider = '<text:p text:style-name="Heading_20_4">* * *</text:p>'
 
     fileFooter = OdtBuilder.CONTENT_XML_FOOTER
 
