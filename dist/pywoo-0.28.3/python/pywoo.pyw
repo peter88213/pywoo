@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.28.2
+Version 0.28.3
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -6432,10 +6432,6 @@ class UniversalFileFactory(FileFactory):
 
                 if result[0].startswith('SUCCESS'):
                     targetFile = Yw7File(fileName + Yw7File.EXTENSION)
-
-                    if targetFile.file_exists():
-                        return 'ERROR: Target "' + os.path.normpath(targetFile.filePath) + '" already exists.', None, None
-
                     targetFile.ywTreeBuilder = Yw7TreeCreator()
                     targetFile.ywProjectMerger = YwProjectCreator()
 
@@ -6600,14 +6596,14 @@ class YwCnvUi(YwCnv):
     def create_yw7(self, sourceFile, targetFile):
         """Template method for creation of a new yw7 project.
         """
+        self.userInterface.set_info_what(
+            'Create a yWriter project file from ' + sourceFile.DESCRIPTION + '\nNew project: "' + os.path.normpath(targetFile.filePath) + '"')
 
         if targetFile.file_exists():
             self.userInterface.set_info_how(
                 'ERROR: "' + os.path.normpath(targetFile._filePath) + '" already exists.')
 
         else:
-            self.userInterface.set_info_what(
-                'Create a yWriter project file from ' + sourceFile.DESCRIPTION + '\nNew project: "' + os.path.normpath(targetFile.filePath) + '"')
             message = self.convert(sourceFile, targetFile)
             self.userInterface.set_info_how(message)
 
