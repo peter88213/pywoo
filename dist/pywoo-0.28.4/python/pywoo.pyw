@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.28.3
+Version 0.28.4
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -184,8 +184,8 @@ class Novel():
         """
 
     def file_exists(self):
-        """Check whether the file specified by _filePath exists. """
-        if os.path.isfile(self._filePath):
+        """Check whether the file specified by filePath exists. """
+        if os.path.isfile(self.filePath):
             return True
 
         else:
@@ -852,7 +852,7 @@ class YwFile(Novel):
 
                     self.scenes[scId].items.append(itId.text)
 
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self._filePath + '".'
+        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self.filePath + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -1617,7 +1617,7 @@ class AnsiTreeReader(YwTreeReader):
             os.remove(_TEMPFILE)
 
         except:
-            return 'ERROR: Can not process "' + os.path.normpath(ywFile._filePath) + '".'
+            return 'ERROR: Can not process "' + os.path.normpath(ywFile.filePath) + '".'
 
         return 'SUCCESS: XML element tree read in.'
 
@@ -1938,10 +1938,10 @@ class AnsiTreeWriter(YwTreeWriter):
 
         try:
             ywProject._tree.write(
-                ywProject._filePath, xml_declaration=False, encoding='iso-8859-1')
+                ywProject.filePath, xml_declaration=False, encoding='iso-8859-1')
 
         except(PermissionError):
-            return 'ERROR: "' + os.path.normpath(ywProject._filePath) + '" is write protected.'
+            return 'ERROR: "' + os.path.normpath(ywProject.filePath) + '" is write protected.'
 
         return 'SUCCESS'
 
@@ -2080,10 +2080,10 @@ class Utf8TreeReader(YwTreeReader):
         """
 
         try:
-            ywFile._tree = ET.parse(ywFile._filePath)
+            ywFile._tree = ET.parse(ywFile.filePath)
 
         except:
-            return 'ERROR: Can not process "' + os.path.normpath(ywFile._filePath) + '".'
+            return 'ERROR: Can not process "' + os.path.normpath(ywFile.filePath) + '".'
 
         return 'SUCCESS: XML element tree read in.'
 
@@ -2099,10 +2099,10 @@ class Utf8TreeWriter(YwTreeWriter):
 
         try:
             ywProject._tree.write(
-                ywProject._filePath, xml_declaration=False, encoding='utf-8')
+                ywProject.filePath, xml_declaration=False, encoding='utf-8')
 
         except(PermissionError):
-            return 'ERROR: "' + os.path.normpath(ywProject._filePath) + '" is write protected.'
+            return 'ERROR: "' + os.path.normpath(ywProject.filePath) + '" is write protected.'
 
         return 'SUCCESS'
 
@@ -2578,10 +2578,10 @@ class Yw5TreeCreator(Yw5TreeBuilder):
         # Modify xml tree.
 
         try:
-            ywProject._tree = ET.parse(ywProject._filePath)
+            ywProject._tree = ET.parse(ywProject.filePath)
 
         except:
-            return 'ERROR: Can not read xml file "' + ywProject._filePath + '".'
+            return 'ERROR: Can not read xml file "' + ywProject.filePath + '".'
 
         return Yw5TreeBuilder.build_element_tree(self, ywProject)
 
@@ -5147,7 +5147,7 @@ class HtmlFile(Novel, HTMLParser):
         with chapter and scene sections.
         Return a message beginning with SUCCESS or ERROR. 
         """
-        result = read_html_file(self._filePath)
+        result = read_html_file(self.filePath)
 
         if result[0].startswith('ERROR'):
             return (result[0])
@@ -5800,11 +5800,11 @@ class CsvSceneList(CsvFile):
         Return a message beginning with SUCCESS or ERROR.
         """
         try:
-            with open(self._filePath, 'r', encoding='utf-8') as f:
+            with open(self.filePath, 'r', encoding='utf-8') as f:
                 lines = (f.readlines())
 
         except(FileNotFoundError):
-            return 'ERROR: "' + os.path.normpath(self._filePath) + '" not found.'
+            return 'ERROR: "' + os.path.normpath(self.filePath) + '" not found.'
 
         cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
@@ -5930,7 +5930,7 @@ class CsvSceneList(CsvFile):
                             self.scenes[scId].items.append(id)
                 '''
 
-        return 'SUCCESS: Data read from "' + self._filePath + '".'
+        return 'SUCCESS: Data read from "' + self.filePath + '".'
 
 
 
@@ -6041,11 +6041,11 @@ class CsvPlotList(CsvFile):
         Return a message beginning with SUCCESS or ERROR.
         """
         try:
-            with open(self._filePath, 'r', encoding='utf-8') as f:
+            with open(self.filePath, 'r', encoding='utf-8') as f:
                 lines = (f.readlines())
 
         except(FileNotFoundError):
-            return 'ERROR: "' + os.path.normpath(self._filePath) + '" not found.'
+            return 'ERROR: "' + os.path.normpath(self.filePath) + '" not found.'
 
         cellsInLine = len(self.fileHeader.split(self._SEPARATOR))
 
@@ -6108,7 +6108,7 @@ class CsvPlotList(CsvFile):
                 elif tableHeader[i] != self._NOT_APPLICABLE:
                     self.scenes[scId].field4 = '1'
 
-        return 'SUCCESS: Data read from "' + self._filePath + '".'
+        return 'SUCCESS: Data read from "' + self.filePath + '".'
 
 
 
@@ -6136,11 +6136,11 @@ class CsvCharList(CsvFile):
         Return a message beginning with SUCCESS or ERROR.
         """
         try:
-            with open(self._filePath, 'r', encoding='utf-8') as f:
+            with open(self.filePath, 'r', encoding='utf-8') as f:
                 lines = (f.readlines())
 
         except(FileNotFoundError):
-            return 'ERROR: "' + os.path.normpath(self._filePath) + '" not found.'
+            return 'ERROR: "' + os.path.normpath(self.filePath) + '" not found.'
 
         if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
@@ -6172,7 +6172,7 @@ class CsvCharList(CsvFile):
                 self.characters[crId].tags = cell[8].split(';')
                 self.characters[crId].notes = self.convert_to_yw(cell[9])
 
-        return 'SUCCESS: Data read from "' + self._filePath + '".'
+        return 'SUCCESS: Data read from "' + self.filePath + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6207,11 +6207,11 @@ class CsvLocList(CsvFile):
         Return a message beginning with SUCCESS or ERROR.
         """
         try:
-            with open(self._filePath, 'r', encoding='utf-8') as f:
+            with open(self.filePath, 'r', encoding='utf-8') as f:
                 lines = (f.readlines())
 
         except(FileNotFoundError):
-            return 'ERROR: "' + os.path.normpath(self._filePath) + '" not found.'
+            return 'ERROR: "' + os.path.normpath(self.filePath) + '" not found.'
 
         if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
@@ -6232,7 +6232,7 @@ class CsvLocList(CsvFile):
                 self.locations[lcId].aka = cell[3]
                 self.locations[lcId].tags = cell[4].split(';')
 
-        return 'SUCCESS: Data read from "' + self._filePath + '".'
+        return 'SUCCESS: Data read from "' + self.filePath + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6267,11 +6267,11 @@ class CsvItemList(CsvFile):
         Return a message beginning with SUCCESS or ERROR.
         """
         try:
-            with open(self._filePath, 'r', encoding='utf-8') as f:
+            with open(self.filePath, 'r', encoding='utf-8') as f:
                 lines = (f.readlines())
 
         except(FileNotFoundError):
-            return 'ERROR: "' + os.path.normpath(self._filePath) + '" not found.'
+            return 'ERROR: "' + os.path.normpath(self.filePath) + '" not found.'
 
         if lines[0] != self.fileHeader:
             return 'ERROR: Wrong lines content.'
@@ -6292,7 +6292,7 @@ class CsvItemList(CsvFile):
                 self.items[itId].aka = cell[3]
                 self.items[itId].tags = cell[4].split(';')
 
-        return 'SUCCESS: Data read from "' + self._filePath + '".'
+        return 'SUCCESS: Data read from "' + self.filePath + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6601,7 +6601,7 @@ class YwCnvUi(YwCnv):
 
         if targetFile.file_exists():
             self.userInterface.set_info_how(
-                'ERROR: "' + os.path.normpath(targetFile._filePath) + '" already exists.')
+                'ERROR: "' + os.path.normpath(targetFile.filePath) + '" already exists.')
 
         else:
             message = self.convert(sourceFile, targetFile)
