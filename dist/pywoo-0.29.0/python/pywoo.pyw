@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.28.4
+Version 0.29.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -852,7 +852,7 @@ class YwFile(Novel):
 
                     self.scenes[scId].items.append(itId.text)
 
-        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + self.filePath + '".'
+        return 'SUCCESS: ' + str(len(self.scenes)) + ' Scenes read from "' + os.path.normpath(self.filePath) + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -2626,6 +2626,12 @@ class OdtBuilder():
    <style:section-properties style:editable="false">
     <style:columns fo:column-count="1" fo:column-gap="0cm"/>
    </style:section-properties>
+  </style:style>
+  <style:style style:name="T1" style:family="text">
+   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/>
+  </style:style>
+  <style:style style:name="T2" style:family="text">
+   <style:text-properties style:text-line-through-style="solid" style:text-line-through-type="single"/>
   </style:style>
  </office:automatic-styles>
  <office:body>
@@ -4544,6 +4550,10 @@ class OdtFile(FileExport, OdtBuilder):
             ['[/i]', '</text:span>'],
             ['[b]', '<text:span text:style-name="Strong_20_Emphasis">'],
             ['[/b]', '</text:span>'],
+            ['[u]', '<text:span text:style-name="T1">'],
+            ['[/u]', '</text:span>'],
+            ['[s]', '<text:span text:style-name="T2">'],
+            ['[/s]', '</text:span>'],
             ['/*', '<office:annotation><dc:creator>' +
                 self.author + '</dc:creator><text:p>'],
             ['*/', '</text:p></office:annotation>'],
@@ -4590,6 +4600,10 @@ class OdtFile(FileExport, OdtBuilder):
 
             for r in ODT_REPLACEMENTS:
                 text = text.replace(r[0], r[1])
+
+            # Remove highlighting and alignment tags.
+
+            text = re.sub('\[\/*[h|c|r]\d*\]', '', text)
 
         except AttributeError:
             text = ''
@@ -5040,7 +5054,7 @@ def read_html_file(filePath):
 
 
 class HtmlFile(Novel, HTMLParser):
-    """HTML file representation of an yWriter project's part.
+    """Abstract HTML file representation.
     """
 
     EXTENSION = '.html'
@@ -5079,6 +5093,14 @@ class HtmlFile(Novel, HTMLParser):
         text = text.replace('<I>', '[i]')
         text = text.replace('</i>', '[/i]')
         text = text.replace('</I>', '[/i]')
+        text = text.replace('<strike>', '[s]')
+        text = text.replace('<STRIKE>', '[s]')
+        text = text.replace('</strike>', '[/s]')
+        text = text.replace('</STRIKE>', '[/s]')
+        text = text.replace('<u>', '[u]')
+        text = text.replace('<U>', '[u]')
+        text = text.replace('</u>', '[/u]')
+        text = text.replace('</U>', '[/u]')
         text = text.replace('</em>', '[/i]')
         text = text.replace('</EM>', '[/i]')
         text = text.replace('<b>', '[b]')
@@ -5110,22 +5132,30 @@ class HtmlFile(Novel, HTMLParser):
         return text
 
     def preprocess(self, text):
-        """Strip yWriter 6/7 raw markup. Return a plain text string."""
-
+        """Clean up the HTML code and strip yWriter 6/7 raw markup. 
+        This prevents accidentally applied formatting from being 
+        transferred to the yWriter metadata. If rich text is 
+        applicable, such as in scenes, overwrite this method 
+        in a subclass) 
+        """
         text = self.convert_to_yw(text)
-        text = text.replace('[i]', '')
-        text = text.replace('[/i]', '')
-        text = text.replace('[b]', '')
-        text = text.replace('[/b]', '')
+
+        # Remove misplaced formatting tags.
+
+        text = re.sub('\[\/*[b|i|s|u]\]', '', text)
         return text
 
     def postprocess(self):
         """Process the plain text after parsing.
+        This is a hook for subclasses.
         """
 
     def handle_starttag(self, tag, attrs):
         """Identify scenes and chapters.
-        Overwrites HTMLparser.handle_starttag()
+        Overwrites HTMLparser.handle_starttag().
+        This method is applicable to HTML files that are divided into 
+        chapters and scenes. For differently structured HTML files 
+        overwrite this method in a subclass.
         """
         if tag == 'div':
 
@@ -5143,9 +5173,10 @@ class HtmlFile(Novel, HTMLParser):
                     self.srtChapters.append(self._chId)
 
     def read(self):
-        """Read scene content from a html file 
-        with chapter and scene sections.
-        Return a message beginning with SUCCESS or ERROR. 
+        """Read and parse a html file, fetching the Novel attributes.
+        Return a message beginning with SUCCESS or ERROR.
+        This is a template method for subclasses tailored to the 
+        content of the respective HTML file.
         """
         result = read_html_file(self.filePath)
 
@@ -5581,10 +5612,12 @@ class HtmlImport(HtmlFile):
                 self.scenes[self._scId].sceneContent = ''.join(self._lines)
 
                 if self.scenes[self._scId].wordCount < self._LOW_WORDCOUNT:
-                    self.scenes[self._scId].status = 1
+                    self.scenes[self._scId].status = Scene.STATUS.index(
+                        'Outline')
 
                 else:
-                    self.scenes[self._scId].status = 2
+                    self.scenes[self._scId].status = Scene.STATUS.index(
+                        'Draft')
 
         elif tag in ('h1', 'h2'):
             self.chapters[self._chId].title = ''.join(self._lines)
@@ -5645,7 +5678,7 @@ class HtmlOutline(HtmlFile):
             self.scenes[self._scId] = Scene()
             self.chapters[self._chId].srtScenes.append(self._scId)
             self.scenes[self._scId].sceneContent = ''
-            self.scenes[self._scId].status = '1'
+            self.scenes[self._scId].status = Scene.STATUS.index('Outline')
 
         elif tag == 'div':
             self._scId = None
@@ -5930,7 +5963,7 @@ class CsvSceneList(CsvFile):
                             self.scenes[scId].items.append(id)
                 '''
 
-        return 'SUCCESS: Data read from "' + self.filePath + '".'
+        return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
 
 
@@ -6108,7 +6141,7 @@ class CsvPlotList(CsvFile):
                 elif tableHeader[i] != self._NOT_APPLICABLE:
                     self.scenes[scId].field4 = '1'
 
-        return 'SUCCESS: Data read from "' + self.filePath + '".'
+        return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
 
 
@@ -6172,7 +6205,7 @@ class CsvCharList(CsvFile):
                 self.characters[crId].tags = cell[8].split(';')
                 self.characters[crId].notes = self.convert_to_yw(cell[9])
 
-        return 'SUCCESS: Data read from "' + self.filePath + '".'
+        return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6232,7 +6265,7 @@ class CsvLocList(CsvFile):
                 self.locations[lcId].aka = cell[3]
                 self.locations[lcId].tags = cell[4].split(';')
 
-        return 'SUCCESS: Data read from "' + self.filePath + '".'
+        return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6292,7 +6325,7 @@ class CsvItemList(CsvFile):
                 self.items[itId].aka = cell[3]
                 self.items[itId].tags = cell[4].split(';')
 
-        return 'SUCCESS: Data read from "' + self.filePath + '".'
+        return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
     def merge(self, novel):
         """Copy required attributes of the novel object.
@@ -6744,10 +6777,7 @@ class YwCnvOo(YwCnvTk):
         self.fileFactory = None
 
     def finish(self, sourcePath):
-
-        if self.success:
-            self.delete_tempfile(sourcePath)
-
+        self.delete_tempfile(sourcePath)
         self.userInterface.finish()
 
     def edit(self):
