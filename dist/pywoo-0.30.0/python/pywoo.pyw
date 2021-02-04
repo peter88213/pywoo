@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or csv and vice versa. 
 
-Version 0.29.0
+Version 0.30.0
 
 Copyright (c) 2020 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -2627,12 +2627,6 @@ class OdtBuilder():
     <style:columns fo:column-count="1" fo:column-gap="0cm"/>
    </style:section-properties>
   </style:style>
-  <style:style style:name="T1" style:family="text">
-   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/>
-  </style:style>
-  <style:style style:name="T2" style:family="text">
-   <style:text-properties style:text-line-through-style="solid" style:text-line-through-type="single"/>
-  </style:style>
  </office:automatic-styles>
  <office:body>
   <office:text text:use-soft-page-breaks="true">
@@ -4550,10 +4544,6 @@ class OdtFile(FileExport, OdtBuilder):
             ['[/i]', '</text:span>'],
             ['[b]', '<text:span text:style-name="Strong_20_Emphasis">'],
             ['[/b]', '</text:span>'],
-            ['[u]', '<text:span text:style-name="T1">'],
-            ['[/u]', '</text:span>'],
-            ['[s]', '<text:span text:style-name="T2">'],
-            ['[/s]', '</text:span>'],
             ['/*', '<office:annotation><dc:creator>' +
                 self.author + '</dc:creator><text:p>'],
             ['*/', '</text:p></office:annotation>'],
@@ -4601,9 +4591,10 @@ class OdtFile(FileExport, OdtBuilder):
             for r in ODT_REPLACEMENTS:
                 text = text.replace(r[0], r[1])
 
-            # Remove highlighting and alignment tags.
+            # Remove highlighting, alignment,
+            # strikethrough, and underline tags.
 
-            text = re.sub('\[\/*[h|c|r]\d*\]', '', text)
+            text = re.sub('\[\/*[h|c|r|s|u]\d*\]', '', text)
 
         except AttributeError:
             text = ''
@@ -5093,14 +5084,6 @@ class HtmlFile(Novel, HTMLParser):
         text = text.replace('<I>', '[i]')
         text = text.replace('</i>', '[/i]')
         text = text.replace('</I>', '[/i]')
-        text = text.replace('<strike>', '[s]')
-        text = text.replace('<STRIKE>', '[s]')
-        text = text.replace('</strike>', '[/s]')
-        text = text.replace('</STRIKE>', '[/s]')
-        text = text.replace('<u>', '[u]')
-        text = text.replace('<U>', '[u]')
-        text = text.replace('</u>', '[/u]')
-        text = text.replace('</U>', '[/u]')
         text = text.replace('</em>', '[/i]')
         text = text.replace('</EM>', '[/i]')
         text = text.replace('<b>', '[b]')
@@ -5142,7 +5125,7 @@ class HtmlFile(Novel, HTMLParser):
 
         # Remove misplaced formatting tags.
 
-        text = re.sub('\[\/*[b|i|s|u]\]', '', text)
+        text = re.sub('\[\/*[b|i]\]', '', text)
         return text
 
     def postprocess(self):
