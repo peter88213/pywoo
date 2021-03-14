@@ -18,6 +18,12 @@
 
 ## Changelog
 
+### v0.31.0 Import/export csv lists
+
+Import/export character/location/item lists to/from Calc spreadsheets. Rows may be added, deleted and re-ordered.
+
+Based on PyWriter v2.10.0
+
 ### v0.30.0 Underline and strikethrough no longer supported
 
 That is because a real support would require considering nesting and multi paragraph formatting. That would make everything too complicated, considering that such formatting is not common in a fictional prose text.
