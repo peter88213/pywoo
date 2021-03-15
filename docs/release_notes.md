@@ -18,6 +18,12 @@
 
 ## Changelog
 
+### v0.32.0 Import ods spreadsheets
+
+Change character/location/item list export from csv to ods file format.
+
+Based on PyWriter v2.11.0
+
 ### v0.31.0 Import/export csv lists
 
 Import/export character/location/item lists to/from Calc spreadsheets. Rows may be added, deleted and re-ordered.
