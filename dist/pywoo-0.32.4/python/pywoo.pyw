@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.32.3
+Version 0.32.4
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -13,10 +13,11 @@ from urllib.parse import unquote
 
 
 
+from abc import ABC
 from abc import abstractmethod
 
 
-class FileFactory():
+class FileFactory(ABC):
     """Abstract factory class that instantiates a source file object
     and a target file object for conversion.
     """
@@ -33,7 +34,6 @@ class FileFactory():
 
 
 
-from abc import abstractmethod
 from urllib.parse import quote
 
 
@@ -168,35 +168,35 @@ class Novel():
             self.projectName = quote(tail.replace(
                 suffix + self.EXTENSION, ''))
 
-    @abstractmethod
     def read(self):
         """Parse the file and store selected properties.
         To be overwritten by file format specific subclasses.
         """
+        return 'ERROR: read method is not implemented.'
 
-    @abstractmethod
     def merge(self, novel):
         """Copy required attributes of the novel object.
         To be overwritten by file format specific subclasses.
         """
+        return 'ERROR: merge method is not implemented.'
 
-    @abstractmethod
     def write(self):
         """Write selected properties to the file.
         To be overwritten by file format specific subclasses.
         """
+        return 'ERROR: write method is not implemented.'
 
-    @abstractmethod
     def convert_to_yw(self, text):
         """Convert source format to yw7 markup.
         To be overwritten by file format specific subclasses.
         """
+        return text
 
-    @abstractmethod
     def convert_from_yw(self, text):
         """Convert yw7 markup to target format.
         To be overwritten by file format specific subclasses.
         """
+        return text
 
     def file_exists(self):
         """Check whether the file specified by filePath exists. """
@@ -927,16 +927,12 @@ class YwFile(Novel):
             return False
 
 
-
 import xml.etree.ElementTree as ET
-
-from abc import abstractmethod
 
 
 class YwTreeBuilder():
     """Build yWriter project xml tree."""
 
-    @abstractmethod
     def build_element_tree(self, ywProject):
         """Modify the yWriter project attributes of an existing xml element tree.
         Return a message beginning with SUCCESS or ERROR.
@@ -1568,11 +1564,11 @@ class Yw5TreeBuilder(YwTreeBuilder):
 
         return YwTreeBuilder.build_element_tree(self, ywProject)
 
-
+from abc import ABC
 from abc import abstractmethod
 
 
-class YwTreeReader():
+class YwTreeReader(ABC):
     """Read yWriter xml project file."""
 
     @abstractmethod
@@ -2003,11 +1999,11 @@ class YwProjectMerger():
         else:
             return 'SUCCESS'
 
-
+from abc import ABC
 from abc import abstractmethod
 
 
-class YwTreeWriter():
+class YwTreeWriter(ABC):
     """Write yWriter 7 xml project file."""
 
     @abstractmethod
@@ -2035,12 +2031,12 @@ class AnsiTreeWriter(YwTreeWriter):
 
         return 'SUCCESS'
 
-
-from html import unescape
+from abc import ABC
 from abc import abstractmethod
+from html import unescape
 
 
-class YwPostprocessor():
+class YwPostprocessor(ABC):
 
     @abstractmethod
     def postprocess_xml_file(self, ywFile):
@@ -5841,15 +5837,10 @@ class CsvFile(FileExport):
     _SEPARATOR = '|'
     # delimits data fields within a record.
 
-    _LINEBREAK = '\t'
-    # substitutes embedded line breaks.
-
     _LIST_SEPARATOR = ','
     # delimits items listed within a data field
 
-    CSV_REPLACEMENTS = [
-        ['\n', _LINEBREAK],
-    ]
+    CSV_REPLACEMENTS = []
 
     def convert_from_yw(self, text):
         """Convert line breaks."""
@@ -5931,8 +5922,8 @@ class CsvSceneList(CsvFile):
 '''
 
     sceneTemplate = '''=HYPERLINK("file:///$ProjectPath/${ProjectName}_manuscript.odt#ScID:$ID%7Cregion";"ScID:$ID")|''' +\
-        '''$Title|$Desc|$Tags|$Notes|''' +\
-        '''$ReactionScene|$Goal|$Conflict|$Outcome|''' +\
+        '''$Title|"$Desc"|$Tags|"$Notes"|''' +\
+        '''$ReactionScene|"$Goal"|"$Conflict"|"$Outcome"|''' +\
         '''$SceneNumber|$WordsTotal|$Field1|$Field2|$Field3|$Field4|''' +\
         '''$WordCount|$LetterCount|$Status|''' +\
         '''$Characters|$Locations|$Items
@@ -6126,7 +6117,7 @@ class CsvPlotList(CsvFile):
 '''
 
     sceneTemplate = '''=HYPERLINK("file:///$ProjectPath/${ProjectName}_manuscript.odt#ScID:$ID%7Cregion";"ScID:$ID")|''' +\
-        '''|$Tags|$Title|$Notes|''' +\
+        '''|$Tags|$Title|"$Notes"|''' +\
         '''$SceneNumber|$WordsTotal|$Field1|$Field2|$Field3|$Field4
 '''
 
@@ -6275,7 +6266,7 @@ class CsvCharList(CsvFile):
     fileHeader = '''ID|Name|Full name|Aka|Description|Bio|Goals|Importance|Tags|Notes
 '''
 
-    characterTemplate = '''CrID:$ID|$Title|$FullName|$AKA|$Desc|$Bio|$Goals|$Status|$Tags|$Notes
+    characterTemplate = '''CrID:$ID|$Title|$FullName|$AKA|"$Desc"|"$Bio"|"$Goals"|$Status|$Tags|"$Notes"
 '''
 
     def read(self):
@@ -6337,7 +6328,7 @@ class CsvLocList(CsvFile):
     fileHeader = '''ID|Name|Description|Aka|Tags
 '''
 
-    locationTemplate = '''LcID:$ID|$Title|$Desc|$AKA|$Tags
+    locationTemplate = '''LcID:$ID|$Title|"$Desc"|$AKA|$Tags
 '''
 
     def read(self):
@@ -6387,7 +6378,7 @@ class CsvItemList(CsvFile):
     fileHeader = '''ID|Name|Description|Aka|Tags
 '''
 
-    itemTemplate = '''ItID:$ID|$Title|$Desc|$AKA|$Tags
+    itemTemplate = '''ItID:$ID|$Title|"$Desc"|$AKA|$Tags
 '''
 
     def read(self):
