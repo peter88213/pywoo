@@ -92,7 +92,6 @@ An outline has at least one third level heading.
 * OpenOffice 3.0 or more recent. 
 * Python 3.4 or more recent.
 * Java Runtime Environment (OpenOffice needs it for macro execution).
-* yWriter 7. 
 
 ## Credits
 

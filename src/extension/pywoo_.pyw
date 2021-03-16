@@ -1,4 +1,4 @@
-"""Convert yWriter project to odt or csv and vice versa. 
+"""Convert yWriter project to odt or ods and vice versa. 
 
 Version @release
 
