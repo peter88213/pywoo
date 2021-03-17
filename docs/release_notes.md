@@ -1,11 +1,8 @@
 ## OpenOffice extension (a Python 3.4+ installation is required).
 
-* Download the `.oxt` file.
-
-* Install it using the OpenOffice extension manager.
-
+* Download the `.oxt` file (Scroll down this page to _Assets_).
+* Install it either by double-clicking or using the LibreOffice extension manager. Instructions can be found here: https://wiki.documentfoundation.org/Documentation/HowTo/install_extension
 * After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.
-
 * If no additional "yWriter Import/Export" submenu shows up in the "Files" menu, please look at the "Tools" > "Extensions" menu.
 
 ## Requirements
@@ -13,8 +10,6 @@
 * Windows.
 * OpenOffice 3.0 or more recent.   __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring Python can be found here: https://github.com/peter88213/yw-cnv_
 * Python 3.4 or more recent.
-* Java Runtime Environment (OpenOffice needs it for macro execution).
-* yWriter 7. 
 
 ## Changelog
 

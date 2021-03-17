@@ -1,6 +1,6 @@
 # The pywoo extension for OpenOffice: Import and export yWriter 6/7 projects
 
-![Screenshot: Menu in LibreOffice](https://raw.githubusercontent.com/peter88213/yw-cnv/master/docs/Screenshots/lo_menu.png)
+![Screenshot: Menu in LibreOffice](https://raw.githubusercontent.com/peter88213/pywoo/master/docs/Screenshots/lo_menu.png)
 
 ## Features (a Python 3 installation is required)
 
