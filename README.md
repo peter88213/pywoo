@@ -20,7 +20,7 @@ Generate a "standard manuscript" formatted OpenDocument textfile from an yWriter
 * Text passages embraced in slashes and asterisks like `/* this is a comment */` are converted to author's comments.
 
 
-### yWriter5 style proof reading
+### Proof reading
 
 #### Load yWriter 6/7 chapters and scenes into an OpenDocument file with chapter and scene markers. 
 
