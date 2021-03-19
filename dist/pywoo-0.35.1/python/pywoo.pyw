@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.35.0
+Version 0.35.1
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -7781,6 +7781,9 @@ class UniversalFileFactory(FileFactory):
 
             elif sourcePath.endswith(HtmlItems.SUFFIX + HtmlItems.EXTENSION):
                 sourceFile = HtmlItems(sourcePath)
+
+            if (OdtXref.SUFFIX + '.' in sourcePath):
+                return 'ERROR: Cross references are not meant to be written back.', None, None
 
             elif sourcePath.endswith('.html'):
 

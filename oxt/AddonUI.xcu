@@ -131,7 +131,7 @@
                               <value/>
                            </prop>
                            <prop oor:name="Title" oor:type="xs:string">
-                              <value xml:lang="en">Cross reference</value>
+                              <value xml:lang="en">Cross references</value>
                               <value xml:lang="de">Querverweise</value>
                            </prop>
                            <prop oor:name="URL" oor:type="xs:string">
@@ -452,7 +452,7 @@
                      <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Cross reference</value>
+                     <value xml:lang="en">Cross references</value>
                      <value xml:lang="de">Querverweise</value>
                   </prop>
                   <prop oor:name="URL" oor:type="xs:string">
