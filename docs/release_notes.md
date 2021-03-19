@@ -13,7 +13,9 @@
 
 ## Changelog
 
-### v0.34.0 Add advanced features to the "Files" menu
+### v0.34.0 Fix a bug and add advanced features to the "Files" menu
+
+* Fix a macro bug causing a crash if no file is selected in the file picker dialog.
 
 The "advanced features" are meant to be used by experienced OpenOffice users only. If you aren't familiar with Calc and the concept of sections in Writer, please do not use the advanced features. There is a risk of damaging the project when writing back if you don't respect the section boundaries in the odt text documents, or if you mess up the IDs in the ods tables.
 
