@@ -4,7 +4,7 @@
 
 &apos; OpenYw - OpenOffice macro for yWriter file import
 &apos;
-&apos; Copyright (c) 2020 Peter Triesberger
+&apos; Copyright (c) 2021 Peter Triesberger
 &apos; For further information see https://github.com/peter88213/pywoo
 &apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
@@ -45,23 +45,27 @@ Sub get_itemdesc
 End Sub
 
 Sub get_scenelist
-    open_yw(&quot;_scenelist&quot;, &quot;.csv&quot;)
+    open_yw(&quot;_scenelist&quot;, &quot;.ods&quot;)
 End Sub
 
 Sub get_charlist
-    open_yw(&quot;_charlist&quot;, &quot;.csv&quot;)
+    open_yw(&quot;_charlist&quot;, &quot;.ods&quot;)
 End Sub
 
 Sub get_loclist
-    open_yw(&quot;_loclist&quot;, &quot;.csv&quot;)
+    open_yw(&quot;_loclist&quot;, &quot;.ods&quot;)
 End Sub
 
 Sub get_itemlist
-    open_yw(&quot;_itemlist&quot;, &quot;.csv&quot;)
+    open_yw(&quot;_itemlist&quot;, &quot;.ods&quot;)
 End Sub
 
 Sub get_plotlist
-    open_yw(&quot;_plotlist&quot;, &quot;.csv&quot;)
+    open_yw(&quot;_plotlist&quot;, &quot;.ods&quot;)
+End Sub
+
+Sub get_crossreference
+    open_yw(&quot;_xref&quot;, &quot;.odt&quot;)
 End Sub
 
 

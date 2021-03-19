@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.34.0
+Version 0.35.0
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -2719,10 +2719,129 @@ class FileExport(Novel):
     unusedChapterEndTemplate = ''
     notExportedChapterEndTemplate = ''
     notesChapterEndTemplate = ''
+    characterTagsTemplate = ''
+    locationTagsTemplate = ''
+    itemTagsTemplate = ''
+    scnTagsTemplate = ''
     characterTemplate = ''
     locationTemplate = ''
     itemTemplate = ''
     fileFooter = ''
+
+    def __init__(self, filePath):
+        Novel.__init__(self, filePath)
+
+        # Cross reference dictionaries:
+
+        self.chrScnXref = {}
+        # Scenes per character
+
+        self.locScnXref = {}
+        # Scenes per location
+
+        self.itmScnXref = {}
+        # Scenes per item
+
+        self.tagsScXref = {}
+        # Scenes per tag
+
+        self.tagsCrXref = {}
+        # Characters per tag
+
+        self.tagsLcXref = {}
+        # Locations per tag
+
+        self.tagsItXref = {}
+        # Items per tag
+
+    def make_xref(self):
+        """Generate cross references
+        """
+        self.chrScnXref = {}
+        self.locScnXref = {}
+        self.itmScnXref = {}
+        self.tagsScXref = {}
+        self.tagsCrXref = {}
+        self.tagsLcXref = {}
+        self.tagsItXref = {}
+
+        # Characters per tag:
+
+        for crId in self.srtCharacters:
+            self.chrScnXref[crId] = []
+
+            if self.characters[crId].tags:
+
+                for tag in self.characters[crId].tags:
+
+                    if not tag in self.tagsCrXref:
+                        self.tagsCrXref[tag] = []
+
+                    self.tagsCrXref[tag].append(crId)
+
+        # Locations per tag:
+
+        for lcId in self.srtLocations:
+            self.locScnXref[lcId] = []
+
+            if self.locations[lcId].tags:
+
+                for tag in self.locations[lcId].tags:
+
+                    if not tag in self.tagsLcXref:
+                        self.tagsLcXref[tag] = []
+
+                    self.tagsLcXref[tag].append(lcId)
+
+        # Items per tag:
+
+        for itId in self.srtItems:
+            self.itmScnXref[itId] = []
+
+            if self.items[itId].tags:
+
+                for tag in self.items[itId].tags:
+
+                    if not tag in self.tagsItXref:
+                        self.tagsItXref[tag] = []
+
+                    self.tagsItXref[tag].append(itId)
+
+        for chId in self.srtChapters:
+
+            for scId in self.chapters[chId].srtScenes:
+
+                # Scenes per character:
+
+                if self.scenes[scId].characters:
+
+                    for crId in self.scenes[scId].characters:
+                        self.chrScnXref[crId].append(scId)
+
+                # Scenes per location:
+
+                if self.scenes[scId].locations:
+
+                    for lcId in self.scenes[scId].locations:
+                        self.locScnXref[lcId].append(scId)
+
+                # Scenes per item:
+
+                if self.scenes[scId].items:
+
+                    for itId in self.scenes[scId].items:
+                        self.itmScnXref[itId].append(scId)
+
+                # Scenes per tag:
+
+                if self.scenes[scId].tags:
+
+                    for tag in self.scenes[scId].tags:
+
+                        if not tag in self.tagsScXref:
+                            self.tagsScXref[tag] = []
+
+                        self.tagsScXref[tag].append(scId)
 
     def convert_from_yw(self, text):
         """Convert yw7 markup to target format.
@@ -2946,6 +3065,17 @@ class FileExport(Novel):
         """Return a mapping dictionary for a character section. 
         """
 
+        if self.chrScnXref[crId] != []:
+            scenelist = []
+
+            for scId in self.chrScnXref[crId]:
+                scenelist.append(self.scenes[scId].title)
+
+            scenes = '\n'.join(scenelist)
+
+        else:
+            scenes = ''
+
         if self.characters[crId].tags is not None:
             tags = ', '.join(self.characters[crId].tags)
 
@@ -2970,6 +3100,7 @@ class FileExport(Novel):
             FullName=FileExport.convert_from_yw(
                 self, self.characters[crId].fullName),
             Status=characterStatus,
+            Scenes=scenes,
         )
 
         for key in characterMapping:
@@ -2981,6 +3112,17 @@ class FileExport(Novel):
     def get_locationMapping(self, lcId):
         """Return a mapping dictionary for a location section. 
         """
+
+        if self.locScnXref[lcId] != []:
+            scenelist = []
+
+            for scId in self.locScnXref[lcId]:
+                scenelist.append(self.scenes[scId].title)
+
+            scenes = '\n'.join(scenelist)
+
+        else:
+            scenes = ''
 
         if self.locations[lcId].tags is not None:
             tags = ', '.join(self.locations[lcId].tags)
@@ -2994,6 +3136,7 @@ class FileExport(Novel):
             Desc=self.convert_from_yw(self.locations[lcId].desc),
             Tags=tags,
             AKA=FileExport.convert_from_yw(self, self.locations[lcId].aka),
+            Scenes=scenes,
         )
 
         for key in locationMapping:
@@ -3005,6 +3148,17 @@ class FileExport(Novel):
     def get_itemMapping(self, itId):
         """Return a mapping dictionary for an item section. 
         """
+
+        if self.itmScnXref[itId] != []:
+            scenelist = []
+
+            for scId in self.itmScnXref[itId]:
+                scenelist.append(self.scenes[scId].title)
+
+            scenes = '\n'.join(scenelist)
+
+        else:
+            scenes = ''
 
         if self.items[itId].tags is not None:
             tags = ', '.join(self.items[itId].tags)
@@ -3018,6 +3172,7 @@ class FileExport(Novel):
             Desc=self.convert_from_yw(self.items[itId].desc),
             Tags=tags,
             AKA=FileExport.convert_from_yw(self, self.items[itId].aka),
+            Scenes=scenes,
         )
 
         for key in itemMapping:
@@ -3025,6 +3180,34 @@ class FileExport(Novel):
                 itemMapping[key] = ''
 
         return itemMapping
+
+    def get_tagMapping(self, tag, xref, elements):
+        """Return a mapping dictionary for a tags section. 
+        xref: Cross reference dictionary.
+        elements: dictionary of tagged elements.
+        """
+
+        try:
+            titlelist = []
+
+            for elementId in xref:
+                titlelist.append(elements[elementId].title)
+
+            titles = '\n'.join(titlelist)
+
+        except:
+            titles = ''
+
+        tagMapping = dict(
+            Tag=tag,
+            Elements=titles,
+        )
+
+        for key in tagMapping:
+            if tagMapping[key] is None:
+                tagMapping[key] = ''
+
+        return tagMapping
 
     def write(self):
         """Create a template-based output file. 
@@ -3035,6 +3218,8 @@ class FileExport(Novel):
         lettersTotal = 0
         chapterNumber = 0
         sceneNumber = 0
+
+        self.make_xref()
 
         template = Template(self.fileHeader)
         lines.append(template.safe_substitute(
@@ -3179,22 +3364,60 @@ class FileExport(Novel):
             elif self.chapterEndTemplate != '':
                 lines.append(self.chapterEndTemplate)
 
+        # Scene tags
+
+        for tag in self.tagsScXref:
+            template = Template(self.scnTagsTemplate)
+            lines.append(template.safe_substitute(
+                self.get_tagMapping(tag, self.tagsScXref[tag], self.scenes)))
+
+        # Characters
+
         for crId in self.srtCharacters:
             template = Template(self.characterTemplate)
             lines.append(template.safe_substitute(
                 self.get_characterMapping(crId)))
+
+        # Locations
 
         for lcId in self.srtLocations:
             template = Template(self.locationTemplate)
             lines.append(template.safe_substitute(
                 self.get_locationMapping(lcId)))
 
+        # Items
+
         for itId in self.srtItems:
             template = Template(self.itemTemplate)
             lines.append(template.safe_substitute(self.get_itemMapping(itId)))
 
+        # Character tags
+
+        for tag in self.tagsCrXref:
+            template = Template(self.characterTagsTemplate)
+            lines.append(template.safe_substitute(
+                self.get_tagMapping(tag, self.tagsCrXref[tag], self.characters)))
+
+        # Location tags
+
+        for tag in self.tagsLcXref:
+            template = Template(self.locationTagsTemplate)
+            lines.append(template.safe_substitute(
+                self.get_tagMapping(tag, self.tagsLcXref[tag], self.locations)))
+
+        # Item tags
+
+        for tag in self.tagsItXref:
+            template = Template(self.itemTagsTemplate)
+            lines.append(template.safe_substitute(
+                self.get_tagMapping(tag, self.tagsItXref[tag], self.items)))
+
+        # Assemble the whole text...
+
         lines.append(self.fileFooter)
         text = ''.join(lines)
+
+        # Write the file...
 
         try:
             with open(self.filePath, 'w', encoding='utf-8') as f:
@@ -5124,6 +5347,66 @@ class OdtLocations(OdtFile):
             locationMapping['AKA'] = ' ("' + self.locations[lcId].aka + '")'
 
         return locationMapping
+
+
+class OdtXref(OdtFile):
+    """OpenDocument xml cross reference file representation.
+    """
+
+    DESCRIPTION = 'Cross reference'
+    SUFFIX = '_xref'
+
+    fileHeader = OdtFile.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+<text:p text:style-name="Subtitle">$AuthorName</text:p>
+'''
+
+    characterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Scenes with Character $Title:</text:h><text:p text:style-name="Hanging_20_indent">$Scenes</text:p>
+'''
+    locationTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Scenes with Location $Title:</text:h><text:p text:style-name="Hanging_20_indent">$Scenes</text:p>
+'''
+    itemTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Scenes with Item $Title:</text:h><text:p text:style-name="Hanging_20_indent">$Scenes</text:p>
+'''
+    characterTagsTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Characters tagged $Tag:</text:h><text:p text:style-name="Hanging_20_indent">$Elements</text:p>
+'''
+    locationTagsTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Locations tagged $Tag:</text:h><text:p text:style-name="Hanging_20_indent">$Elements</text:p>
+'''
+    itemTagsTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Items tagged $Tag:</text:h><text:p text:style-name="Hanging_20_indent">$Elements</text:p>
+'''
+    scnTagsTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">Scenes tagged $Tag:</text:h><text:p text:style-name="Hanging_20_indent">$Elements</text:p>
+'''
+    fileFooter = OdtFile.CONTENT_XML_FOOTER
+
+    def get_characterMapping(self, crId):
+        """Return a mapping dictionary for a character section. 
+        """
+        characterMapping = OdtFile.get_characterMapping(self, crId)
+        characterMapping['Scenes'] = characterMapping['Scenes'].replace(
+            '\n', '</text:p><text:p text:style-name="Hanging_20_indent">')
+        return characterMapping
+
+    def get_locationMapping(self, lcId):
+        """Return a mapping dictionary for a location section. 
+        """
+        locationMapping = OdtFile.get_locationMapping(self, lcId)
+        locationMapping['Scenes'] = locationMapping['Scenes'].replace(
+            '\n', '</text:p><text:p text:style-name="Hanging_20_indent">')
+        return locationMapping
+
+    def get_itemMapping(self, itId):
+        """Return a mapping dictionary for a item section. 
+        """
+        itemMapping = OdtFile.get_itemMapping(self, itId)
+        itemMapping['Scenes'] = itemMapping['Scenes'].replace(
+            '\n', '</text:p><text:p text:style-name="Hanging_20_indent">')
+        return itemMapping
+
+    def get_tagMapping(self, tag, xref, elements):
+        """Return a mapping dictionary for a tag section. 
+        """
+        tagMapping = OdtFile.get_tagMapping(self, tag, xref, elements)
+        tagMapping['Elements'] = tagMapping['Elements'].replace(
+            '\n', '</text:p><text:p text:style-name="Hanging_20_indent">')
+        return tagMapping
 
 
 
@@ -7443,6 +7726,9 @@ class UniversalFileFactory(FileFactory):
 
             elif suffix == OdtItems.SUFFIX:
                 targetFile = OdtItems(fileName + suffix + OdtItems.EXTENSION)
+
+            elif suffix == OdtXref.SUFFIX:
+                targetFile = OdtXref(fileName + suffix + OdtXref.EXTENSION)
 
             elif suffix == OdsSceneList.SUFFIX:
                 targetFile = OdsSceneList(
