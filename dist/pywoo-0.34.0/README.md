@@ -1,6 +1,6 @@
 # The pywoo extension for OpenOffice: Import and export yWriter 6/7 projects
 
-![Screenshot: Menu in LibreOffice](https://raw.githubusercontent.com/peter88213/yw-cnv/master/docs/Screenshots/lo_menu.png)
+![Screenshot: Menu in LibreOffice](https://raw.githubusercontent.com/peter88213/pywoo/master/docs/Screenshots/lo_menu.png)
 
 ## Features (a Python 3 installation is required)
 
@@ -20,7 +20,7 @@ Generate a "standard manuscript" formatted OpenDocument textfile from an yWriter
 * Text passages embraced in slashes and asterisks like `/* this is a comment */` are converted to author's comments.
 
 
-### yWriter5 style proof reading
+### Proof reading
 
 #### Load yWriter 6/7 chapters and scenes into an OpenDocument file with chapter and scene markers. 
 

@@ -107,6 +107,8 @@ Sub open_yw(suffix As String, new_ext As String)
 
     AddFiltersToDialog(FilterNames(), file_dialog)
     file_dialog.SetDisplayDirectory(default_file)
+    
+    on Error goto flop
     open_status = file_dialog.Execute()
 
     If open_status = 1 Then
@@ -160,6 +162,8 @@ Sub open_yw(suffix As String, new_ext As String)
 	batch_file = ConvertToURL(batch_file)
 
 	shell(batch_file, 2, &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix, false)
+	
+flop:
 
 End Sub
 
