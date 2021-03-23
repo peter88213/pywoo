@@ -82,6 +82,11 @@
                            </prop>
                         </node>
                         <node oor:name="N006" oor:op="replace">
+                           <prop oor:name="URL" oor:type="xs:string">
+                              <value>private:separator</value>
+                           </prop>
+                        </node>
+                        <node oor:name="N007" oor:op="replace">
                            <prop oor:name="Context" oor:type="xs:string">
                               <value/>
                            </prop>
@@ -96,7 +101,7 @@
                               <value>_self</value>
                            </prop>
                         </node>
-                        <node oor:name="N007" oor:op="replace">
+                        <node oor:name="N008" oor:op="replace">
                            <prop oor:name="Context" oor:type="xs:string">
                               <value/>
                            </prop>
@@ -111,7 +116,7 @@
                               <value>_self</value>
                            </prop>
                         </node>
-                        <node oor:name="N008" oor:op="replace">
+                        <node oor:name="N009" oor:op="replace">
                            <prop oor:name="Context" oor:type="xs:string">
                               <value/>
                            </prop>
@@ -121,21 +126,6 @@
                            </prop>
                            <prop oor:name="URL" oor:type="xs:string">
                               <value>vnd.sun.star.script:pywoo.OpenYw.get_itemlist?language=Basic&amp;location=application</value>
-                           </prop>
-                           <prop oor:name="Target" oor:type="xs:string">
-                              <value>_self</value>
-                           </prop>
-                        </node>
-                        <node oor:name="N009" oor:op="replace">
-                           <prop oor:name="Context" oor:type="xs:string">
-                              <value/>
-                           </prop>
-                           <prop oor:name="Title" oor:type="xs:string">
-                              <value xml:lang="en">Cross references</value>
-                              <value xml:lang="de">Querverweise</value>
-                           </prop>
-                           <prop oor:name="URL" oor:type="xs:string">
-                              <value>vnd.sun.star.script:pywoo.OpenYw.get_crossreference?language=Basic&amp;location=application</value>
                            </prop>
                            <prop oor:name="Target" oor:type="xs:string">
                               <value>_self</value>
@@ -151,11 +141,11 @@
                               <value/>
                            </prop>
                            <prop oor:name="Title" oor:type="xs:string">
-                              <value xml:lang="en">Export to yWriter</value>
-                              <value xml:lang="de">Zu yWriter exportieren</value>
+                              <value xml:lang="en">Cross reference</value>
+                              <value xml:lang="de">Querverweise</value>
                            </prop>
                            <prop oor:name="URL" oor:type="xs:string">
-                              <value>vnd.sun.star.script:pywoo.SaveYw.export_yw?language=Basic&amp;location=application</value>
+                              <value>vnd.sun.star.script:pywoo.OpenYw.get_xref?language=Basic&amp;location=application</value>
                            </prop>
                            <prop oor:name="Target" oor:type="xs:string">
                               <value>_self</value>
@@ -171,11 +161,11 @@
                               <value/>
                            </prop>
                            <prop oor:name="Title" oor:type="xs:string">
-                              <value xml:lang="en">Help</value>
-                              <value xml:lang="de">Hilfe</value>
+                              <value xml:lang="en">Export to yWriter</value>
+                              <value xml:lang="de">Zu yWriter exportieren</value>
                            </prop>
                            <prop oor:name="URL" oor:type="xs:string">
-                              <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
+                              <value>vnd.sun.star.script:pywoo.SaveYw.export_yw?language=Basic&amp;location=application</value>
                            </prop>
                            <prop oor:name="Target" oor:type="xs:string">
                               <value>_self</value>
@@ -191,10 +181,30 @@
                               <value/>
                            </prop>
                            <prop oor:name="Title" oor:type="xs:string">
+                              <value xml:lang="en">Help</value>
+                              <value xml:lang="de">Hilfe</value>
+                           </prop>
+                           <prop oor:name="URL" oor:type="xs:string">
+                              <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
+                           </prop>
+                           <prop oor:name="Target" oor:type="xs:string">
+                              <value>_self</value>
+                           </prop>
+                        </node>
+                        <node oor:name="N016" oor:op="replace">
+                           <prop oor:name="URL" oor:type="xs:string">
+                              <value>private:separator</value>
+                           </prop>
+                        </node>
+                        <node oor:name="N017" oor:op="replace">
+                           <prop oor:name="Context" oor:type="xs:string">
+                              <value/>
+                           </prop>
+                           <prop oor:name="Title" oor:type="xs:string">
                               <value xml:lang="en">Advanced features</value>
                            </prop>
                            <node oor:name="Submenu">
-                              <node oor:name="N016" oor:op="replace">
+                              <node oor:name="N018" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -208,7 +218,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N017" oor:op="replace">
+                              <node oor:name="N019" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -222,7 +232,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N018" oor:op="replace">
+                              <node oor:name="N020" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -236,7 +246,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N019" oor:op="replace">
+                              <node oor:name="N021" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -250,12 +260,12 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N020" oor:op="replace">
+                              <node oor:name="N022" oor:op="replace">
                                  <prop oor:name="URL" oor:type="xs:string">
                                     <value>private:separator</value>
                                  </prop>
                               </node>
-                              <node oor:name="N021" oor:op="replace">
+                              <node oor:name="N023" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -269,7 +279,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N022" oor:op="replace">
+                              <node oor:name="N024" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -283,7 +293,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N023" oor:op="replace">
+                              <node oor:name="N025" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -297,12 +307,12 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N024" oor:op="replace">
+                              <node oor:name="N026" oor:op="replace">
                                  <prop oor:name="URL" oor:type="xs:string">
                                     <value>private:separator</value>
                                  </prop>
                               </node>
-                              <node oor:name="N025" oor:op="replace">
+                              <node oor:name="N027" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -316,7 +326,7 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N026" oor:op="replace">
+                              <node oor:name="N028" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -330,12 +340,12 @@
                                     <value>_self</value>
                                  </prop>
                               </node>
-                              <node oor:name="N027" oor:op="replace">
+                              <node oor:name="N029" oor:op="replace">
                                  <prop oor:name="URL" oor:type="xs:string">
                                     <value>private:separator</value>
                                  </prop>
                               </node>
-                              <node oor:name="N028" oor:op="replace">
+                              <node oor:name="N030" oor:op="replace">
                                  <prop oor:name="Context" oor:type="xs:string">
                                     <value/>
                                  </prop>
@@ -353,7 +363,7 @@
                         </node>
                      </node>
                   </node>
-                  <node oor:name="N029" oor:op="replace">
+                  <node oor:name="N031" oor:op="replace">
                      <prop oor:name="URL" oor:type="xs:string">
                         <value>private:separator</value>
                      </prop>
@@ -403,6 +413,11 @@
                   </prop>
                </node>
                <node oor:name="N004" oor:op="replace">
+                  <prop oor:name="URL" oor:type="xs:string">
+                     <value>private:separator</value>
+                  </prop>
+               </node>
+               <node oor:name="N005" oor:op="replace">
                   <prop oor:name="Context" oor:type="xs:string">
                      <value/>
                   </prop>
@@ -417,7 +432,7 @@
                      <value>_self</value>
                   </prop>
                </node>
-               <node oor:name="N005" oor:op="replace">
+               <node oor:name="N006" oor:op="replace">
                   <prop oor:name="Context" oor:type="xs:string">
                      <value/>
                   </prop>
@@ -432,7 +447,7 @@
                      <value>_self</value>
                   </prop>
                </node>
-               <node oor:name="N006" oor:op="replace">
+               <node oor:name="N007" oor:op="replace">
                   <prop oor:name="Context" oor:type="xs:string">
                      <value/>
                   </prop>
@@ -447,21 +462,6 @@
                      <value>_self</value>
                   </prop>
                </node>
-               <node oor:name="N007" oor:op="replace">
-                  <prop oor:name="Context" oor:type="xs:string">
-                     <value/>
-                  </prop>
-                  <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Cross references</value>
-                     <value xml:lang="de">Querverweise</value>
-                  </prop>
-                  <prop oor:name="URL" oor:type="xs:string">
-                     <value>vnd.sun.star.script:pywoo.OpenYw.get_crossreference?language=Basic&amp;location=application</value>
-                  </prop>
-                  <prop oor:name="Target" oor:type="xs:string">
-                     <value>_self</value>
-                  </prop>
-               </node>
                <node oor:name="N008" oor:op="replace">
                   <prop oor:name="URL" oor:type="xs:string">
                      <value>private:separator</value>
@@ -469,14 +469,14 @@
                </node>
                <node oor:name="N009" oor:op="replace">
                   <prop oor:name="Context" oor:type="xs:string">
-                     <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument</value>
+                     <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Export to yWriter</value>
-                     <value xml:lang="de">Zu yWriter exportieren</value>
+                     <value xml:lang="en">Cross reference</value>
+                     <value xml:lang="de">Querverweise</value>
                   </prop>
                   <prop oor:name="URL" oor:type="xs:string">
-                     <value>vnd.sun.star.script:pywoo.SaveYw.export_yw?language=Basic&amp;location=application</value>
+                     <value>vnd.sun.star.script:pywoo.OpenYw.get_xref?language=Basic&amp;location=application</value>
                   </prop>
                   <prop oor:name="Target" oor:type="xs:string">
                      <value>_self</value>
@@ -489,14 +489,14 @@
                </node>
                <node oor:name="N011" oor:op="replace">
                   <prop oor:name="Context" oor:type="xs:string">
-                     <value/>
+                     <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument</value>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Help</value>
-                     <value xml:lang="de">Hilfe</value>
+                     <value xml:lang="en">Export to yWriter</value>
+                     <value xml:lang="de">Zu yWriter exportieren</value>
                   </prop>
                   <prop oor:name="URL" oor:type="xs:string">
-                     <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
+                     <value>vnd.sun.star.script:pywoo.SaveYw.export_yw?language=Basic&amp;location=application</value>
                   </prop>
                   <prop oor:name="Target" oor:type="xs:string">
                      <value>_self</value>
@@ -512,10 +512,30 @@
                      <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
+                     <value xml:lang="en">Help</value>
+                     <value xml:lang="de">Hilfe</value>
+                  </prop>
+                  <prop oor:name="URL" oor:type="xs:string">
+                     <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
+                  </prop>
+                  <prop oor:name="Target" oor:type="xs:string">
+                     <value>_self</value>
+                  </prop>
+               </node>
+               <node oor:name="N014" oor:op="replace">
+                  <prop oor:name="URL" oor:type="xs:string">
+                     <value>private:separator</value>
+                  </prop>
+               </node>
+               <node oor:name="N015" oor:op="replace">
+                  <prop oor:name="Context" oor:type="xs:string">
+                     <value/>
+                  </prop>
+                  <prop oor:name="Title" oor:type="xs:string">
                      <value xml:lang="en">Advanced features</value>
                   </prop>
                   <node oor:name="Submenu">
-                     <node oor:name="N014" oor:op="replace">
+                     <node oor:name="N016" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -529,7 +549,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N015" oor:op="replace">
+                     <node oor:name="N017" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -543,7 +563,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N016" oor:op="replace">
+                     <node oor:name="N018" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -557,7 +577,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N017" oor:op="replace">
+                     <node oor:name="N019" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -571,12 +591,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N018" oor:op="replace">
+                     <node oor:name="N020" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N019" oor:op="replace">
+                     <node oor:name="N021" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -590,7 +610,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N020" oor:op="replace">
+                     <node oor:name="N022" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -604,7 +624,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N021" oor:op="replace">
+                     <node oor:name="N023" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -618,12 +638,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N022" oor:op="replace">
+                     <node oor:name="N024" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N023" oor:op="replace">
+                     <node oor:name="N025" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -637,7 +657,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N024" oor:op="replace">
+                     <node oor:name="N026" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -651,12 +671,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N025" oor:op="replace">
+                     <node oor:name="N027" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N026" oor:op="replace">
+                     <node oor:name="N028" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
