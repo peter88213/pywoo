@@ -13,6 +13,19 @@
 
 ## Changelog
 
+### v0.36.0 Export cross references
+
+Generate an OpenDocument text file containing navigable cross references:
+
+* Scenes per character,
+* scenes per location,
+* scenes per item,
+* scenes per tag, 
+* characters per tag, 
+* locations per tag, 
+* items per tag.
+
+
 ### v0.34.0 Fix a bug and add advanced features to the "Files" menu
 
 * Fix a macro bug causing a crash if no file is selected in the file picker dialog.
