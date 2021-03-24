@@ -1,4 +1,4 @@
-## OpenOffice extension (a Python 3.4+ installation is required).
+## OpenOffice extension (a Python installation is required).
 
 * Download the `.oxt` file (Scroll down this page to _Assets_).
 * Install it either by double-clicking or using the LibreOffice extension manager. Instructions can be found here: https://wiki.documentfoundation.org/Documentation/HowTo/install_extension
@@ -7,9 +7,12 @@
 
 ## Requirements
 
+__LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separate Python installation can be found here: https://github.com/peter88213/yw-cnv_
+
 * Windows.
-* OpenOffice 3.0 or more recent.   __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring Python can be found here: https://github.com/peter88213/yw-cnv_
-* Python 3.4 or more recent.
+* OpenOffice 3.0 or more recent. 
+* Python 3.4 or more recent will work. However, Python 3.7 or above is highly recommended.
+* Java Runtime Environment (OpenOffice might need it for macro execution).
 
 ## Changelog
 
