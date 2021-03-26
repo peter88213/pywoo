@@ -1,33 +1,32 @@
 <html>
 <head>
 <title>yw-cnv Help</title>
-<style type='text/css'>
-<!--
-h1, h2, h3 {font-family: sans-serif;}
-h1, h2 {color: cornflowerblue;}
-h3 {font-style: italic; font-size: 1em;}
-em, code {color: maroon;}
--->
-</style>
+<link rel=stylesheet href=help.css type=text/css>
 </head>
 
 <body>
 
-<h1>The pywoo extension for OpenOffice and Python 3.4+: Import and export yWriter 6/7 projects</h1>
+<h1>Import and export yWriter projects</h1>
 
-<h2>Commands</h2>
+<h2 id="commands">Commands</h2>
 
+<ul>
 <li><a href="#import_from_ywriter">Import from yWriter</a></li>
 <li><a href="#import_from_ywriter_for_proof_reading">Import from yWriter for proof reading</a></li>
-<li><a href="#character_list">Character list</a></li>
-</li>
+<li id="new_section"><a href="#character_list">Character list</a></li>
+<li><a href="#location_list">Location list</a></li>
+<li><a href="#item_list">Item list</a></li>
+<li id="new_section"><a href="#cross_references">Cross references</a></li>
+<li id="new_section"><a href="#export_to_ywriter">Export to yWriter</a></li>
+<li id="new_section"><a href="#advanced_features">Advanced features</a></li>
+</ul>
 
 <h2 id="import_from_ywriter">Import from yWriter</h2>
 
 <p>This will load yWriter 6/7 chapters and scenes into a new OpenDocument text document (odt).</p>
 
 <ul>
-<li><The document is placed in the same folder as the yWriter project.</li>
+<li>The document is placed in the same folder as the yWriter project.</li>
 <li>Document's <strong>filename</strong>: <code>&#139;yW project name&#155;.odt</code>.</li>
 <li>Text markup: Bold and italics are supported. Other highlighting such as underline and strikethrough are lost.</li>
 <li>Only "normal" chapters and scenes are imported. Chapters and scenes marked "unused", "todo" or "notes" are not imported.</li>
@@ -39,13 +38,16 @@ em, code {color: maroon;}
 <li>Chapter titles appear as second level heading if the chapter is  not marked as beginning of a new section. Such headings are considered as "chapter" headings.</li>
 <li>Scene titles appear as navigable comments pinned to the beginning of the scene.</li>
 <li>Usually, scenes are separated by blank lines. The first line is not indented.</li>
-<li>Starting from the second paragraph, paragraphs begin with indentation of the first line.</p>
+<li>Starting from the second paragraph, paragraphs begin with indentation of the first line.</li>
 <li>Scenes marked "attach to previous scene" in yWriter appear like continuous paragraphs.</li>
 </ul>
+
+<a href="#commands">Back</a>
 
 <h2 id="import_from_ywriter_for_proof_reading">Import from yWriter for proof reading</h2>
 
 <p>This will load yWriter 6/7 chapters and scenes into a new OpenDocument text document (odt) with chapter and scene markers.</p>
+<a href="#commands">Back</a>
 
 <ul>
 <li>Please consider the following conventions:</li>
@@ -59,6 +61,7 @@ em, code {color: maroon;}
 <li>Document's filename: <code>&#139;yW project name&#155;_proof.odt</code>.</li>
 </ul>
 
+
 <h3>Write back the proofread scenes to the yWriter 6/7 project file.</h3>
 
 <ul>
@@ -66,15 +69,16 @@ em, code {color: maroon;}
 <li>If both yw6 and yw7 project files exist, yw7 is rewritten. </li>
 </ul>
 
+<a href="#commands">Back</a>
+
 
 <h2 id="character_list">Character list</h2>
 
-<ul>
-<li>Character lists that can be edited in Office Calc and written back to yWriter format.</li>
+Character lists that can be edited in Office Calc and written back to yWriter format.
 
-<li>Location lists that can be edited in Office Calc and written back to yWriter format.</li>
+Location lists that can be edited in Office Calc and written back to yWriter format.
 
-<li>Item lists that can be edited in Office Calc and written back to yWriter format.</li>
+Item lists that can be edited in Office Calc and written back to yWriter format.
 </ul>
 
 <p>You may change the sort order of the rows. You may also add or remove rows. New entities must get a unique ID.</p>
