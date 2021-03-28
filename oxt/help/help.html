@@ -8,7 +8,7 @@
 
 <h1>Import and export yWriter projects</h1>
 
-<h2 id="commands">Commands</h2>
+<h2 id="commands">Command reference</h2>
 
 <ul>
 <li><a href="#import_from_ywriter">Import from yWriter</a></li>
@@ -16,9 +16,16 @@
 <li id="new_section"><a href="#character_list">Character list</a></li>
 <li><a href="#location_list">Location list</a></li>
 <li><a href="#item_list">Item list</a></li>
-<li id="new_section"><a href="#cross_references">Cross references</a></li>
+<li id="new_section"><a href="#cross_reference">Cross reference</a></li>
 <li id="new_section"><a href="#export_to_ywriter">Export to yWriter</a></li>
-<li id="new_section"><a href="#advanced_features">Advanced features</a></li>
+<li id="new_section"><a href="help_adv.html">Advanced features</a></li>
+</ul>
+
+<h2>HowTo</h2>
+
+<ul>
+<li><a href="#how_to_set_up_a_work_in_progress_for_export">How to set up a work in progress for export</a></li>
+<li><a href="#how_to_set_up_an_outline_for_export">How to set up an outline for export</a></li>
 </ul>
 
 <h2 id="import_from_ywriter">Import from yWriter</h2>
@@ -71,20 +78,31 @@
 
 <a href="#commands">Back</a>
 
-
 <h2 id="character_list">Character list</h2>
 
-Character lists that can be edited in Office Calc and written back to yWriter format.
-
-Location lists that can be edited in Office Calc and written back to yWriter format.
-
-Item lists that can be edited in Office Calc and written back to yWriter format.
-</ul>
-
+<p>Character lists that can be edited in Office Calc and written back to yWriter format.</p>
 <p>You may change the sort order of the rows. You may also add or remove rows. New entities must get a unique ID.</p>
 
+<a href="#commands">Back</a>
 
-<h2>Generate cross references</h2>
+
+<h2 id="location_list">Location list</h2>
+
+<p>Location lists that can be edited in Office Calc and written back to yWriter format.</p>
+<p>You may change the sort order of the rows. You may also add or remove rows. New entities must get a unique ID.</p>
+
+<a href="#commands">Back</a>
+
+
+<h2 id="item_list">Item list</h2>
+
+<p>Item lists that can be edited in Office Calc and written back to yWriter format.</p>
+<p>You may change the sort order of the rows. You may also add or remove rows. New entities must get a unique ID.</p>
+
+<a href="#commands">Back</a>
+
+
+<h2 id="cross_reference">Cross reference</h2>
 
 An OpenDocument text file containing navigable cross references:
 
@@ -98,10 +116,18 @@ An OpenDocument text file containing navigable cross references:
 <li>items per tag.</li>
 </ul>
 
+<a href="#commands">Back</a>
 
-<h2>Create a new yw7 project</h2>
+<h2 id="export_to_ywriter">Export to yWriter</h2>
 
-<p>Generate a new yWriter 7 project from a work in progress or an outline:</p>
+<p>This writes back the document's content to the yWriter project file. 
+</p>
+
+<a href="#commands">Back</a>
+
+<h2 id="how_to_set_up_a_work_in_progress_for_export">How to set up a work in progress for export</h2>
+
+<p>Generate a new yWriter 7 project from a work in progress:</p>
 
 <ul>
 <li>The new yWriter project is placed in the same folder as the document.</li>
@@ -109,7 +135,7 @@ An OpenDocument text file containing navigable cross references:
 <li>Existing yWriter 7 projects will not be overwritten.</li>
 </ul>
 
-<h3>Formatting a work in progress:</h3>
+<h3>How to format a work in progress:</h3>
 
 <p>A work in progress has no third level heading.</p>
 
@@ -120,7 +146,19 @@ An OpenDocument text file containing navigable cross references:
 <li>All other text is considered to be scene content.</li>
 </ul>
 
-<h3>Formatting an outline:</h3>
+<a href="#commands">Back</a>
+
+<h2 id="how_to_set_up_an_outline_for_export">How to set up an outline for export</h2>
+
+<p>Generate a new yWriter 7 project from an outline:</p>
+
+<ul>
+<li>The new yWriter project is placed in the same folder as the document.</li>
+<li>yWriter project's filename: <code>&#139;document name&#155;.yw7</code>.</li>
+<li>Existing yWriter 7 projects will not be overwritten.</li>
+</ul>
+
+<h3>How to format an outline:</h3>
 
 <p>An outline has at least one third level heading.</p>
 
@@ -130,5 +168,8 @@ An OpenDocument text file containing navigable cross references:
 <li><em>Heading 3</em> &#150;&#155;  New scene title.</li>
 <li>All other text is considered to be chapter/scene description.</li>
 </ul>
+
+<a href="#commands">Back</a>
+
 
 </body>
