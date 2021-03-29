@@ -26,6 +26,15 @@
 
 You can find more information in the [help text](help/help.html).
 
+## Requirements
+
+-   Windows.
+-   [OpenOffice](https://www.openoffice.org) version 3.0 or more recent.
+-   [Python](https://www.python.org/) version 3.4 or more recent will work. 
+    However, Python 3.7 or above is highly recommended.
+-   Java Runtime Environment (OpenOffice might need it for macro
+    execution).
+
 ## Download and install {#download}
 
 [Download page](https://github.com/peter88213/pywoo/releases/latest)
@@ -42,15 +51,6 @@ You can find more information in the [help text](help/help.html).
     "Files" menu, please look at the "Tools" > "Extensions" menu.
 
 [Changelog](changelog.html)
-
-## Requirements
-
--   Windows.
--   OpenOffice 3.0 or more recent.
--   Python 3.4 or more recent will work. However, Python 3.7 or above is
-    highly recommended.
--   Java Runtime Environment (OpenOffice might need it for macro
-    execution).
 
 ## Credits
 
