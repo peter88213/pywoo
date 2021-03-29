@@ -2,7 +2,7 @@
 
 ## Features (a Python 3 installation is required) {#features}
 
--   Generate a \"standard manuscript\" formatted **ODF text document
+-   Generate a "standard manuscript" formatted **ODF text document
     (ODT)** from an yWriter 6/7 project.
 
 -   Load yWriter 6/7 chapters and scenes into an OpenDocument file with
@@ -35,11 +35,11 @@ You can find more information in the [help text](help/help.html).
 -   Install it either by double-clicking or using the OpenOffice
     extension manager.
 
--   After installation (and Office restart) you find a new \"yWriter
-    Import/Export\" submenu in the \"Files\" menu.
+-   After installation (and Office restart) you find a new "yWriter
+    Import/Export" submenu in the "Files" menu.
 
--   If no additional \"yWriter Import/Export\" submenu shows up in the
-    \"Files\" menu, please look at the \"Tools\" \> \"Extensions\" menu.
+-   If no additional "yWriter Import/Export" submenu shows up in the
+    "Files" menu, please look at the "Tools" > "Extensions" menu.
 
 [Changelog](changelog.html)
 

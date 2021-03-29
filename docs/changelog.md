@@ -20,15 +20,15 @@ references:
 -   locations per tag,
 -   items per tag.
 
-### v0.34.0 Fix a bug and add advanced features to the \"Files\" menu
+### v0.34.0 Fix a bug and add advanced features to the "Files" menu
 
 -   Fix a macro bug causing a crash if no file is selected in the file
     picker dialog.
 
-The \"advanced features\" are meant to be used by experienced OpenOffice
-users only. If you aren\'t familiar with Calc and the concept of
+The "advanced features" are meant to be used by experienced OpenOffice
+users only. If you aren't familiar with Calc and the concept of
 sections in Writer, please do not use the advanced features. There is a
-risk of damaging the project when writing back if you don\'t respect the
+risk of damaging the project when writing back if you don't respect the
 section boundaries in the odt text documents, or if you mess up the IDs
 in the ods tables.
 
@@ -36,7 +36,7 @@ Export files with invisible markers (to be written back after editing):
 
 -   Manuscript with invisible chapter and scene sections.
 -   Very brief synopsis (Part descriptions): Titles and descriptions of
-    chapters \"beginning a new section\".
+    chapters "beginning a new section".
 -   Brief synopsis (Chapter descriptions): Chapter titles and chapter
     descriptions.
 -   Full synopsis (Scene descriptions): Chapter titles and scene
@@ -120,8 +120,8 @@ Based on PyWriter v2.6.1
 
 -   Add strict project structure check.
 -   Improve screen output.
--   Do not indent a chapter\'s first scene even if marked \"append to
-    previous\".
+-   Do not indent a chapter's first scene even if marked "append to
+    previous".
 -   Can now write complete yw5 Files.
 -   Convert work in progress that contains empty chapter titles.
 -   Fix location descriptions export.
@@ -131,11 +131,11 @@ Based on PyWriter v2.5.1
 
 ### v0.24.0
 
-Adapt to modified yw7 file format (yWriter 7.0.7.2+): \* \"Info\"
-chapters are replaced by \"Notes\" chapters (always unused). \* New
-\"Todo\" chapter type (always unused). \* Distinguish between \"Notes
-scene\", \"Todo scene\" and \"Unused scene\". \* Chapter/scene tag
-colors in \"proofread\" export correspond to those of the yWriter
+Adapt to modified yw7 file format (yWriter 7.0.7.2+): \* "Info"
+chapters are replaced by "Notes" chapters (always unused). \* New
+"Todo" chapter type (always unused). \* Distinguish between "Notes
+scene", "Todo scene" and "Unused scene". \* Chapter/scene tag
+colors in "proofread" export correspond to those of the yWriter
 chapter list.
 
 Bugfix: \* Suppress chapter title if required.
@@ -149,13 +149,13 @@ PyWriter v2.1.4
 
 ### v0.23.4
 
-Adapt to yWriter 7.0.4.9 Beta: Don\'t replace dashes any longer by
-\"safe\" double hyphens when writing yw7 (PyWriter library v2.1.3).
+Adapt to yWriter 7.0.4.9 Beta: Don't replace dashes any longer by
+"safe" double hyphens when writing yw7 (PyWriter library v2.1.3).
 
 ### v0.23.3
 
 Rewrite large parts of the code (PyWriter library v2.1.0). Support
-author\'s comments: Text /\* commented out \*/ in yWriter scenes is
+author's comments: Text /\* commented out \*/ in yWriter scenes is
 exported as comment and vice versa.
 
 ### v0.22.3
