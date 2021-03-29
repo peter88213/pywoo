@@ -16,4 +16,4 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Changelog
 
-[https://peter88213.github.io/pywoo/changelog.html](https://peter88213.github.io/pywoo/changelog.html).
+[https://peter88213.github.io/pywoo/changelog](https://peter88213.github.io/pywoo/changelog).
