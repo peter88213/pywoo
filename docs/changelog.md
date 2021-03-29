@@ -1,5 +1,3 @@
-# yWriter import/export extension for OpenOffice
-
 ## Changelog
 
 ### v0.36.1 Improve the processing of comma-separated lists
