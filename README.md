@@ -1,7 +1,6 @@
 # The pywoo extension for OpenOffice and Python: Import and export yWriter 6/7 projects
 
-* [Description](https://peter88213.github.io/pywoo)
-* [Download page](https://github.com/peter88213/pywoo/releases/latest)
+* [Description and download](https://peter88213.github.io/pywoo)
 
 
 ## Want to fork this project?

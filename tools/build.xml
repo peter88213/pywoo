@@ -71,13 +71,16 @@
 		<copy file="${oxt}/description.xml" todir="${dist}/${release-name}" />
 		<replace encoding="utf-8" file="${dist}/${release-name}/description.xml" token="0.99.0" value="${release}" />
 
-		<copy file="../README.md" todir="${dist}/${release-name}" />
+		<!-- copy file="../README.md" todir="${dist}/${release-name}" /-->
 
 		<zip destfile="${dist}/${release-name}.oxt" basedir="${dist}/${release-name}" />
 
 		<copy file="./${ant.project.name}.update.xml" overwrite="True" todir=".." />
 		<replace encoding="utf-8" file="../${ant.project.name}.update.xml" token="0.99.0" value="${release}" />
 
+		<copy file="${docs}/template/index.md" todir="${docs}" />
+		<replace encoding="utf-8" file="${docs}/index.md" token="0.99.0" value="${release}" />
+		
 	</target>
 
 	<target name="clean" description="clean up">
