@@ -43,10 +43,8 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 [Download the latest release (version 0.36.1)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.36.1.oxt)
 
--   Download the `OXT` file.
-
--   Install it either by double-clicking or using the OpenOffice
-    extension manager.
+-   Installation right at download, by double-clicking on the downloaded 
+    file, or via the OpenOffice Extension Manager.
 
 -   After installation (and Office restart) you find a new "yWriter
     Import/Export" submenu in the "Files" menu.
