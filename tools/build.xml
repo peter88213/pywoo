@@ -78,7 +78,7 @@
 		<copy file="./${ant.project.name}.update.xml" overwrite="True" todir=".." />
 		<replace encoding="utf-8" file="../${ant.project.name}.update.xml" token="0.99.0" value="${release}" />
 
-		<copy file="${docs}/template/index.md" todir="${docs}" />
+		<copy file="${docs}/template/index.md" overwrite="True" todir="${docs}" />
 		<replace encoding="utf-8" file="${docs}/index.md" token="0.99.0" value="${release}" />
 		
 	</target>
