@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/peter88213/pywoo/master/docs/Screenshots/lo_menu.png)
+![screenshot](Screenshots/lo_menu.png)
 
 ## Features (a Python 3 installation is required) {#features}
 
