@@ -2,6 +2,11 @@
 
 ## Changelog
 
+### v0.36.2 Make the help function os independent
+
+- Change the HTML launch mechanism of the show_help macro.
+- Add a project website link to the help files.
+
 ### v0.36.1 Improve the processing of comma-separated lists
 
 - Fix incorrectly defined tags during yWriter import.
