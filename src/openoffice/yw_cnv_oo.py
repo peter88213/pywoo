@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Import and export yWriter data (OpenOffice 3/4 variant).
 
 Copyright (c) 2021 Peter Triesberger
