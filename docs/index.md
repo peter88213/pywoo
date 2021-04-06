@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/peter88213/pywoo/master/docs/Screenshots/lo_menu.png)
+![screenshot](Screenshots/lo_menu.png)
 
 ## Features (a Python 3 installation is required) {#features}
 
@@ -41,7 +41,7 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Download and install {#download}
 
-[Download the latest release (version 0.36.1)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.36.1.oxt)
+[Download the latest release (version 0.36.2)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.36.2.oxt)
 
 -   Installation right at download, by double-clicking on the downloaded 
     file, or via the OpenOffice Extension Manager.

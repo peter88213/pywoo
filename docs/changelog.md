@@ -2,10 +2,13 @@
 
 ## Changelog
 
-### v0.36.2 Make the help function os independent
+### v0.36.2 Service release
 
+- Generate compressed ODF documents.
 - Change the HTML launch mechanism of the show_help macro.
 - Add a project website link to the help files.
+
+Based on PyWriter v2.14.2
 
 ### v0.36.1 Improve the processing of comma-separated lists
 
