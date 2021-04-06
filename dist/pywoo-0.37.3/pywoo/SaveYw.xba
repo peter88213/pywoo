@@ -10,8 +10,8 @@
 
 Sub export_yw
 &apos; ----------------------------------------------------------------------
-&apos; Save an OpenDocument file as html or csv and call an external Python 3 script
-&apos; via batch file to convert the csv file to yWriter format.
+&apos; Save an OpenDocument file as html or csv and call an external
+&apos;  Python 3 script to convert the csv file to yWriter format.
 &apos; ----------------------------------------------------------------------
 	Dim document As object
 	Dim dispatcher As object
@@ -80,29 +80,15 @@ Sub export_yw
 	End If	
 		
 	&apos; ----------------------------------------------------------------------
-	&apos; Call a batch script to convert to yw7
+	&apos; Convert to yw7
 	&apos; ----------------------------------------------------------------------
-	Dim file_no As Integer
-	Dim script_dir, batch_file As String
-		
+	Dim launcher As Object
+	Dim aScript As String
 	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
-	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)
-
-	script_dir = ConvertFromURL(sPackageLocation)
-	batch_file = script_dir + &quot;\python\saveyw.bat&quot;
-	
-	If NOT FileExists(batch_file) Then
-		file_no = FreeFile
-		Open batch_file For Output As #file_no
-		Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
-		Print #file_no, &quot;pywoo.pyw %1&quot;
-		Close #file_no
-	End If
-	
-	batch_file = ConvertToURL(batch_file)
-	
-	shell(batch_file, 2, &quot;&quot;&quot;&quot; + ConvertFromURL(temp_path) + &quot;&quot;&quot;&quot;, false)
-	
+	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)	
+	launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+	aScript = sPackageLocation + &quot;/python/pywoo.pyw&quot;
+	launcher.execute(aScript, &quot;&quot;&quot;&quot; + ConvertFromURL(temp_path) + &quot;&quot;&quot;&quot;, 0)	
 
 DontSave:
 

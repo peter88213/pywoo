@@ -151,21 +151,13 @@ Sub open_yw(suffix As String, new_ext As String)
     &apos; ----------------------------------------------------------------------
     &apos; Open yWriter project and convert data.
     &apos; ----------------------------------------------------------------------
-    Dim batch_file As String
-
-    batch_file = script_dir + &quot;\python\openyw.bat&quot;
-    
-    If NOT FileExists(batch_file) Then
-	    file_no = FreeFile
-		Open batch_file For Output As #file_no
-		Print #file_no, &quot;cd &quot; + script_dir + &quot;\python&quot;
-		Print #file_no, &quot;pywoo.pyw %1 %2&quot;	
-		Close #file_no
-	End If
-
-	batch_file = ConvertToURL(batch_file)
-
-	shell(batch_file, 2, &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix, false)
+	Dim launcher As Object
+	Dim aScript As String
+	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
+	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)	
+	launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+	aScript = sPackageLocation + &quot;/python/pywoo.pyw&quot;
+	launcher.execute(aScript, &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot;&quot; + &quot; &quot; + suffix, 0)
 	
 flop:
 

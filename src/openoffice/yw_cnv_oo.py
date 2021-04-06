@@ -8,6 +8,7 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 import subprocess
+import platform
 
 from pywriter.converter.ui_tk import UiTk
 from pywriter.converter.yw_cnv_tk import YwCnvTk
@@ -20,7 +21,8 @@ class YwCnvOo(YwCnvTk):
     """
 
     def __init__(self, silentMode=False):
-        self.userInterface = UiTk('yWriter import/export')
+        self.userInterface = UiTk(
+            'yWriter import/export (Python version ' + str(platform.python_version()) + ")")
         self.success = False
         self._newFile = None
         self.fileFactory = None

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.37.0
+Version 0.37.3
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -8267,6 +8267,7 @@ class YwCnvTk(YwCnvUi):
         self.userInterface.finish()
 #!/usr/bin/env python3
 import subprocess
+import platform
 
 
 
@@ -8277,7 +8278,8 @@ class YwCnvOo(YwCnvTk):
     """
 
     def __init__(self, silentMode=False):
-        self.userInterface = UiTk('yWriter import/export')
+        self.userInterface = UiTk(
+            'yWriter import/export (Python version ' + str(platform.python_version()) + ")")
         self.success = False
         self._newFile = None
         self.fileFactory = None
