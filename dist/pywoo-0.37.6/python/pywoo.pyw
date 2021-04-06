@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.37.5
+Version 0.37.6
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -8266,7 +8266,6 @@ class YwCnvTk(YwCnvUi):
     def finish(self, sourcePath):
         self.userInterface.finish()
 #!/usr/bin/env python3
-import subprocess
 import platform
 
 
@@ -8289,22 +8288,8 @@ class YwCnvOo(YwCnvTk):
         self.userInterface.finish()
 
     def edit(self):
-
-        OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files/OpenOffice 4/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
-
-        for office in OPENOFFICE:
-
-            if os.path.isfile(office):
-
-                if self._newFile.endswith('.csv'):
-                    office = office.replace('swriter', 'scalc')
-
-                subprocess.Popen([os.path.normpath(office),
-                                  os.path.normpath(self._newFile)])
-                sys.exit(0)
+        os.startfile(self._newFile)
+        sys.exit(0)
 
 
 class Converter(YwCnvOo):
