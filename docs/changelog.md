@@ -9,6 +9,8 @@
 - Add a shebang to the Python script.
 - Save the Python script using Linux compatible linefeeds.
 
+Based on PyWriter v2.14.3
+
 ### v0.36.4 Prepare os-independent export to yWriter
 
 Save to yWriter by calling the Python script directly. Based on PyWriter
