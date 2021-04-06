@@ -83,12 +83,15 @@ Sub export_yw
 	&apos; Convert to yw7
 	&apos; ----------------------------------------------------------------------
 	Dim launcher As Object
-	Dim aScript As String
+	Dim aCommand,aParameter As String
+	Dim nflags as Long
 	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
 	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)	
 	launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
-	aScript = sPackageLocation + &quot;/python/pywoo.pyw&quot;
-	launcher.execute(aScript, &quot;&quot;&quot;&quot; + ConvertFromURL(temp_path) + &quot;&quot;&quot;&quot;, 0)	
+	aCommand = sPackageLocation + &quot;/python/pywoo.pyw&quot;
+	aParameter = &quot;&quot;&quot;&quot; + ConvertFromURL(temp_path) + &quot;&quot;&quot;&quot;
+	nFlags = 0
+	launcher.execute(aCommand, aParameter, nFlags)	
 
 DontSave:
 
