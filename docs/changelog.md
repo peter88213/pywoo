@@ -2,6 +2,22 @@
 
 ## Changelog
 
+### v0.36.5 Prepare os-independent import from yWriter
+
+- Edit the generated document using os.startfile(). Thus determining the
+  Office program location is no longer necessary.
+- Add a shebang to the Python script.
+- Save the Python script using Linux compatible linefeeds.
+
+### v0.36.4 Prepare os-independent export to yWriter
+
+Save to yWriter by calling the Python script directly. Based on PyWriter
+v2.14.3
+
+### v0.36.3 Bugfix release
+
+Fix a regression causing wrong file type detection. Based on PyWriter 2.14.3
+
 ### v0.36.2 Service release
 
 - Generate compressed ODF documents.

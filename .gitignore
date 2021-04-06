@@ -1,6 +1,7 @@
 /src/__pycache__/
 /src/extension/__pycache__/
 /src/standalone/__pycache__/
+/src/openoffice/__pycache__/
 /test/__pycache__/
 /test/yw7/
 /build/

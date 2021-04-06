@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Import and export yWriter data (OpenOffice 3/4 variant).
 
 Copyright (c) 2021 Peter Triesberger
@@ -6,7 +7,7 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 """
 import os
 import sys
-import subprocess
+import platform
 
 from pywriter.converter.ui_tk import UiTk
 from pywriter.converter.yw_cnv_tk import YwCnvTk
@@ -19,7 +20,8 @@ class YwCnvOo(YwCnvTk):
     """
 
     def __init__(self, silentMode=False):
-        self.userInterface = UiTk('yWriter import/export')
+        self.userInterface = UiTk(
+            'yWriter import/export (Python version ' + str(platform.python_version()) + ")")
         self.success = False
         self._newFile = None
         self.fileFactory = None
@@ -29,19 +31,5 @@ class YwCnvOo(YwCnvTk):
         self.userInterface.finish()
 
     def edit(self):
-
-        OPENOFFICE = ['c:/Program Files/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice.org 3/program/swriter.exe',
-                      'c:/Program Files/OpenOffice 4/program/swriter.exe',
-                      'c:/Program Files (x86)/OpenOffice 4/program/swriter.exe']
-
-        for office in OPENOFFICE:
-
-            if os.path.isfile(office):
-
-                if self._newFile.endswith('.csv'):
-                    office = office.replace('swriter', 'scalc')
-
-                subprocess.Popen([os.path.normpath(office),
-                                  os.path.normpath(self._newFile)])
-                sys.exit(0)
+        os.startfile(self._newFile)
+        sys.exit(0)
