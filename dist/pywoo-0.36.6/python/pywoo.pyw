@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.36.5
+Version 0.36.6
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -1502,7 +1502,7 @@ class Yw5TreeBuilder(YwTreeBuilder):
             ['‘', '\\lquote '],
             ['’', '\\rquote '],
             ['“', '\\ldblquote '],
-            ['”', '\\rdblquote '],
+            ['�?', '\\rdblquote '],
             ['\u202f', '\\~'],
             ['»', '\\u0187?'],
             ['«', '\\u0171?'],

@@ -17,11 +17,11 @@ Sub export_yw
 	Dim dispatcher As object
 	Dim document_path, temp_path As String
 
+	On Error Goto DontSave
+
 	document   = ThisComponent.CurrentController.Frame
 	dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
 	document_path = ThisComponent.getURL()
-
-	On Error Goto DontSave
 
 	extension = Right(document_path, 5)
 	
