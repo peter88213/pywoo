@@ -2,6 +2,11 @@
 
 ## Changelog
 
+### v0.36.6 Bugfix release
+
+Fix a bug in the SaveYw StarBASIC module throwing an exception when trying to export to yWriter with no Writer document open. 
+Based on PyWriter v2.14.3
+
 ### v0.36.5 Prepare os-independent import from yWriter
 
 - Edit the generated document using os.startfile(). Thus determining the
