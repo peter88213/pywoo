@@ -9,31 +9,23 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 """
 import os
 import sys
-
 from urllib.parse import unquote
+import platform
+
+from openoffice.cnv_open import CnvOpen
+
 from pywriter.converter.universal_file_factory import UniversalFileFactory
-from pywriter.converter.yw_cnv_tk import YwCnvTk
-from openoffice.yw_cnv_oo import YwCnvOo
+from pywriter.ui.ui_tk import UiTk
 
 
-class Converter(YwCnvOo):
-    """yWriter converter with a simple tkinter GUI. 
-    Handles temporary files created by OpenOffice.
-    Calls OpenOffice to edit the conversion result.
-    """
-
-    def __init__(self, silentMode=False):
-        YwCnvOo.__init__(self, silentMode)
-        self.fileFactory = UniversalFileFactory()
-
-    def export_from_yw(self, sourceFile, targetFile):
-        """Method for conversion from yw to other.
-        """
-        YwCnvTk.export_from_yw(self, sourceFile, targetFile)
-
-        if self.success:
-            self._newFile = targetFile.filePath
-            self.edit()
+def run(sourcePath, suffix=None):
+    ui = UiTk('yWriter import/export (Python version ' +
+              str(platform.python_version()) + ')')
+    converter = CnvOpen()
+    converter.ui = ui
+    converter.fileFactory = UniversalFileFactory()
+    converter.run(sourcePath, suffix)
+    ui.start()
 
 
 if __name__ == '__main__':
@@ -46,7 +38,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in Converter.YW_EXTENSIONS:
+    if not FileExtension in CnvOpen.YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 
@@ -59,4 +51,4 @@ if __name__ == '__main__':
         except:
             suffix = ''
 
-    Converter().run(sourcePath, suffix)
+    run(sourcePath, suffix)
