@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.37.8
+Version 0.37.9
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -12,7 +11,6 @@ import sys
 from urllib.parse import unquote
 import platform
 
-#!/usr/bin/env python3
 
 
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
 Version @release
