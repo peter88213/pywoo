@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="pywoo" basedir=".">
-	<property name="release" value="0.36.6" />
+	<property name="release" value="0.36.7" />
 	<property name="project-name" value="${ant.project.name}" />
 	<property name="release-name" value="${project-name}-${release}" />
 	<property name="release-name-L" value="${project-name}-L-${release}" />
@@ -19,7 +19,6 @@
 			<exec executable="python" failonerror="true">
 			    <arg value="${src}/build_extension.py"/>
 			</exec>
-		<fixcrlf eol="lf" srcdir="${test}" includes="**/*.pyw" />
 		
 		<mkdir dir="${builddir}" />
 		<delete file="${builddir}/pywoo.pyw" />
@@ -27,7 +26,6 @@
 			    <arg value="${src}/build_standalone.py"/>
 			</exec>
 		<replace encoding="utf-8" file="${builddir}/pywoo.pyw" token="@release" value="${release}" />
-		<fixcrlf eol="lf" srcdir="${builddir}" includes="**/*.pyw" />
 	</target>
 
 	<target name="dist" description="Generate the extension">
