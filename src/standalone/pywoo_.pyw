@@ -12,17 +12,13 @@ from urllib.parse import unquote
 
 from openoffice.cnv_button import CnvButton
 
-from pywriter.converter.export_file_factory import ExportFileFactory
-from pywriter.ui.ui_tk_open import UiTkOpen
+YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    ui = UiTkOpen('yWriter import/export')
     converter = CnvButton()
-    converter.ui = ui
-    converter.fileFactory = ExportFileFactory()
     converter.run(sourcePath, suffix)
-    ui.start()
+    converter.ui.start()
 
 
 if __name__ == '__main__':
@@ -35,7 +31,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in CnvButton.YW_EXTENSIONS:
+    if not FileExtension in YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 

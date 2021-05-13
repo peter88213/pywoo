@@ -9,22 +9,16 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 from urllib.parse import unquote
-import platform
 
 from openoffice.cnv_open import CnvOpen
 
-from pywriter.converter.universal_file_factory import UniversalFileFactory
-from pywriter.ui.ui_tk import UiTk
+YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    ui = UiTk('yWriter import/export (Python version ' +
-              str(platform.python_version()) + ')')
     converter = CnvOpen()
-    converter.ui = ui
-    converter.fileFactory = UniversalFileFactory()
     converter.run(sourcePath, suffix)
-    ui.start()
+    converter.ui.start()
 
 
 if __name__ == '__main__':
@@ -37,7 +31,7 @@ if __name__ == '__main__':
 
     fileName, FileExtension = os.path.splitext(sourcePath)
 
-    if not FileExtension in CnvOpen.YW_EXTENSIONS:
+    if not FileExtension in YW_EXTENSIONS:
         # Source file is not a yWriter project
         suffix = None
 
