@@ -8,7 +8,7 @@ from pywriter.converter.universal_exporter import UniversalExporter
 from pywriter.ui.ui_tk_open import UiTkOpen
 
 
-class CnvButton(UniversalExporter):
+class PywooExporter(UniversalExporter):
     """yWriter converter with a simple tkinter GUI. 
     Show 'Open' button after conversion from yw.
     """

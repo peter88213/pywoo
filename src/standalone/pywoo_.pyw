@@ -10,14 +10,15 @@ import os
 import sys
 from urllib.parse import unquote
 
-from openoffice.cnv_button import CnvButton
+from openoffice.pywoo_exporter import PywooExporter
 
 YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = CnvButton()
-    converter.run(sourcePath, suffix)
+    converter = PywooExporter()
+    kwargs = {'suffix': suffix}
+    converter.run(sourcePath, **kwargs)
     converter.ui.start()
 
 
@@ -32,11 +33,11 @@ if __name__ == '__main__':
     fileName, FileExtension = os.path.splitext(sourcePath)
 
     if not FileExtension in YW_EXTENSIONS:
-        # Source file is not a yWriter project
+        # Source file is not a yWriter project.
         suffix = None
 
     else:
-        # Source file is a yWriter project; suffix matters
+        # Source file is a yWriter project; suffix matters.
 
         try:
             suffix = sys.argv[2]

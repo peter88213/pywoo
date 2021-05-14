@@ -9,7 +9,7 @@ from pywriter.converter.universal_converter import UniversalConverter
 from pywriter.ui.ui_tk_open import UiTkOpen
 
 
-class CnvOpen(UniversalConverter):
+class pywooConverter(UniversalConverter):
     """yWriter converter with a simple tkinter GUI. 
     Open the new file after conversion from yw.
     """
