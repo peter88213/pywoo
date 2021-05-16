@@ -6,7 +6,7 @@
 
 ## Warning!
 
-The \"advanced features\" are meant to be used by experienced
+The "advanced features" are meant to be used by experienced
 OpenOffice/LibreOffice users only. If you aren\'t familiar with **Calc**
 and the concept of **sections in Writer**, please do not use the
 advanced features. There is a risk of damaging the project when writing
@@ -153,11 +153,11 @@ related metadata that can be displayed and edited. File name suffix is
 ### Plotting conventions
 
 In yWriter, you can divide your novel into **Plot Sections** (e.g. acts
-or steps) by inserting chapters marked \"other\". They will show up in
+or steps) by inserting chapters marked "other". They will show up in
 blue color and won\'t get exported.
 
-**Plot-related events** (e.g. \"Mid Point\", \"Climax\") can be
-identified by \"scene tags\" if you want to link them to a specific
+**Plot-related events** (e.g. "Mid Point", "Climax") can be
+identified by "scene tags" if you want to link them to a specific
 scene.
 
 You can use scene notes for **plot-specific explanations**.
@@ -169,10 +169,10 @@ put them into the scenes. It\'s easy then to let OpenOffice Calc show a
 diagram for the scene ratings over scene count or word count.
 
 -   Only rating field names corresponding to character names or
-    containing the string \"story\", e.g. \"A-Story\", \"BStoryline\"
+    containing the string "story", e.g. "A-Story", "BStoryline"
     (up to 10 case insensitive characters) appear in the plot list.
 -   Only ratings greater than 1 appear in the plot list, i.e. 1 means
-    \"a rating is not set for this chapter\".
+    "a rating is not set for this chapter".
 -   Recommended ratings:
     -   1 = N/A
     -   2 = unhappy
