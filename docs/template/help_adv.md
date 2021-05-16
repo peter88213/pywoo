@@ -1,4 +1,4 @@
-[Visit the project website](https://peter88213.github.io/pywoo/)
+[Main help page](@help@)
 
 # yWriter import/export: advanced features {#top}
 
@@ -11,8 +11,6 @@ advanced features. There is a risk of damaging the project when writing
 back if you don\'t respect the section boundaries in the ODT text
 documents, or if you mess up the IDs in the ODS tables. Be sure to try
 out the features with a test project first.
-
-[Main help page](@help@)
 
 ## Command reference
 
