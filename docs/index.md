@@ -26,7 +26,7 @@
 -   Generate a new yWriter 7 project from a **work in progress** or an
     **outline** .
 
-You can find all the information on the [help pages](help).
+You can find more information on the [help pages](help).
 
 ## Requirements
 
