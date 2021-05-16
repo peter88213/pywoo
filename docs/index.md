@@ -26,7 +26,7 @@
 -   Generate a new yWriter 7 project from a **work in progress** or an
     **outline** .
 
-You can find more information in the [help text](help/help.html).
+You can find more information in the [help text](help).
 
 ## Requirements
 
@@ -43,7 +43,7 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Download and install {#download}
 
-[Download the latest release (version 0.37.15)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.37.15.oxt)
+[Download the latest release (version 0.37.16)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.37.16.oxt)
 
 -   Installation right at download, by double-clicking on the downloaded 
     file, or via the OpenOffice Extension Manager.

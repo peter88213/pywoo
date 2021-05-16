@@ -1,5 +1,3 @@
-[Visit the project website](https://peter88213.github.io/pywoo/)
-
 # yWriter import/export {#top}
 
 ## Command reference
@@ -7,12 +5,12 @@
 -   [Import from yWriter](#import_from_ywriter)
 -   [Import from yWriter for proof
     reading](#import_from_ywriter_for_proof_reading)
--   [[Character list](#character_list)]{#new_section}
+-   [Character list](#character_list)
 -   [Location list](#location_list)
 -   [Item list](#item_list)
--   [[Cross reference](#cross_reference)]{#new_section}
--   [[Export to yWriter](#export_to_ywriter)]{#new_section}
--   [[Advanced features](help_adv)]{#new_section}
+-   [Cross reference](#cross_reference)
+-   [Export to yWriter](#export_to_ywriter) 
+-   [Advanced features](help_adv)
 
 ## HowTo
 
@@ -29,30 +27,30 @@ This will load yWriter 6/7 chapters and scenes into a new OpenDocument
 text document (odt).
 
 -   The document is placed in the same folder as the yWriter project.
--   Document\'s **filename**: `<yW project name>.odt`.
+-   Document's **filename**: `<yW project name>.odt`.
 -   Text markup: Bold and italics are supported. Other highlighting such
     as underline and strikethrough are lost.
--   Only \"normal\" chapters and scenes are imported. Chapters and
-    scenes marked \"unused\", \"todo\" or \"notes\" are not imported.
+-   Only "normal" chapters and scenes are imported. Chapters and
+    scenes marked "unused", "todo" or "notes" are not imported.
 -   Only scenes that are intended for RTF export in yWriter will be
     imported.
 -   Comments in the text bracketed with slashes and asterisks (like
-    `/* this is a comment */`) are converted to author\'s comments.
+    `/* this is a comment */`) are converted to author's comments.
 -   Interspersed HTML, TEX, or RTF commands are taken over unchanged.
 -   Gobal variables and project variables are not resolved.
 -   Chapter titles appear as first level heading if the chapter is
     marked as beginning of a new section in yWriter. Such headings are
-    considered as \"part\" headings.
+    considered as "part" headings.
 -   Chapter titles appear as second level heading if the chapter is not
     marked as beginning of a new section. Such headings are considered
-    as \"chapter\" headings.
+    as "chapter" headings.
 -   Scene titles appear as navigable comments pinned to the beginning of
     the scene.
 -   Usually, scenes are separated by blank lines. The first line is not
     indented.
 -   Starting from the second paragraph, paragraphs begin with
     indentation of the first line.
--   Scenes marked \"attach to previous scene\" in yWriter appear like
+-   Scenes marked "attach to previous scene" in yWriter appear like
     continuous paragraphs.
 
 [Top of page](#top)
@@ -67,11 +65,11 @@ text document (odt) with chapter and scene markers. File name suffix is
 
 -   The proof read document is placed in the same folder as the yWriter
     project.
--   Document\'s filename: `<yW project name>_proof.odt`.
+-   Document's filename: `<yW project name>_proof.odt`.
 -   Text markup: Bold and italics are supported. Other highlighting such
     as underline and strikethrough are lost.
--   All chapters and scenes will be exported, whether \"used\" or
-    \"unused\".
+-   All chapters and scenes will be exported, whether "used" or
+    "unused".
 -   The document contains chapter `[ChID:x]` and scene `[ScID:y]`
     markers according to yWriter 5 standard. **Do not touch lines
     containing the markers** if you want to be able to reimport the
@@ -153,14 +151,14 @@ references are:
 
 ## Export to yWriter {#export_to_ywriter}
 
-This writes back the document\'s content to the yWriter project file.
+This writes back the document's content to the yWriter project file.
 
--   Make sure not to change a generated document\'s file name before
+-   Make sure not to change a generated document's file name before
     writing back to yWriter format.
 -   The yWriter 6/7 project to rewrite must exist in the same folder as
     the document.
 -   If both yw6 and yw7 project files exist, yw7 is rewritten.
--   If the document\'s file name has no suffix, the document is
+-   If the document's file name has no suffix, the document is
     considered a [Work in
     progress](#how_to_set_up_a_work_in_progress_for_export) or an
     [Outline](#how_to_set_up_an_outline_for_export) to be exported into
@@ -177,7 +175,7 @@ Generate a new yWriter 7 project from a work in progress:
 
 -   The new yWriter project is placed in the same folder as the
     document.
--   yWriter project\'s filename: `<document name>.yw7`.
+-   yWriter project's filename: `<document name>.yw7`.
 -   Existing yWriter 7 projects will not be overwritten.
 
 ### How to format a work in progress:
@@ -201,7 +199,7 @@ Generate a new yWriter 7 project from an outline:
 
 -   The new yWriter project is placed in the same folder as the
     document.
--   yWriter project\'s filename: `<document name>.yw7`.
+-   yWriter project's filename: `<document name>.yw7`.
 -   Existing yWriter 7 projects will not be overwritten.
 
 ### How to format an outline:

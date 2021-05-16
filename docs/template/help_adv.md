@@ -10,7 +10,7 @@ back if you don\'t respect the section boundaries in the ODT text
 documents, or if you mess up the IDs in the ODS tables. Be sure to try
 out the features with a test project first.
 
-[Main help page](help)
+[Main help page](@help@)
 
 ## Command reference
 

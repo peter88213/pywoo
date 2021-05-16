@@ -39,24 +39,32 @@
 
 		<mkdir dir="${dist}/${release-name}/help" />
 		
+		<copy file="${docs}/template/help.md" overwrite="True" todir="./help" />
+		<replace encoding="utf-8" file="./help/help.md" token="@help_adv@" value="help_adv.html" />
+		
+		<copy file="${docs}/template/help_adv.md" overwrite="True" todir="./help" />
+		<replace encoding="utf-8" file="./help/help_adv.md" token="@help@" value="help.html" />
+		
 		<exec executable="cmd">
 			<arg value="/c"/>
-			<arg value="pandoc -o ./help/body.html ..\docs\help-en.md"/>
+			<arg value="pandoc -o ./help/body.html -fMarkdown-smart .\help\help.md"/>
 		</exec>
 		
-		<concat destfile="${dist}/${release-name}/help/help-en.html">
+		<concat destfile="${dist}/${release-name}/help/help.html">
 			<filelist dir="./help" files="header.txt, body.html, footer.txt" />
 		</concat>
 		
 		<exec executable="cmd">
 			<arg value="/c"/>
-			<arg value="pandoc -o ./help/body.html ..\docs\help_adv.md"/>
+			<arg value="pandoc -o ./help/body.html -fMarkdown-smart .\help\help_adv.md"/>
 		</exec>
 		
 		<concat destfile="${dist}/${release-name}/help/help_adv.html">
 			<filelist dir="./help" files="header.txt, body.html, footer.txt" />
 		</concat>
 		
+		<delete file="./help/help.md" />
+		<delete file="./help/help_adv.md" />
 		<delete file="./help/body.html" />
 		
 		
@@ -98,6 +106,12 @@
 
 		<copy file="${docs}/template/index.md" overwrite="True" todir="${docs}" />
 		<replace encoding="utf-8" file="${docs}/index.md" token="0.99.0" value="${release}" />
+		
+		<copy file="${docs}/template/help.md" overwrite="True" todir="${docs}" />
+		<replace encoding="utf-8" file="${docs}/help.md" token="@help_adv@" value="help_adv" />
+		
+		<copy file="${docs}/template/help_adv.md" overwrite="True" todir="${docs}" />
+		<replace encoding="utf-8" file="${docs}/help_adv.md" token="@help@" value="help" />
 		
 	</target>
 
