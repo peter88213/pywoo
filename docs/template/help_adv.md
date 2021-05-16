@@ -1,8 +1,8 @@
-[Project home page](https://peter88213.github.io/pywoo/) > [Main help page](@help@) > Advanced features
+[Project home page](https://peter88213.github.io/pywoo/) > [Main help page](@help@) > Advanced features {#top}
 
 ------------------------------------------------------------------------
 
-# yWriter import/export: advanced features {#top}
+# yWriter import/export: advanced features
 
 ## Warning!
 
