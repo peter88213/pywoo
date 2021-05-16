@@ -1,5 +1,7 @@
 [Project home page](https://peter88213.github.io/pywoo/) > Main help page
 
+------------------------------------------------------------------------
+
 # yWriter import/export {#top}
 
 ## Command reference
