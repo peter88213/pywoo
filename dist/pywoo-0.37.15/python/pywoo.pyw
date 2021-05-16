@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.37.14
+Version 0.37.15
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3044,6 +3044,8 @@ class HtmlImport(HtmlFile):
 
     _SCENE_DIVIDER = '* * *'
     _LOW_WORDCOUNT = 10
+    _COMMENT_START = '/*'
+    _COMMENT_END = '*/'
 
     def __init__(self, filePath, **kwargs):
         HtmlFile.__init__(self, filePath)
@@ -3130,7 +3132,23 @@ class HtmlImport(HtmlFile):
             self._scId = None
 
         else:
-            self._lines.append(data.rstrip().lstrip())
+            data = data.rstrip().lstrip()
+            
+            # Convert prefixed comment into scene title.
+
+            if self._lines == [] and data.startswith(self._COMMENT_START):
+
+                try:
+                    scTitle, scText = data.split(
+                        sep=self._COMMENT_END, maxsplit=1)
+                    self.scenes[self._scId].title = scTitle.lstrip(
+                        self._COMMENT_START).lstrip('- ')
+                    data = scText
+
+                except:
+                    pass
+
+            self._lines.append(data)
 
 
 
