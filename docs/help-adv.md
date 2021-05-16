@@ -36,7 +36,7 @@ text document (odt) with invisible chapter and scene sections (to be
 seen in the Navigator). File name suffix is `_manuscript`.
 
 You can write back the edited scene contents to the yWriter 6/7 project
-file with the [Export to yWriter](help#export_to_ywriter) command.
+file with the [Export to yWriter](help#export-to-ywriter) command.
 
 [Top of page](#top)
 
@@ -50,7 +50,7 @@ edited and written back to yWriter format. File name suffix is
 `_scenes`.
 
 You can write back the edited descriptions to the yWriter 6/7 project
-file with the [Export to yWriter](help#export_to_ywriter) command.
+file with the [Export to yWriter](help#export-to-ywriter) command.
 
 [Top of page](#top)
 
