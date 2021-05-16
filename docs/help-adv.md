@@ -1,4 +1,4 @@
-[Project home page](https://peter88213.github.io/pywoo/) > [Main help page](@help) > Advanced features {#top}
+[Project home page](https://peter88213.github.io/pywoo/) > [Main help page](help) > Advanced features
 
 ------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ text document (odt) with invisible chapter and scene sections (to be
 seen in the Navigator). File name suffix is `_manuscript`.
 
 You can write back the edited scene contents to the yWriter 6/7 project
-file with the [Export to yWriter](@help#export_to_ywriter) command.
+file with the [Export to yWriter](help#export_to_ywriter) command.
 
 [Top of page](#top)
 

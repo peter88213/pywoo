@@ -1,4 +1,4 @@
-[Project home page](https://peter88213.github.io/pywoo/) > Main help page {#top}
+[Project home page](https://peter88213.github.io/pywoo/) > Main help page
 
 ------------------------------------------------------------------------
 
@@ -6,26 +6,26 @@
 
 ## Command reference
 
--   [Import from yWriter](#import_from_ywriter)
+-   [Import from yWriter](#import-from-ywriter)
 -   [Import from yWriter for proof
-    reading](#import_from_ywriter_for_proof_reading)
--   [Character list](#character_list)
--   [Location list](#location_list)
--   [Item list](#item_list)
--   [Cross reference](#cross_reference)
--   [Export to yWriter](#export_to_ywriter) 
--   [Advanced features](@help_adv@)
+    reading](#import-from-ywriter-for-proof-reading)
+-   [Character list](#character-list)
+-   [Location list](#location-list)
+-   [Item list](#item-list)
+-   [Cross reference](#cross-reference)
+-   [Export to yWriter](#export-to-ywriter) 
+-   [Advanced features](@help-adv@)
 
 ## HowTo
 
 -   [How to set up a work in progress for
-    export](#how_to_set_up_a_work_in_progress_for_export)
+    export](#how-to-set-up-a-work-in-progress-for-export)
 -   [How to set up an outline for
-    export](#how_to_set_up_an_outline_for_export)
+    export](#how-to-set-up-an-outline-for-export)
 
 ------------------------------------------------------------------------
 
-## Import from yWriter {#import_from_ywriter}
+## Import from yWriter
 
 This will load yWriter 6/7 chapters and scenes into a new OpenDocument
 text document (odt).
@@ -61,7 +61,7 @@ text document (odt).
 
 ------------------------------------------------------------------------
 
-## Import from yWriter for proof reading {#import_from_ywriter_for_proof_reading}
+## Import from yWriter for proof reading
 
 This will load yWriter 6/7 chapters and scenes into a new OpenDocument
 text document (odt) with chapter and scene markers. File name suffix is
@@ -81,13 +81,13 @@ text document (odt) with chapter and scene markers. File name suffix is
 -   Back up your yWriter project and close yWriter before.
 
 You can write back the proofread scenes to the yWriter 6/7 project file
-with the [Export to yWriter](#export_to_ywriter) command.
+with the [Export to yWriter](#export-to-ywriter) command.
 
 [Top of page](#top)
 
 ------------------------------------------------------------------------
 
-## Character list {#character_list}
+## Character list
 
 This will generate a new OpenDocument spreadsheet (ods) containing a
 character list that can be edited in Office Calc and written back to
@@ -97,13 +97,13 @@ You may change the sort order of the rows. You may also add or remove
 rows. New entities must get a unique ID.
 
 You can write back the edited table to the yWriter 6/7 project file with
-the [Export to yWriter](#export_to_ywriter) command.
+the [Export to yWriter](#export-to-ywriter) command.
 
 [Top of page](#top)
 
 ------------------------------------------------------------------------
 
-## Location list {#location_list}
+## Location list
 
 This will generate a new OpenDocument spreadsheet (ods) containing a
 location list that can be edited in Office Calc and written back to
@@ -113,13 +113,13 @@ You may change the sort order of the rows. You may also add or remove
 rows. New entities must get a unique ID.
 
 You can write back the edited table to the yWriter 6/7 project file with
-the [Export to yWriter](#export_to_ywriter) command.
+the [Export to yWriter](#export-to-ywriter) command.
 
 [Top of page](#top)
 
 ------------------------------------------------------------------------
 
-## Item list {#item_list}
+## Item list
 
 This will generate a new OpenDocument spreadsheet (ods) containing an
 item list that can be edited in Office Calc and written back to yWriter
@@ -129,13 +129,13 @@ You may change the sort order of the rows. You may also add or remove
 rows. New entities must get a unique ID.
 
 You can write back the edited table to the yWriter 6/7 project file with
-the [Export to yWriter](#export_to_ywriter) command.
+the [Export to yWriter](#export-to-ywriter) command.
 
 [Top of page](#top)
 
 ------------------------------------------------------------------------
 
-## Cross reference {#cross_reference}
+## Cross reference
 
 This will generate a new OpenDocument text document (odt) containing
 navigable cross references. File name suffix is `_xref`. The cross
@@ -153,7 +153,7 @@ references are:
 
 ------------------------------------------------------------------------
 
-## Export to yWriter {#export_to_ywriter}
+## Export to yWriter
 
 This writes back the document's content to the yWriter project file.
 
@@ -164,8 +164,8 @@ This writes back the document's content to the yWriter project file.
 -   If both yw6 and yw7 project files exist, yw7 is rewritten.
 -   If the document's file name has no suffix, the document is
     considered a [Work in
-    progress](#how_to_set_up_a_work_in_progress_for_export) or an
-    [Outline](#how_to_set_up_an_outline_for_export) to be exported into
+    progress](#how-to-set-up-a-work-in-progress-for-export) or an
+    [Outline](#how-to-set-up-an-outline-for-export) to be exported into
     a newly created yWriter project. **Note:** Existing yWriter projects
     will not be overwritten.
 
@@ -173,7 +173,7 @@ This writes back the document's content to the yWriter project file.
 
 ------------------------------------------------------------------------
 
-## How to set up a work in progress for export {#how_to_set_up_a_work_in_progress_for_export}
+## How to set up a work in progress for export
 
 Generate a new yWriter 7 project from a work in progress:
 
@@ -197,7 +197,7 @@ A work in progress has no third level heading.
 
 ------------------------------------------------------------------------
 
-## How to set up an outline for export {#how_to_set_up_an_outline_for_export}
+## How to set up an outline for export
 
 Generate a new yWriter 7 project from an outline:
 
