@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 0.37.17
+Version 0.37.18
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -190,14 +190,14 @@ class ExportTargetFactory(FileFactory):
 
 
 class ImportSourceFactory(FileFactory):
-    """A factory class that instantiates a source file object for import or export."""
+    """A factory class that instantiates an import source file object."""
 
     def make_file_objects(self, sourcePath, **kwargs):
         """Instantiate a source object for conversion to a yWriter format.
 
         Return a tuple with three elements:
         - A message string starting with 'SUCCESS' or 'ERROR'
-        - sourceFile: a YwFile subclass instance, or None in case of error
+        - sourceFile: a Novel subclass instance, or None in case of error
         - targetFile: None
         """
 
@@ -214,14 +214,14 @@ class ImportSourceFactory(FileFactory):
 
 
 class ImportTargetFactory(FileFactory):
-    """A factory class that instantiates a target file object for import."""
+    """A factory class that instantiates an import target file object."""
 
     def make_file_objects(self, sourcePath, **kwargs):
         """Factory method.
         Return a tuple with three elements:
         - A message string starting with 'SUCCESS' or 'ERROR'
-        - sourceFile: a Novel subclass instance
-        - targetFile: a Novel subclass instance
+        - sourceFile: None
+        - targetFile: a YwFile subclass instance, or None in case of error
 
         """
         fileName, fileExtension = os.path.splitext(sourcePath)
@@ -990,7 +990,7 @@ class Character(WorldElement):
 
 class YwFile(Novel):
     """Abstract yWriter xml project file representation.
-    To be overwritten by version-specific subclasses. 
+    To be overwritten by yWriter-version-specific subclasses. 
     """
 
     def strip_spaces(self, elements):
@@ -2005,7 +2005,7 @@ class YwTreeReader(ABC):
 
 
 class Utf8TreeReader(YwTreeReader):
-    """Read yWriter xml project file."""
+    """Read utf-8 encoded yWriter xml project file."""
 
     def read_element_tree(self, ywFile):
         """Parse the yWriter xml file located at filePath, fetching the Novel attributes.
@@ -2023,13 +2023,12 @@ class Utf8TreeReader(YwTreeReader):
 
 
 class YwProjectMerger():
-    """Merge two yWriter projects.
-    """
+    """Merge the attributes of two yWriter project structures."""
 
     def merge_projects(self, target, source):
         """Overwrite existing target attributes with source attributes.
-        Create target attributes, if not existing, but return ERROR.
         Return a message beginning with SUCCESS or ERROR.
+        Create target attributes, if not existing, but return ERROR.
         """
 
         # Merge and re-order locations.
@@ -2521,8 +2520,7 @@ class Utf8Postprocessor(YwPostprocessor):
 
 
 class Yw7File(YwFile):
-    """yWriter 7 project file representation.
-    """
+    """yWriter 7 project file representation."""
 
     DESCRIPTION = 'yWriter 7 project'
     EXTENSION = '.yw7'
@@ -2855,12 +2853,13 @@ class Yw7TreeCreator(YwTreeBuilder):
 
 
 class YwProjectCreator(YwProjectMerger):
-    """Create a new project.
-    """
+    """Extend the super class by disabling its project structure check."""
 
     def merge_projects(self, target, source):
         """Create target attributes with source attributes.
-        Return a message beginning with SUCCESS or ERROR.
+        Return a message beginning with SUCCESS, even if the source and 
+        target project structures are inconsistent. Thus the source
+        project can be merged with an empty target, creating a new project.
         """
         YwProjectMerger.merge_projects(self, target, source)
         return 'SUCCESS'
@@ -2906,8 +2905,7 @@ def read_html_file(filePath):
 
 
 class HtmlFile(Novel, HTMLParser):
-    """Abstract HTML file representation.
-    """
+    """Generic HTML file representation."""
 
     EXTENSION = '.html'
 
@@ -3035,8 +3033,9 @@ class HtmlFile(Novel, HTMLParser):
 
 
 class HtmlImport(HtmlFile):
-    """HTML file representation of a work in progress to be 
-    converted to a new yWriter project yWriter project.
+    """HTML 'work in progress' file representation.
+
+    Import untagged chapters and scenes.
     """
 
     DESCRIPTION = 'Work in progress'
@@ -3133,7 +3132,7 @@ class HtmlImport(HtmlFile):
 
         else:
             data = data.rstrip().lstrip()
-            
+
             # Convert prefixed comment into scene title.
 
             if self._lines == [] and data.startswith(self._COMMENT_START):
@@ -3153,10 +3152,9 @@ class HtmlImport(HtmlFile):
 
 
 class HtmlOutline(HtmlFile):
-    """HTML file representation of an yWriter project's OfficeFile part.
+    """HTML outline file representation.
 
-    Represents a html file without chapter and scene tags 
-    to be written by Open/LibreOffice Writer.
+    Import an outline without chapter and scene tags.
     """
 
     DESCRIPTION = 'Novel outline'
@@ -3451,7 +3449,7 @@ class Yw5TreeBuilder(YwTreeBuilder):
 
 
 class AnsiTreeReader(YwTreeReader):
-    """Read yWriter xml project file."""
+    """Read ANSI encoded yWriter xml project file."""
 
     def read_element_tree(self, ywFile):
         """Parse the yWriter xml file located at filePath, fetching the Novel attributes.
@@ -4128,7 +4126,9 @@ class FileExport(Novel):
 
 
 class OdfFile(FileExport):
-    """OpenDocument xml project file representation.
+    """Generic OpenDocument xml file representation.
+
+    Specific document representations inherit from this class.
     """
     TEMPDIR = 'temp_odf'
 
@@ -4149,7 +4149,9 @@ class OdfFile(FileExport):
             pass
 
     def set_up(self):
-        """Create a temporary directory containing the internal 
+        """Helper method for ZIP file generation.
+
+        Create a temporary directory containing the internal 
         structure of an ODF file except 'content.xml'.
         """
         self.tear_down()
@@ -4223,9 +4225,7 @@ class OdfFile(FileExport):
         return 'SUCCESS: ODF structure generated.'
 
     def write(self):
-        """Generate an odf file from a template.
-        Return a message beginning with SUCCESS or ERROR.
-        """
+        """Extend the super class method, adding ZIP file operations."""
 
         # Create a temporary directory containing the internal
         # structure of an ODS file except "content.xml".
@@ -4271,8 +4271,7 @@ class OdfFile(FileExport):
 
 
 class OdtFile(OdfFile):
-    """OpenDocument xml project file representation.
-    """
+    """Generic OpenDocument text document representation."""
 
     EXTENSION = '.odt'
     # overwrites Novel.EXTENSION
@@ -5681,7 +5680,9 @@ class OdtFile(OdfFile):
 
 
 class OdtProof(OdtFile):
-    """OpenDocument xml proof reading file representation.
+    """ODT proof reading file representation.
+
+    Export a manuscript with visibly tagged chapters and scenes.
     """
 
     DESCRIPTION = 'Tagged manuscript for proofing'
@@ -5750,7 +5751,9 @@ class OdtProof(OdtFile):
 
 
 class OdtManuscript(OdtFile):
-    """OpenDocument xml manuscript file representation.
+    """ODT manuscript file representation.
+
+    Export a manuscript with invisibly tagged chapters and scenes.
     """
 
     DESCRIPTION = 'Editable manuscript'
@@ -5808,7 +5811,9 @@ class OdtManuscript(OdtFile):
 
 
 class OdtSceneDesc(OdtFile):
-    """OpenDocument xml scene summaries file representation.
+    """ODT scene summaries file representation.
+
+    Export a full synopsis with invisibly tagged scene descriptions.
     """
 
     DESCRIPTION = 'Scene descriptions'
@@ -5856,7 +5861,9 @@ class OdtSceneDesc(OdtFile):
 
 
 class OdtChapterDesc(OdtFile):
-    """OpenDocument xml chapter summaries file representation.
+    """ODT chapter summaries file representation.
+
+    Export a brief synopsis with invisibly tagged chapter descriptions.
     """
 
     DESCRIPTION = 'Chapter descriptions'
@@ -5879,7 +5886,9 @@ class OdtChapterDesc(OdtFile):
 
 
 class OdtPartDesc(OdtFile):
-    """OpenDocument xml part summaries file representation.
+    """ODT part summaries file representation.
+
+    Export a very brief synopsis with invisibly tagged part descriptions.
     """
 
     DESCRIPTION = 'Part descriptions'
@@ -5899,7 +5908,9 @@ class OdtPartDesc(OdtFile):
 
 
 class OdtExport(OdtFile):
-    """OpenDocument xml project file representation.
+    """ODT novel file representation.
+
+    Export a non-reimportable manuscript with chapters and scenes.
     """
     fileHeader = OdtFile.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
@@ -5940,7 +5951,9 @@ class OdtExport(OdtFile):
 
 
 class OdtCharacters(OdtFile):
-    """OpenDocument xml character descriptions file representation.
+    """ODT character descriptions file representation.
+
+    Export a character sheet with invisibly tagged descriptions.
     """
 
     DESCRIPTION = 'Character descriptions'
@@ -5984,7 +5997,9 @@ class OdtCharacters(OdtFile):
 
 
 class OdtItems(OdtFile):
-    """OpenDocument xml item descriptions file representation.
+    """ODT item descriptions file representation.
+
+    Export a item sheet with invisibly tagged descriptions.
     """
 
     DESCRIPTION = 'Item descriptions'
@@ -6014,7 +6029,9 @@ class OdtItems(OdtFile):
 
 
 class OdtLocations(OdtFile):
-    """OpenDocument xml location descriptions file representation.
+    """ODT location descriptions file representation.
+
+    Export a location sheet with invisibly tagged descriptions.
     """
 
     DESCRIPTION = 'Location descriptions'
@@ -6046,6 +6063,16 @@ from string import Template
 
 
 class CrossReferences():
+    """Create dictionaries containing a novel's cross references:
+
+    - Characters per tag
+    - Locations per tag
+    - Items per tag
+    - Scenes per character
+    - Scenes per location
+    - Scenes per item
+    - Scenes per tag
+    """
 
     def __init__(self):
         # Cross reference dictionaries:
@@ -6095,8 +6122,7 @@ class CrossReferences():
         # scene IDs in the overall order
 
     def generate_xref(self, novel):
-        """Generate cross references
-        """
+        """Generate cross references."""
         self.scnPerChr = {}
         self.scnPerLoc = {}
         self.scnPerItm = {}
@@ -6189,8 +6215,7 @@ class CrossReferences():
 
 
 class OdtXref(OdtFile):
-    """OpenDocument xml cross reference file representation.
-    """
+    """OpenDocument xml cross reference file representation."""
 
     DESCRIPTION = 'Cross reference'
     SUFFIX = '_xref'
@@ -6436,8 +6461,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
 
 class OdsFile(OdfFile):
-    """OpenDocument xml project file representation.
-    """
+    """ODS project file representation."""
 
     EXTENSION = '.ods'
     # overwrites Novel.EXTENSION
@@ -6730,8 +6754,7 @@ class OdsFile(OdfFile):
 
 
 class OdsCharList(OdsFile):
-    """OpenDocument xml characters spreadsheet representation.
-    """
+    """ODS character list representation."""
 
     DESCRIPTION = 'Character list'
     SUFFIX = '_charlist'
@@ -6822,8 +6845,7 @@ class OdsCharList(OdsFile):
 
 
 class OdsLocList(OdsFile):
-    """OpenDocument xml locations spreadsheet representation.
-    """
+    """ODS location list representation."""
 
     DESCRIPTION = 'Location list'
     SUFFIX = '_loclist'
@@ -6880,8 +6902,7 @@ class OdsLocList(OdsFile):
 
 
 class OdsItemList(OdsFile):
-    """OpenDocument xml items spreadsheet representation.
-    """
+    """ODS item list representation."""
 
     DESCRIPTION = 'Item list'
     SUFFIX = '_itemlist'
@@ -6939,8 +6960,7 @@ class OdsItemList(OdsFile):
 
 
 class OdsSceneList(OdsFile):
-    """OpenDocument xml scenes spreadsheet representation.
-    """
+    """ODS scene list representation."""
 
     DESCRIPTION = 'Scene list'
     SUFFIX = '_scenelist'
@@ -7161,8 +7181,7 @@ class OdsSceneList(OdsFile):
 
 
 class OdsPlotList(OdsFile):
-    """OpenDocument xml scenes spreadsheet representation.
-    """
+    """ODS plot list representation with plot related metadata."""
 
     DESCRIPTION = 'Plot list'
     SUFFIX = '_plotlist'
@@ -7399,10 +7418,9 @@ class OdsPlotList(OdsFile):
 
 
 class HtmlProof(HtmlFile):
-    """HTML file representation of an yWriter project's OfficeFile part.
+    """HTML proof reading file representation.
 
-    Represents a html file with visible chapter and scene tags 
-    to be read and written by Open/LibreOffice Writer.
+    Import a manuscript with visibly tagged chapters and scenes.
     """
 
     DESCRIPTION = 'Tagged manuscript for proofing'
@@ -7473,11 +7491,9 @@ class HtmlProof(HtmlFile):
 
 
 class HtmlManuscript(HtmlFile):
-    """HTML file representation of an yWriter project's manuscript part.
+    """HTML manuscript file representation.
 
-    Represents a html file with chapter and scene sections 
-    containing scene contents to be read and written by 
-    OpenOffice/LibreOffice Writer.
+    Import a manuscript with invisibly tagged chapters and scenes.
     """
 
     DESCRIPTION = 'Editable manuscript'
@@ -7517,7 +7533,9 @@ class HtmlManuscript(HtmlFile):
 
 
 class HtmlSceneDesc(HtmlFile):
-    """HTML file representation of an yWriter project's scene summaries.
+    """HTML scene summaries file representation.
+
+    Import a full synopsis with invisibly tagged scene descriptions.
     """
 
     DESCRIPTION = 'Scene descriptions'
@@ -7552,7 +7570,10 @@ class HtmlSceneDesc(HtmlFile):
 
 
 class HtmlChapterDesc(HtmlFile):
-    """HTML file representation of an yWriter project's chapters summaries."""
+    """HTML chapter summaries file representation.
+
+    Import a brief synopsis with invisibly tagged chapter descriptions.
+    """
 
     DESCRIPTION = 'Chapter descriptions'
     SUFFIX = '_chapters'
@@ -7581,7 +7602,10 @@ class HtmlChapterDesc(HtmlFile):
 
 
 class HtmlPartDesc(HtmlChapterDesc):
-    """HTML file representation of an yWriter project's parts summaries."""
+    """HTML part summaries file representation.
+
+    Import a very brief synopsis with invisibly tagged part descriptions.
+    """
 
     DESCRIPTION = 'Part descriptions'
     SUFFIX = '_parts'
@@ -7590,7 +7614,10 @@ class HtmlPartDesc(HtmlChapterDesc):
 
 
 class HtmlCharacters(HtmlFile):
-    """HTML file representation of an yWriter project's character descriptions."""
+    """HTML character descriptions file representation.
+
+    Import a character sheet with invisibly tagged descriptions.
+    """
 
     DESCRIPTION = 'Character descriptions'
     SUFFIX = '_characters'
@@ -7657,7 +7684,10 @@ class HtmlCharacters(HtmlFile):
 
 
 class HtmlLocations(HtmlFile):
-    """HTML file representation of an yWriter project's location descriptions."""
+    """HTML location descriptions file representation.
+
+    Import a location sheet with invisibly tagged descriptions.
+    """
 
     DESCRIPTION = 'Location descriptions'
     SUFFIX = '_locations'
@@ -7703,7 +7733,10 @@ class HtmlLocations(HtmlFile):
 
 
 class HtmlItems(HtmlFile):
-    """HTML file representation of an yWriter project's item descriptions."""
+    """HTML item descriptions file representation.
+
+    Import a item sheet with invisibly tagged descriptions.
+    """
 
     DESCRIPTION = 'Item descriptions'
     SUFFIX = '_items'
@@ -7753,8 +7786,9 @@ import csv
 
 class CsvFile(FileExport):
     """csv file representation.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR character.
+
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR character.
     """
 
     EXTENSION = '.csv'
@@ -7826,8 +7860,8 @@ class CsvSceneList(CsvFile):
     """csv file representation of an yWriter project's scenes table. 
 
     Represents a csv file with a record per scene.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR character.
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR character.
     """
 
     DESCRIPTION = 'Scene list'
@@ -8008,8 +8042,8 @@ class CsvPlotList(CsvFile):
     """csv file representation of an yWriter project's scenes table. 
 
     Represents a csv file with a record per scene.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR character.
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR character.
     """
 
     DESCRIPTION = 'Plot list'
@@ -8179,8 +8213,8 @@ class CsvCharList(CsvFile):
     """csv file representation of an yWriter project's characters table. 
 
     Represents a csv file with a record per character.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR character.
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR character.
     """
 
     DESCRIPTION = 'Character list'
@@ -8241,8 +8275,8 @@ class CsvLocList(CsvFile):
     """csv file representation of an yWriter project's locations table. 
 
     Represents a csv file with a record per location.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR location.
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR location.
     """
 
     DESCRIPTION = 'Location list'
@@ -8291,8 +8325,8 @@ class CsvItemList(CsvFile):
     """csv file representation of an yWriter project's items table. 
 
     Represents a csv file with a record per item.
-    * Records are separated by line breaks.
-    * Data fields are delimited by the _SEPARATOR item.
+    - Records are separated by line breaks.
+    - Data fields are delimited by the _SEPARATOR item.
     """
 
     DESCRIPTION = 'Item list'
@@ -8337,7 +8371,7 @@ class CsvItemList(CsvFile):
 
 
 class UniversalConverter(YwCnvUi):
-    """A converter class.
+    """A converter for import and export.
 
     Support yWriter 7 projects and most of the Novel subclasses 
     that can be read or written by OpenOffice/LibreOffice. 

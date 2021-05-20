@@ -2,6 +2,11 @@
 
 ## Changelog
 
+### v0.36.7 Bugfix release
+
+Rebuild pywoo.pyw with fixed ant build file. Due to a missing encoding information, the script contained some ANSI characters. This may lead to exceptions.
+Based on PyWriter v2.16.1
+
 ### v0.36.6 Bugfix release
 
 Fix a bug in the SaveYw StarBASIC module throwing an exception when trying to export to yWriter with no Writer document open. 
