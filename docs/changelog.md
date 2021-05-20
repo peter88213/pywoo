@@ -2,6 +2,12 @@
 
 ## Changelog
 
+### v1.0.0 Release
+
+- Update the underlying class library with changed API for better maintainability.
+- Revise the GUI.
+Based on PyWriter v3.0.0
+
 ### v0.36.7 Bugfix release
 
 Rebuild pywoo.pyw with fixed ant build file. Due to a missing encoding information, the script contained some ANSI characters. This may lead to exceptions.
