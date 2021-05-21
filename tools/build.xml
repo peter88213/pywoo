@@ -19,12 +19,6 @@
 			<exec executable="python" failonerror="true">
 			    <arg value="${src}/build_extension.py"/>
 			</exec>	
-		<mkdir dir="${builddir}" />
-		<delete file="${builddir}/pywoo.pyw" />
-			<exec executable="python" failonerror="true">
-			    <arg value="${src}/build_standalone.py"/>
-			</exec>
-		<replace encoding="utf-8" file="${builddir}/pywoo.pyw" token="@release" value="${release}" />
 	</target>
 
 	<target name="dist" description="Generate the extension">

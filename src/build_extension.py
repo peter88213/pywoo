@@ -9,7 +9,7 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import inliner
 
-SRC = '../src/extension/'
+SRC = '../src/'
 BUILD = '../test/'
 SOURCE_FILE = SRC + 'pywoo_.pyw'
 TARGET_FILE = BUILD + 'pywoo.pyw'
@@ -25,7 +25,7 @@ def main():
         pass
 
     inliner.run(SOURCE_FILE,
-                TARGET_FILE, 'openoffice', '../src/')
+                TARGET_FILE, 'pywoolib', '../src/')
     inliner.run(TARGET_FILE,
                 TARGET_FILE, 'pywriter', '../../PyWriter/src/')
     print('Done.')

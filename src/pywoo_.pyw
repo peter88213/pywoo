@@ -1,4 +1,4 @@
-"""Convert yWriter project to odt or ods. 
+"""Convert yWriter project to odt or ods and vice versa. 
 
 Version @release
 
@@ -10,13 +10,13 @@ import os
 import sys
 from urllib.parse import unquote
 
-from openoffice.pywoo_exporter import PywooExporter
+from pywoolib.converter import Converter
 
 YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = PywooExporter()
+    converter = Converter()
     kwargs = {'suffix': suffix}
     converter.run(sourcePath, **kwargs)
     converter.ui.start()
