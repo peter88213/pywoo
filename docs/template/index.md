@@ -2,7 +2,7 @@
 
 [yWriter](http://spacejock.com/yWriter7.html) is a free word processor written by Australian author and programmer Simon Haynes. yWriter's strengths are structuring novels and controlling the progress during the writing process. With this extension you can combine the advantages of yWriter 7 with the advantages of OpenOffice.
 
-## Features (a Python 3 installation is required) {#features}
+## Features (a Python 3 installation is required)
 
 -   Generate a "standard manuscript" formatted **ODF text document
     (ODT)** from an yWriter 6/7 project.
@@ -41,7 +41,7 @@ You can find more information on the [help pages](help).
 __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv)._
 
 
-## Download and install {#download}
+## Download and install
 
 [Download the latest release (version 0.99.0)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-0.99.0.oxt)
 
@@ -54,7 +54,7 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 -   If no additional "yWriter Import/Export" submenu shows up in the
     "Files" menu, please look at the "Tools" > "Extensions" menu.
 
-[Changelog](changelog.html)
+[Changelog](changelog)
 
 ## Credits
 
