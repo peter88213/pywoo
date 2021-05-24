@@ -5,6 +5,7 @@
 ### v1.2.0 New user interface
 
 - The main window is replaced by a simple message box.
+Based on PyWriter v3.2.0
 
 ### v1.0.0 Release
 
