@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### v1.1.0 New user interface
+
+- The main window is replaced by a simple message box.
+
 ### v1.0.0 Release
 
 - Update the underlying class library with changed API for better maintainability.

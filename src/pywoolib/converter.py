@@ -4,9 +4,7 @@ Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
-import platform
 from pywriter.converter.universal_converter import UniversalConverter
-from pywriter.ui.ui_tk_open import UiTkOpen
 
 
 class Converter(UniversalConverter):
@@ -14,15 +12,15 @@ class Converter(UniversalConverter):
     Open the new file after conversion from yw.
     """
 
-    def __init__(self):
-        """Extend the super class method."""
-        UniversalConverter.__init__(self)
-        self.ui = UiTkOpen('yWriter import/export (Python version ' +
-                           str(platform.python_version()) + ')')
-
     def export_from_yw(self, sourceFile, targetFile):
-        """Extend the super class method."""
-        UniversalConverter.export_from_yw(self, sourceFile, targetFile)
+        """Override the super class method."""
 
-        if self.newFile:
+        message = self.convert(sourceFile, targetFile)
+
+        if message.startswith('SUCCESS'):
+            self.newFile = targetFile.filePath
             self.open_newFile()
+
+        else:
+            self.newFile = None
+            self.ui.set_info_how(message)

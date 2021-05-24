@@ -8,18 +8,21 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 """
 import os
 import sys
+import platform
 from urllib.parse import unquote
 
-from pywoolib.converter import Converter
+from pywriter.converter.universal_converter import UniversalConverter
+from pywriter.ui.ui_mb import UiMb
 
 YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = Converter()
+    converter = UniversalConverter()
+    converter.ui = UiMb('yWriter import/export (Python version ' +
+                        str(platform.python_version()) + ')')
     kwargs = {'suffix': suffix}
     converter.run(sourcePath, **kwargs)
-    converter.ui.start()
 
 
 if __name__ == '__main__':

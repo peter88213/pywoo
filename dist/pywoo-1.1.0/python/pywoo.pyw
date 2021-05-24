@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.0.0
+Version 1.1.0
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -8,9 +8,9 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 """
 import os
 import sys
+import platform
 from urllib.parse import unquote
 
-import platform
 
 
 
@@ -432,9 +432,9 @@ class YwCnvUi(YwCnv):
 
         1. Send specific information about the conversion to the UI.
         2. Convert sourceFile into targetFile.
-        3. Pass the message to the UI.
-        4. Delete the temporay file, if exists.
-        5. Save the new file pathname.
+        3. Delete the temporay file, if exists.
+        4. Save the new file pathname.
+        5. Pass the message to the UI.
 
         Error handling:
         - If the conversion fails, newFile is set to None.
@@ -449,10 +449,6 @@ class YwCnvUi(YwCnv):
 
         message = self.convert(sourceFile, targetFile)
 
-        # Pass the message to the UI.
-
-        self.ui.set_info_how(message)
-
         # Delete the temporay file, if exists.
 
         self.delete_tempfile(sourceFile.filePath)
@@ -464,6 +460,10 @@ class YwCnvUi(YwCnv):
 
         else:
             self.newFile = None
+
+        # Pass the message to the UI.
+
+        self.ui.set_info_how(message)
 
     def confirm_overwrite(self, filePath):
         """Return boolean permission to overwrite the target file, overriding the superclass method."""
@@ -8419,107 +8419,41 @@ class UniversalConverter(YwCnvUi):
     def __init__(self):
         YwCnvUi.__init__(self)
         self.newProjectFactory = NewProjectFactory(self.CREATE_SOURCE_CLASSES)
-from tkinter import *
-
-from tkinter import *
 from tkinter import messagebox
+import tkinter as tk
 
 
-
-class UiTk(Ui):
-    """UI subclass implementing a Tkinter facade."""
+class UiMb(Ui):
+    """UI subclass with messagebox."""
 
     def __init__(self, title):
-        """Extend the Ui constructor. """
-        Ui.__init__(self, title)
-
-        self.root = Tk()
-        self.root.title(title)
-
-        self.appInfo = Label(self.root, text='')
-        self.successInfo = Label(self.root)
-        self.successInfo.config(height=1, width=60)
-        self.processInfo = Label(self.root, text='')
-        self.root.quitButton = Button(text="Quit", command=quit)
-        self.root.quitButton.config(height=1, width=10)
-
-        self.rowCount = 1
-        self.appInfo.grid(row=self.rowCount, column=1, padx=5, pady=5)
-        self.rowCount += 1
-        self.successInfo.grid(row=self.rowCount, column=1, padx=10, pady=10)
-        self.rowCount += 1
-        self.processInfo.grid(row=self.rowCount, column=1, pady=10)
-        self.rowCount += 1
-        self.root.quitButton.grid(row=self.rowCount, column=1, pady=10)
+        """Override the superclass constructor. """
+        root = tk.Tk()
+        root.withdraw()
+        self.title = title
 
     def ask_yes_no(self, text):
-        """Override the Ui method."""
-        return messagebox.askyesno('WARNING', text)
-
-    def set_info_what(self, message):
-        """What's the converter going to do?"""
-
-        self.infoWhatText = message
-        self.appInfo.config(text=message)
+        """Override the superclass method."""
+        return messagebox.askyesno(self.title, text)
 
     def set_info_how(self, message):
-        """How's the converter doing?"""
+        """Override the superclass method."""
 
-        self.infoHowText = message
-        self.processInfo.config(text=message)
-
-        if message.startswith('SUCCESS'):
-            self.successInfo.config(bg='green')
+        if message.startswith('ERROR'):
+            messagebox.showerror(self.title, message)
 
         else:
-            self.successInfo.config(bg='red')
-
-    def start(self):
-        """Start the Tk main loop."""
-        self.root.mainloop()
-
-
-class UiTkOpen(UiTk):
-    """Extend the UiTk class with an additional 'Open' button."""
-
-    def show_open_button(self, open_cmd):
-        """Add an 'Open' button to UiTk."""
-        self.root.openButton = Button(text="Open", command=open_cmd)
-        self.root.openButton.config(height=1, width=10)
-        self.rowCount += 1
-        self.root.openButton.grid(row=self.rowCount, column=1, pady=10)
-
-
-class pywooConverter(UniversalConverter):
-    """yWriter converter with a simple tkinter GUI. 
-    Open the new file after conversion from yw.
-    """
-
-    def __init__(self):
-        """Define instance variables.
-
-        ui -- user interface object; instance of Ui or a Ui subclass.
-        """
-        UniversalConverter.__init__(self)
-        self.ui = UiTkOpen('yWriter import/export (Python version ' +
-                           str(platform.python_version()) + ')')
-
-    def export_from_yw(self, sourceFile, targetFile):
-        """Method for conversion from yw to other.
-        """
-        UniversalConverter.export_from_yw(self, sourceFile, targetFile)
-
-        if self.newFile:
-            self.open_newFile()
+            messagebox.showinfo(self.title, message)
 
 YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = pywooConverter()
+    converter = UniversalConverter()
+    converter.ui = UiMb('yWriter import/export (Python version ' +
+                        str(platform.python_version()) + ')')
     kwargs = {'suffix': suffix}
     converter.run(sourcePath, **kwargs)
-    converter.ui.start()
 
 
 if __name__ == '__main__':
