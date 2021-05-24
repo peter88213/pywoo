@@ -8,13 +8,12 @@ from pywriter.converter.universal_converter import UniversalConverter
 
 
 class Converter(UniversalConverter):
-    """Extend the Super class. 
+    """Override the export_from_yw() method. 
     Open the new file after conversion from yw.
     """
 
     def export_from_yw(self, sourceFile, targetFile):
         """Override the super class method."""
-
         message = self.convert(sourceFile, targetFile)
 
         if message.startswith('SUCCESS'):

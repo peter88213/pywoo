@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.1.0
+Version 1.1.1
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -432,9 +432,9 @@ class YwCnvUi(YwCnv):
 
         1. Send specific information about the conversion to the UI.
         2. Convert sourceFile into targetFile.
-        3. Delete the temporay file, if exists.
-        4. Save the new file pathname.
-        5. Pass the message to the UI.
+        3. Pass the message to the UI.
+        4. Delete the temporay file, if exists.
+        5. Save the new file pathname.
 
         Error handling:
         - If the conversion fails, newFile is set to None.
@@ -449,6 +449,10 @@ class YwCnvUi(YwCnv):
 
         message = self.convert(sourceFile, targetFile)
 
+        # Pass the message to the UI.
+
+        self.ui.set_info_how(message)
+
         # Delete the temporay file, if exists.
 
         self.delete_tempfile(sourceFile.filePath)
@@ -460,10 +464,6 @@ class YwCnvUi(YwCnv):
 
         else:
             self.newFile = None
-
-        # Pass the message to the UI.
-
-        self.ui.set_info_how(message)
 
     def confirm_overwrite(self, filePath):
         """Return boolean permission to overwrite the target file, overriding the superclass method."""
@@ -8419,6 +8419,24 @@ class UniversalConverter(YwCnvUi):
     def __init__(self):
         YwCnvUi.__init__(self)
         self.newProjectFactory = NewProjectFactory(self.CREATE_SOURCE_CLASSES)
+
+
+class Converter(UniversalConverter):
+    """Override the export_from_yw() method. 
+    Open the new file after conversion from yw.
+    """
+
+    def export_from_yw(self, sourceFile, targetFile):
+        """Override the super class method."""
+        message = self.convert(sourceFile, targetFile)
+
+        if message.startswith('SUCCESS'):
+            self.newFile = targetFile.filePath
+            self.open_newFile()
+
+        else:
+            self.newFile = None
+            self.ui.set_info_how(message)
 from tkinter import messagebox
 import tkinter as tk
 
@@ -8449,7 +8467,7 @@ YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = UniversalConverter()
+    converter = Converter()
     converter.ui = UiMb('yWriter import/export (Python version ' +
                         str(platform.python_version()) + ')')
     kwargs = {'suffix': suffix}

@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### v1.1.0 New user interface
+### v1.2.0 New user interface
 
 - The main window is replaced by a simple message box.
 

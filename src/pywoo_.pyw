@@ -11,14 +11,14 @@ import sys
 import platform
 from urllib.parse import unquote
 
-from pywriter.converter.universal_converter import UniversalConverter
+from pywoolib.converter import Converter
 from pywriter.ui.ui_mb import UiMb
 
 YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
 
 
 def run(sourcePath, suffix=None):
-    converter = UniversalConverter()
+    converter = Converter()
     converter.ui = UiMb('yWriter import/export (Python version ' +
                         str(platform.python_version()) + ')')
     kwargs = {'suffix': suffix}
