@@ -4,6 +4,11 @@
 
 ## Changelog
 
+### v1.2.1 Service release
+
+- Refactor for faster execution.
+Based on Pywriter v3.2.1
+
 ### v1.2.0 New user interface
 
 - The main window is replaced by a simple message box.
