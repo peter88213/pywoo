@@ -4,30 +4,35 @@
 
 ## Changelog
 
-### v1.2.1 Service release
+### v1.2.1 Optional update
 
 - Refactor for faster execution.
+
 Based on Pywriter v3.2.1
 
 ### v1.2.0 New user interface
 
 - The main window is replaced by a simple message box.
+
 Based on PyWriter v3.2.0
 
-### v1.0.0 Release
+### v1.0.0 Official release
 
 - Update the underlying class library with changed API for better maintainability.
 - Revise the GUI.
+
 Based on PyWriter v3.0.0
 
 ### v0.36.7 Bugfix release
 
 Rebuild pywoo.pyw with fixed ant build file. Due to a missing encoding information, the script contained some ANSI characters. This may lead to exceptions.
+
 Based on PyWriter v2.16.1
 
 ### v0.36.6 Bugfix release
 
 Fix a bug in the SaveYw StarBASIC module throwing an exception when trying to export to yWriter with no Writer document open. 
+
 Based on PyWriter v2.14.3
 
 ### v0.36.5 Prepare os-independent import from yWriter
@@ -48,7 +53,7 @@ v2.14.3
 
 Fix a regression causing wrong file type detection. Based on PyWriter 2.14.3
 
-### v0.36.2 Service release
+### v0.36.2 Optional update
 
 - Generate compressed ODF documents.
 - Change the HTML launch mechanism of the show_help macro.
