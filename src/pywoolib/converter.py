@@ -4,10 +4,10 @@ Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
-from pywriter.converter.universal_converter import UniversalConverter
+from pywriter.converter.yw7_converter import Yw7Converter
 
 
-class Converter(UniversalConverter):
+class Converter(Yw7Converter):
     """Override the export_from_yw() method. 
     Open the new file after conversion from yw.
     """

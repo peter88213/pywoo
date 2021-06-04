@@ -5,9 +5,9 @@
 ## Features (a Python 3 installation is required)
 
 -   Generate a "standard manuscript" formatted **ODF text document
-    (ODT)** from an yWriter 6/7 project.
+    (ODT)** from an yWriter 7 project.
 
--   Load yWriter 6/7 chapters and scenes into an OpenDocument file with
+-   Load yWriter 7 chapters and scenes into an OpenDocument file with
     chapter and scene markers for **proof reading** and writing back.
 
 -   Generate a **character list** that can be edited in Office Calc and
@@ -43,7 +43,7 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Download and install
 
-[Download the latest release (version 1.2.1)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-1.2.1.oxt)
+[Download the latest release (version 1.4.0)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-1.4.0.oxt)
 
 -   Installation right at download, by double-clicking on the downloaded 
     file, or via the OpenOffice Extension Manager.
