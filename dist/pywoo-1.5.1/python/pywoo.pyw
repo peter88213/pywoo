@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.4.0
+Version 1.5.1
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3829,9 +3829,8 @@ class FileExport(Novel):
                 else:
                     continue
 
-            elif self.chapters[chId].chType == 1 or self.chapters[chId].oldType == 1:
-                # Chapter is "Notes" (new file format) or "Info" (old file
-                # format) chapter.
+            elif self.chapters[chId].chType == 1:
+                # Chapter is "Notes" type.
 
                 if self.notesChapterTemplate != '':
                     template = Template(self.notesChapterTemplate)
@@ -3843,6 +3842,15 @@ class FileExport(Novel):
 
                 if self.unusedChapterTemplate != '':
                     template = Template(self.unusedChapterTemplate)
+
+                else:
+                    continue
+
+            elif self.chapters[chId].oldType == 1:
+                # Chapter is "Info" type (old file format).
+
+                if self.notesChapterTemplate != '':
+                    template = Template(self.notesChapterTemplate)
 
                 else:
                     continue
@@ -7072,7 +7080,7 @@ class OdsPlotList(OdsFile):
       <text:p>Plot event</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Heading" office:value-type="string">
-      <text:p>Plot event title</text:p>
+      <text:p>Scene title</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Heading" office:value-type="string">
       <text:p>Details</text:p>
@@ -7897,7 +7905,7 @@ class CsvPlotList(CsvFile):
                    'vague', 'satisfied', 'happy', '', '', '', '']
 
     fileHeader = '''ID|''' +\
-        '''Plot section|Plot event|Plot event title|Details|''' +\
+        '''Plot section|Plot event|Scene title|Details|''' +\
         '''Scene|Words total|$FieldTitle1|$FieldTitle2|$FieldTitle3|$FieldTitle4
 '''
 
