@@ -1,4 +1,4 @@
-# The pywoo extension for OpenOffice and Python: Import and export yWriter 6/7 projects
+# The pywoo extension for OpenOffice and Python: Import and export yWriter 7 projects
 
 For more information, see the [project homepage](https://peter88213.github.io/pywoo) with description and download instructions.
 
