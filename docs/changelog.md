@@ -4,11 +4,11 @@
 
 ## Changelog
 
-### v1.6.0 Service update
+### v1.4.2 Optional update
 
-- Slight modifications of the plot list (not backward compatible for re-import).
+- Modify plot list titles.
 
-Based on PyWriter v3.6.0
+Based on PyWriter v3.4.2
 
 ### v1.4.1 Bugfix update
 
