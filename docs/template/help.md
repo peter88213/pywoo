@@ -6,15 +6,20 @@
 
 ## Command reference
 
+### "Files" menu
+
 -   [Import from yWriter](#import-from-ywriter)
--   [Import from yWriter for proof
-    reading](#import-from-ywriter-for-proof-reading)
+-   [Import from yWriter for proof reading](#import-from-ywriter-for-proof-reading)
 -   [Character list](#character-list)
 -   [Location list](#location-list)
 -   [Item list](#item-list)
 -   [Cross reference](#cross-reference)
 -   [Export to yWriter](#export-to-ywriter) 
 -   [Advanced features](@help-adv@)
+
+### "Format" menu
+
+-   [Replace scene dividers with blank lines](#replace-scene-dividers-with-blank-lines)
 
 ## HowTo
 
@@ -219,3 +224,14 @@ An outline has at least one third level heading.
 [Top of page](#top)
 
 ------------------------------------------------------------------------
+
+## Replace scene dividers with blank lines
+
+This will replace the three-line "* * *" scene dividers
+with single blank lines. The style of the scene-dividing
+lines will be changed from  _Heading 4_  to  _Heading 5_.
+
+[Top of page](#top)
+
+------------------------------------------------------------------------
+

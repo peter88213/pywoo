@@ -4,6 +4,18 @@
 
 ## Changelog
 
+### v1.6.0 New document formatting
+
+- Imported *Scenes/chapters* and *manuscript* documents now have three-line 
+"* * *" scene dividers instead of single blank lines.
+- *Replace scene dividers with blank lines* is added to the **Format** menu.
+- Scene titles as comments at the beginning of the scenes in the *manuscript* 
+and *work in progress* documents are written back to yWriter.
+- Chapter titles in the *manuscript*, *scene descriptions*, *part descriptions*,
+and *chapter descriptions* documents are written back to yWriter.
+
+Based on PyWriter v3.6.2
+
 ### v1.4.2 Optional update
 
 - Modify plot list titles.

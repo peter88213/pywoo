@@ -394,7 +394,7 @@
                         <value/>
                      </prop>
                      <prop oor:name="Title" oor:type="xs:string">
-                        <value xml:lang="en">Replace scene delimiters with blank lines</value>
+                        <value xml:lang="en">Replace scene dividers with blank lines</value>
                         <value xml:lang="de">Szenentrenner durch Leerzeilen ersetzen</value>
                      </prop>
                      <prop oor:name="URL" oor:type="xs:string">
@@ -738,7 +738,7 @@
                      <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Replace scene delimiters with blank lines</value>
+                     <value xml:lang="en">Replace scene dividers with blank lines</value>
                      <value xml:lang="de">Szenentrenner durch Leerzeilen ersetzen</value>
                   </prop>
                   <prop oor:name="URL" oor:type="xs:string">
