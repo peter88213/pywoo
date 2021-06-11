@@ -548,11 +548,11 @@
                      <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Replace scene delimiters with blank lines</value>
-                     <value xml:lang="de">Szenentrenner durch Leerzeilen ersetzen</value>
+                     <value xml:lang="en">Help</value>
+                     <value xml:lang="de">Hilfe</value>
                   </prop>
                   <prop oor:name="URL" oor:type="xs:string">
-                     <value>vnd.sun.star.script:pywoo.ChScDelim.to_blank_lines?language=Basic&amp;location=application</value>
+                     <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
                   </prop>
                   <prop oor:name="Target" oor:type="xs:string">
                      <value>_self</value>
@@ -568,30 +568,10 @@
                      <value/>
                   </prop>
                   <prop oor:name="Title" oor:type="xs:string">
-                     <value xml:lang="en">Help</value>
-                     <value xml:lang="de">Hilfe</value>
-                  </prop>
-                  <prop oor:name="URL" oor:type="xs:string">
-                     <value>vnd.sun.star.script:pywoo.help.show_help?language=Basic&amp;location=application</value>
-                  </prop>
-                  <prop oor:name="Target" oor:type="xs:string">
-                     <value>_self</value>
-                  </prop>
-               </node>
-               <node oor:name="N016" oor:op="replace">
-                  <prop oor:name="URL" oor:type="xs:string">
-                     <value>private:separator</value>
-                  </prop>
-               </node>
-               <node oor:name="N017" oor:op="replace">
-                  <prop oor:name="Context" oor:type="xs:string">
-                     <value/>
-                  </prop>
-                  <prop oor:name="Title" oor:type="xs:string">
                      <value xml:lang="en">Advanced features</value>
                   </prop>
                   <node oor:name="Submenu">
-                     <node oor:name="N018" oor:op="replace">
+                     <node oor:name="N016" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -605,7 +585,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N019" oor:op="replace">
+                     <node oor:name="N017" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -619,7 +599,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N020" oor:op="replace">
+                     <node oor:name="N018" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -633,7 +613,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N021" oor:op="replace">
+                     <node oor:name="N019" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -647,12 +627,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N022" oor:op="replace">
+                     <node oor:name="N020" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N023" oor:op="replace">
+                     <node oor:name="N021" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -666,7 +646,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N024" oor:op="replace">
+                     <node oor:name="N022" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -680,7 +660,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N025" oor:op="replace">
+                     <node oor:name="N023" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -694,12 +674,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N026" oor:op="replace">
+                     <node oor:name="N024" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N027" oor:op="replace">
+                     <node oor:name="N025" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -713,7 +693,7 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N028" oor:op="replace">
+                     <node oor:name="N026" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -727,12 +707,12 @@
                            <value>_self</value>
                         </prop>
                      </node>
-                     <node oor:name="N029" oor:op="replace">
+                     <node oor:name="N027" oor:op="replace">
                         <prop oor:name="URL" oor:type="xs:string">
                            <value>private:separator</value>
                         </prop>
                      </node>
-                     <node oor:name="N030" oor:op="replace">
+                     <node oor:name="N028" oor:op="replace">
                         <prop oor:name="Context" oor:type="xs:string">
                            <value/>
                         </prop>
@@ -747,6 +727,26 @@
                         </prop>
                      </node>
                   </node>
+               </node>
+               <node oor:name="N029" oor:op="replace">
+                  <prop oor:name="URL" oor:type="xs:string">
+                     <value>private:separator</value>
+                  </prop>
+               </node>
+               <node oor:name="N030" oor:op="replace">
+                  <prop oor:name="Context" oor:type="xs:string">
+                     <value/>
+                  </prop>
+                  <prop oor:name="Title" oor:type="xs:string">
+                     <value xml:lang="en">Replace scene delimiters with blank lines</value>
+                     <value xml:lang="de">Szenentrenner durch Leerzeilen ersetzen</value>
+                  </prop>
+                  <prop oor:name="URL" oor:type="xs:string">
+                     <value>vnd.sun.star.script:pywoo.ChScDelim.to_blank_lines?language=Basic&amp;location=application</value>
+                  </prop>
+                  <prop oor:name="Target" oor:type="xs:string">
+                     <value>_self</value>
+                  </prop>
                </node>
             </node>
          </node>
