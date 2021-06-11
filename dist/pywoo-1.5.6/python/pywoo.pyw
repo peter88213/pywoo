@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.5.5
+Version 1.5.6
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -5524,8 +5524,8 @@ class OdtChapterDesc(OdtFile):
     partTemplate = '''<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_parts.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
 '''
 
-    chapterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:a xlink:href="../${ProjectName}_manuscript.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
-<text:section text:style-name="Sect1" text:name="ChID:$ID">
+    chapterTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
+<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:a xlink:href="../${ProjectName}_manuscript.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
 <text:p text:style-name="Text_20_body">$Desc</text:p>
 </text:section>
 '''
@@ -5546,8 +5546,8 @@ class OdtPartDesc(OdtFile):
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
-    partTemplate = '''<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_manuscript.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
-<text:section text:style-name="Sect1" text:name="ChID:$ID">
+    partTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
+<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_manuscript.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
 <text:p text:style-name="Text_20_body">$Desc</text:p>
 </text:section>
 '''
@@ -7213,8 +7213,9 @@ class HtmlSceneDesc(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        Override HTMLparser.handle_endtag().
         """
+
         if self._scId is not None:
 
             if tag == 'div':
@@ -7249,10 +7250,15 @@ class HtmlSceneDesc(HtmlFile):
 
     def handle_data(self, data):
         """Collect data within scene sections.
-        Overwrites HTMLparser.handle_data().
+        Override HTMLparser.handle_data().
         """
         if self._scId is not None:
             self._lines.append(data.rstrip().lstrip())
+
+        elif self._chId is not None:
+
+            if not self.chapters[self._chId].title:
+                self.chapters[self._chId].title = data.rstrip().lstrip()
 
 
 
@@ -7267,7 +7273,7 @@ class HtmlChapterDesc(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the chapter section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        Override HTMLparser.handle_endtag().
         """
         if self._chId is not None:
 
@@ -7279,9 +7285,15 @@ class HtmlChapterDesc(HtmlFile):
             elif tag == 'p':
                 self._lines.append('\n')
 
+            elif tag == 'h1' or tag == 'h2':
+
+                if not self.chapters[self._chId].title:
+                    self.chapters[self._chId].title = ''.join(self._lines)
+                    self._lines = []
+
     def handle_data(self, data):
         """collect data within chapter sections.
-        Overwrites HTMLparser.handle_data().
+        Override HTMLparser.handle_data().
         """
         if self._chId is not None:
             self._lines.append(data.rstrip().lstrip())
