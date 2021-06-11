@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.5.18
+Version 1.5.19
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -8180,8 +8180,8 @@ def run(sourcePath, suffix=None):
 
 if __name__ == '__main__':
 
-    sys.stderr = open(os.path.join(os.getenv("TEMP"),
-                                   "stderr-" + os.path.basename(sys.argv[0])), "w")
+    sys.stderr = open(os.path.join(os.getenv('TEMP'),
+                                   'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
 
     try:
         sourcePath = unquote(sys.argv[1].replace('file:///', ''))
