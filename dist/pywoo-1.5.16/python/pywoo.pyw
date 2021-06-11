@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.5.15
+Version 1.5.16
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3999,7 +3999,7 @@ class FileExport(Novel):
 class OdfFile(FileExport):
     """Generic OpenDocument xml file representation.
     """
-    TEMPDIR = 'temp_odf'
+    TEMPDIR = (os.getenv("TEMP") + '/temp_odf').replace('\\', '/')
 
     ODF_COMPONENTS = []
     _MIMETYPE = ''
@@ -8179,6 +8179,9 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
+
+    sys.stderr = open(os.path.join(os.getenv("TEMP"),
+                                   "stderr-" + os.path.basename(sys.argv[0])), "w")
 
     try:
         sourcePath = unquote(sys.argv[1].replace('file:///', ''))
