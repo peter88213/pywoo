@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.5.19
+Version 1.5.20
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3395,6 +3395,7 @@ class NewProjectFactory(FileFactory):
 
 import zipfile
 import locale
+import tempfile
 from shutil import rmtree
 from datetime import datetime
 from string import Template
@@ -3999,7 +4000,6 @@ class FileExport(Novel):
 class OdfFile(FileExport):
     """Generic OpenDocument xml file representation.
     """
-    TEMPDIR = (os.getenv("TEMP") + '/temp_odf').replace('\\', '/')
 
     ODF_COMPONENTS = []
     _MIMETYPE = ''
@@ -4008,50 +4008,69 @@ class OdfFile(FileExport):
     _STYLES_XML = ''
     _META_XML = ''
 
+    def __init__(self, filePath, **kwargs):
+        """Extend the superclass constructor, 
+        creating a temporary directory.
+        """
+        FileExport.__init__(self, filePath, **kwargs)
+        self.tempDir = tempfile.mkdtemp(suffix='.tmp', prefix='odf_')
+
+    def __del__(self):
+        """Make sure to delete the temporary directory,
+        in case write() has not been called.
+        """
+        self.tear_down()
+
     def tear_down(self):
         """Delete the temporary directory 
         containing the unpacked ODF directory structure.
         """
         try:
-            rmtree(self.TEMPDIR)
+            rmtree(self.tempDir)
         except:
             pass
 
     def set_up(self):
         """Helper method for ZIP file generation.
 
-        Create a temporary directory containing the internal 
+        Prepare the temporary directory containing the internal 
         structure of an ODF file except 'content.xml'.
         """
-        self.tear_down()
-        os.mkdir(self.TEMPDIR)
-        os.mkdir(self.TEMPDIR + '/META-INF')
-
-        # Generate mimetype
+        # Create and open a temporary directory for the files to zip.
 
         try:
-            with open(self.TEMPDIR + '/mimetype', 'w', encoding='utf-8') as f:
+            self.tear_down()
+            os.mkdir(self.tempDir)
+            os.mkdir(self.tempDir + '/META-INF')
+
+        except:
+            return 'ERROR: Cannot create "' + os.path.normpath(self.tempDir) + '".'
+
+        # Generate mimetype.
+
+        try:
+            with open(self.tempDir + '/mimetype', 'w', encoding='utf-8') as f:
                 f.write(self._MIMETYPE)
         except:
             return 'ERROR: Cannot write "mimetype"'
 
-        # Generate settings.xml
+        # Generate settings.xml.
 
         try:
-            with open(self.TEMPDIR + '/settings.xml', 'w', encoding='utf-8') as f:
+            with open(self.tempDir + '/settings.xml', 'w', encoding='utf-8') as f:
                 f.write(self._SETTINGS_XML)
         except:
             return 'ERROR: Cannot write "settings.xml"'
 
-        # Generate META-INF\manifest.xml
+        # Generate META-INF\manifest.xml.
 
         try:
-            with open(self.TEMPDIR + '/META-INF/manifest.xml', 'w', encoding='utf-8') as f:
+            with open(self.tempDir + '/META-INF/manifest.xml', 'w', encoding='utf-8') as f:
                 f.write(self._MANIFEST_XML)
         except:
             return 'ERROR: Cannot write "manifest.xml"'
 
-        # Generate styles.xml with system language set as document language
+        # Generate styles.xml with system language set as document language.
 
         localeCodes = locale.getdefaultlocale()[0].split('_')
 
@@ -4063,12 +4082,12 @@ class OdfFile(FileExport):
         text = template.safe_substitute(localeMapping)
 
         try:
-            with open(self.TEMPDIR + '/styles.xml', 'w', encoding='utf-8') as f:
+            with open(self.tempDir + '/styles.xml', 'w', encoding='utf-8') as f:
                 f.write(text)
         except:
             return 'ERROR: Cannot write "styles.xml"'
 
-        # Generate meta.xml with actual document metadata
+        # Generate meta.xml with actual document metadata.
 
         dt = datetime.today()
 
@@ -4086,7 +4105,7 @@ class OdfFile(FileExport):
         text = template.safe_substitute(metaMapping)
 
         try:
-            with open(self.TEMPDIR + '/meta.xml', 'w', encoding='utf-8') as f:
+            with open(self.tempDir + '/meta.xml', 'w', encoding='utf-8') as f:
                 f.write(text)
         except:
             return 'ERROR: Cannot write "meta.xml".'
@@ -4108,7 +4127,7 @@ class OdfFile(FileExport):
 
         filePath = self._filePath
 
-        self._filePath = self.TEMPDIR + '/content.xml'
+        self._filePath = self.tempDir + '/content.xml'
 
         message = FileExport.write(self)
 
@@ -4124,7 +4143,7 @@ class OdfFile(FileExport):
 
         try:
             with zipfile.ZipFile(self.filePath, 'w') as odfTarget:
-                os.chdir(self.TEMPDIR)
+                os.chdir(self.tempDir)
 
                 for file in self.ODF_COMPONENTS:
                     odfTarget.write(file, compress_type=zipfile.ZIP_DEFLATED)
@@ -5249,7 +5268,7 @@ class OdtFile(OdfFile):
         # Generate manifest.rdf
 
         try:
-            with open(self.TEMPDIR + '/manifest.rdf', 'w', encoding='utf-8') as f:
+            with open(self.tempDir + '/manifest.rdf', 'w', encoding='utf-8') as f:
                 f.write(self._MANIFEST_RDF)
         except:
             return 'ERROR: Cannot write "manifest.rdf"'
@@ -8179,9 +8198,10 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-
+    """Enable this for debugging unhandled exceptions:
     sys.stderr = open(os.path.join(os.getenv('TEMP'),
                                    'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
+    """
 
     try:
         sourcePath = unquote(sys.argv[1].replace('file:///', ''))

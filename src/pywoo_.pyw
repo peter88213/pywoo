@@ -26,9 +26,10 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-
+    """Enable this for debugging unhandled exceptions:
     sys.stderr = open(os.path.join(os.getenv('TEMP'),
                                    'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
+    """
 
     try:
         sourcePath = unquote(sys.argv[1].replace('file:///', ''))

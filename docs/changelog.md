@@ -13,8 +13,8 @@
 and *work in progress* documents are written back to yWriter.
 - Chapter titles in the *manuscript*, *scene descriptions*, *part descriptions*,
 and *chapter descriptions* documents are written back to yWriter.
-- Generate temporary files and error log in the user's temp folder.
-- Improve the StarBasic-Python3 connection (abandon the calling batch file).
+- Generate temporary files in the user's temp folder.
+- Improve the Python3 connection to the StarBasic macro (abandon the calling batch file).
 
 Based on PyWriter v3.6.4
 
