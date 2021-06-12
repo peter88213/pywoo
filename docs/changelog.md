@@ -6,7 +6,7 @@
 
 ### v1.6.1 Bugfix update
 
-- Fix the "proofread tags" paragraph styles.
+- Fix the "proofread" chapter/scene tags paragraph styles.
 - Make the StarBasic macros, the Python script, and the html helpfiles 
 Linux compatible.
 
