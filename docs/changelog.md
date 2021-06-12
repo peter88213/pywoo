@@ -4,7 +4,9 @@
 
 ## Changelog
 
-### v1.6.0 New document formatting
+### v1.6.0 New document formatting, general program improvement
+
+It is highly advised to update to this version.
 
 - Imported *Scenes/chapters* and *manuscript* documents now have three-line 
 "* * *" scene dividers instead of single blank lines.

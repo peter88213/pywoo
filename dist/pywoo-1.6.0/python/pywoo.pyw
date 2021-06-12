@@ -1,6 +1,6 @@
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.5.20
+Version 1.6.0
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -8186,7 +8186,7 @@ class UiMb(Ui):
         else:
             messagebox.showinfo(self.title, message)
 
-YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
+YW_EXTENSIONS = ['.yw7']
 
 
 def run(sourcePath, suffix=None):

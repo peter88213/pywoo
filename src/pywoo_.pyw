@@ -14,7 +14,7 @@ from urllib.parse import unquote
 from pywoolib.converter import Converter
 from pywriter.ui.ui_mb import UiMb
 
-YW_EXTENSIONS = ['.yw7', '.yw6', '.yw5']
+YW_EXTENSIONS = ['.yw7']
 
 
 def run(sourcePath, suffix=None):
