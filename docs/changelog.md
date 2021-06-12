@@ -6,13 +6,14 @@
 
 ### v1.6.1 Bugfix update
 
-It is highly advised to update to this version.
-
 - Fix the "proofread tags" paragraph styles.
+- Make the StarBasic macros, the Python script, and the html helpfiles 
+Linux compatible.
+
+Based on PyWriter v3.6.6
+
 
 ### v1.6.0 New document formatting, general program improvement
-
-It is highly advised to update to this version.
 
 - Imported *Scenes/chapters* and *manuscript* documents now have three-line 
 "* * *" scene dividers instead of single blank lines.
