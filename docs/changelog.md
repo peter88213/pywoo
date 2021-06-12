@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.6.1 Bugfix update
+
+It is highly advised to update to this version.
+
+- Fix the "proofread tags" paragraph styles.
+
 ### v1.6.0 New document formatting, general program improvement
 
 It is highly advised to update to this version.
