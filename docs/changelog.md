@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.6.2 Optional update
+
+- Refactor the Python script.
+- Make the YwCnvUi.open_newFile() method os-independent.
+
+Based on PyWriter v3.6.7
+
 ### v1.6.1 Bugfix update
 
 - Fix the "proofread" chapter/scene tags paragraph styles.

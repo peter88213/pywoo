@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.6.1
+Version 1.6.2
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -10,8 +10,8 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 import platform
-from urllib.parse import unquote
 
+import webbrowser
 
 
 
@@ -545,7 +545,7 @@ class YwCnvUi(YwCnv):
 
     def open_newFile(self):
         """Open the converted file for editing and exit the converter script."""
-        os.startfile(self.newFile)
+        webbrowser.open(self.newFile)
         sys.exit(0)
 
 
@@ -8211,13 +8211,12 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-    """Enable this for debugging unhandled exceptions:
+    '''Enable this for debugging unhandled exceptions:
     sys.stderr = open(os.path.join(os.getenv('TEMP'),
                                    'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
-    """
-
+    '''
     try:
-        sourcePath = unquote(sys.argv[1].replace('file:///', ''))
+        sourcePath = sys.argv[1]
 
     except:
         sourcePath = ''

@@ -10,7 +10,6 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 import platform
-from urllib.parse import unquote
 
 from pywoolib.converter import Converter
 from pywriter.ui.ui_mb import UiMb
@@ -27,13 +26,12 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-    """Enable this for debugging unhandled exceptions:
+    '''Enable this for debugging unhandled exceptions:
     sys.stderr = open(os.path.join(os.getenv('TEMP'),
                                    'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
-    """
-
+    '''
     try:
-        sourcePath = unquote(sys.argv[1].replace('file:///', ''))
+        sourcePath = sys.argv[1]
 
     except:
         sourcePath = ''
