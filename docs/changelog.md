@@ -7,6 +7,7 @@
 ### v1.6.3 Optional update
 
 - Major refactoring of the yw7 file processing.
+- Refactor the OpenYw macro.
 
 Based on PyWriter v3.8.0
 
