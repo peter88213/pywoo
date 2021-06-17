@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.6.3 Optional update
+
+- Major refactoring of the yw7 file processing.
+
+Based on PyWriter v3.8.0
+
 ### v1.6.2 Optional update
 
 - Refactor the Python script.

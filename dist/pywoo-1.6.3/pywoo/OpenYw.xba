@@ -160,7 +160,7 @@ Sub open_yw(suffix As String, new_ext As String)
 
 	launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
 	aCommand = sPackageLocation + &quot;/python/pywoo.pyw&quot;
-	aParameter = &quot;&quot;&quot;&quot; + ConvertFromURL(file_path) + &quot;&quot;&quot; &quot; + suffix
+	aParameter = &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix
 	nFlags = 0
 	launcher.execute(aCommand, aParameter, nFlags)	
 	
