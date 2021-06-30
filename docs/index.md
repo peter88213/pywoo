@@ -58,8 +58,6 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Credits
 
-[yWriter](http://spacejock.com/yWriter7.html) by Simon Haynes.
-
 [OpenOffice Extension
 Compiler](https://wiki.openoffice.org/wiki/Extensions_Packager#Extension_Compiler)
 by Bernard Marcelly.
