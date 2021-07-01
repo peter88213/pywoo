@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.6.4 Optional update
+
+- Major refactoring of the templase based export.
+
+Based on PyWriter v3.12.5
+
 ### v1.6.3 Optional update
 
 - Major refactoring of the yw7 file processing.
