@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.6.4
+Version 1.6.5
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -554,6 +554,7 @@ class YwCnvUi(YwCnv):
 
 
 from urllib.parse import quote
+from shutil import copy2
 
 
 class Novel():
@@ -715,7 +716,7 @@ class Novel():
         else:
             suffix = ''
 
-        if filePath.lower().endswith(suffix + self.EXTENSION):
+        if filePath.lower().endswith((suffix + self.EXTENSION).lower()):
             self._filePath = filePath
             head, tail = os.path.split(os.path.realpath(filePath))
             self.projectPath = quote(head.replace('\\', '/'), '/:')
@@ -761,6 +762,37 @@ class Novel():
         """
         if os.path.isfile(self.filePath):
             return True
+
+        else:
+            return False
+
+    def back_up(self, single=True):
+        """Create a backup file from filePath. Return True, if successful.
+        Otherwise, return False.
+
+        Parameter: single
+        True - Overwrite existing backup file. Extension = .bak
+        False - Create a new, numbered backup file. Extension = .bkxxxx
+        """
+        if os.path.isfile(self.filePath):
+
+            if single:
+                backupFile = self.filePath + '.bak'
+
+            else:
+                i = 0
+                backupFile = self.filePath + '.bk0000'
+
+                while os.path.isfile(backupFile):
+                    i += 1
+                    backupFile = self.filePath + '.bk' + str(i).zfill(4)
+
+            try:
+                copy2(self.filePath, backupFile)
+                return True
+
+            except:
+                return False
 
         else:
             return False
@@ -1078,6 +1110,33 @@ class Character(WorldElement):
 import xml.etree.ElementTree as ET
 
 
+def indent(elem, level=0):
+    """xml pretty printer
+
+    Kudos to to Fredrik Lundh. 
+    Source: http://effbot.org/zone/element-lib.htm#prettyprint
+    """
+    i = "\n" + level * "  "
+
+    if len(elem):
+
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+
+        for elem in elem:
+            indent(elem, level + 1)
+
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
+
+
 class Yw7TreeBuilder():
     """Build yWriter 7 project xml tree."""
 
@@ -1138,14 +1197,14 @@ class Yw7TreeBuilder():
                 xmlScn.remove(xmlScn.find('Unused'))
 
             if prjScn.isNotesScene:
+                scFields = xmlScn.find('Fields')
 
                 try:
-                    scFields = xmlScn.find('Fields')
+                    if scFields.find('Field_SceneType') is None:
+                        ET.SubElement(scFields, 'Field_SceneType').text = '1'
 
                 except(AttributeError):
                     scFields = ET.SubElement(xmlScn, 'Fields')
-
-                if scFields.find('Field_SceneType') is None:
                     ET.SubElement(scFields, 'Field_SceneType').text = '1'
 
             elif xmlScn.find('Fields') is not None:
@@ -1157,14 +1216,15 @@ class Yw7TreeBuilder():
                         scFields.remove(scFields.find('Field_SceneType'))
 
             if prjScn.isTodoScene:
+                scFields = xmlScn.find('Fields')
 
                 try:
-                    scFields = xmlScn.find('Fields')
+
+                    if scFields.find('Field_SceneType') is None:
+                        ET.SubElement(scFields, 'Field_SceneType').text = '2'
 
                 except(AttributeError):
                     scFields = ET.SubElement(xmlScn, 'Fields')
-
-                if scFields.find('Field_SceneType') is None:
                     ET.SubElement(scFields, 'Field_SceneType').text = '2'
 
             elif xmlScn.find('Fields') is not None:
@@ -1362,8 +1422,12 @@ class Yw7TreeBuilder():
             if prjScn.characters is not None:
                 characters = xmlScn.find('Characters')
 
-                for oldCrId in characters.findall('CharID'):
-                    characters.remove(oldCrId)
+                try:
+                    for oldCrId in characters.findall('CharID'):
+                        characters.remove(oldCrId)
+
+                except(AttributeError):
+                    characters = ET.SubElement(xmlScn, 'Characters')
 
                 for crId in prjScn.characters:
                     ET.SubElement(characters, 'CharID').text = crId
@@ -1371,8 +1435,12 @@ class Yw7TreeBuilder():
             if prjScn.locations is not None:
                 locations = xmlScn.find('Locations')
 
-                for oldLcId in locations.findall('LocID'):
-                    locations.remove(oldLcId)
+                try:
+                    for oldLcId in locations.findall('LocID'):
+                        locations.remove(oldLcId)
+
+                except(AttributeError):
+                    locations = ET.SubElement(xmlScn, 'Locations')
 
                 for lcId in prjScn.locations:
                     ET.SubElement(locations, 'LocID').text = lcId
@@ -1380,8 +1448,12 @@ class Yw7TreeBuilder():
             if prjScn.items is not None:
                 items = xmlScn.find('Items')
 
-                for oldItId in items.findall('ItemID'):
-                    items.remove(oldItId)
+                try:
+                    for oldItId in items.findall('ItemID'):
+                        items.remove(oldItId)
+
+                except(AttributeError):
+                    items = ET.SubElement(xmlScn, 'Items')
 
                 for itId in prjScn.items:
                     ET.SubElement(items, 'ItemID').text = itId
@@ -1713,7 +1785,7 @@ class Yw7TreeBuilder():
 
             chapters.append(xmlChapters[chId])
 
-        self.indent_xml(root)
+        indent(root)
         ywProject.tree = ET.ElementTree(root)
 
         # Write version-dependent scene contents to the xml element tree.
@@ -1746,32 +1818,6 @@ class Yw7TreeBuilder():
                 pass
 
         return 'SUCCESS'
-
-    def indent_xml(self, elem, level=0):
-        """xml pretty printer
-
-        Kudos to to Fredrik Lundh. 
-        Source: http://effbot.org/zone/element-lib.htm#prettyprint
-        """
-        i = "\n" + level * "  "
-
-        if len(elem):
-
-            if not elem.text or not elem.text.strip():
-                elem.text = i + "  "
-
-            if not elem.tail or not elem.tail.strip():
-                elem.tail = i
-
-            for elem in elem:
-                self.indent_xml(elem, level + 1)
-
-            if not elem.tail or not elem.tail.strip():
-                elem.tail = i
-
-        else:
-            if level and (not elem.tail or not elem.tail.strip()):
-                elem.tail = i
 
 
 
@@ -2053,6 +2099,9 @@ class Yw7File(Novel):
             self.fieldTitle4 = prj.find('FieldTitle4').text
 
         #--- Read attributes at chapter level from the xml element tree.
+
+        self.srtChapters = []
+        # This is necessary for re-reading.
 
         for chp in root.iter('CHAPTER'):
             chId = chp.find('ID').text
@@ -2556,11 +2605,17 @@ class Yw7File(Novel):
             if source.scenes[scId].appendToPrev is not None:
                 self.scenes[scId].appendToPrev = source.scenes[scId].appendToPrev
 
-            if source.scenes[scId].date is not None:
-                self.scenes[scId].date = source.scenes[scId].date
+            if source.scenes[scId].date or source.scenes[scId].time:
 
-            if source.scenes[scId].time is not None:
-                self.scenes[scId].time = source.scenes[scId].time
+                if source.scenes[scId].date is not None:
+                    self.scenes[scId].date = source.scenes[scId].date
+
+                if source.scenes[scId].time is not None:
+                    self.scenes[scId].time = source.scenes[scId].time
+
+            elif source.scenes[scId].minute or source.scenes[scId].hour or source.scenes[scId].day:
+                self.scenes[scId].date = None
+                self.scenes[scId].time = None
 
             if source.scenes[scId].minute is not None:
                 self.scenes[scId].minute = source.scenes[scId].minute
@@ -3468,11 +3523,21 @@ class FileExport(Novel):
         else:
             time = ''
 
-            if self.scenes[scId].hour is not None:
-                hour = self.scenes[scId].hour
-                minute = self.scenes[scId].minute
-                scTime = self.scenes[scId].hour.zfill(2) + \
-                    ':' + self.scenes[scId].minute.zfill(2)
+            if self.scenes[scId].hour or self.scenes[scId].minute:
+
+                if self.scenes[scId].hour:
+                    hour = self.scenes[scId].hour
+
+                else:
+                    hour = '00'
+
+                if self.scenes[scId].minute:
+                    minute = self.scenes[scId].minute
+
+                else:
+                    minute = '00'
+
+                scTime = hour.zfill(2) + ':' + minute.zfill(2)
 
             else:
                 hour = ''
@@ -3931,6 +3996,7 @@ class OdfFile(FileExport):
         """
         FileExport.__init__(self, filePath, **kwargs)
         self.tempDir = tempfile.mkdtemp(suffix='.tmp', prefix='odf_')
+        self.originalPath = self._filePath
 
     def __del__(self):
         """Make sure to delete the temporary directory,
@@ -4042,13 +4108,13 @@ class OdfFile(FileExport):
 
         # Add "content.xml" to the temporary directory.
 
-        filePath = self._filePath
+        self.originalPath = self._filePath
 
         self._filePath = self.tempDir + '/content.xml'
 
         message = FileExport.write(self)
 
-        self._filePath = filePath
+        self._filePath = self.originalPath
 
         if message.startswith('ERROR'):
             return message
