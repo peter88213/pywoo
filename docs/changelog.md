@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.6.6 Bugfix release
+
+- Fix a bug causing an exception when a new item is added to a scene.
+
+Based on PyWriter v3.18.1
+
 ### v1.6.5 Bugfix release
 
 Fix a regression from v1.6.4 causing a crash if a scene has an 
