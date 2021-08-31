@@ -4,7 +4,7 @@
 
 ## Changelog
 
-### v1.8.0 Optional update
+### v1.8.0 Feature update
 
 - Add notes to the character descriptions.
 
