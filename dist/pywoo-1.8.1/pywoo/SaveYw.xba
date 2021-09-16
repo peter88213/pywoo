@@ -62,7 +62,7 @@ Sub export_yw
 		args2(1).Name = &quot;FilterName&quot;
 		args2(1).Value = &quot;Text - txt - csv (StarCalc)&quot;
 		args2(2).Name = &quot;FilterOptions&quot;
-		args2(2).Value = &quot;124,34,76,1,,0,false,true,true&quot;
+		args2(2).Value = &quot;44,34,76,1,,0,true,true,true&quot;
 		dispatcher.executeDispatch(document, &quot;.uno:SaveAs&quot;, &quot;&quot;, 0, args2())
 		
 		&apos; ----------------------------------------------------------------------

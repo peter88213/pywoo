@@ -43,7 +43,7 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 ## Download and install
 
-[Download the latest release (version 1.8.0)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-1.8.0.oxt)
+[Download the latest release (version 1.8.1)](https://raw.githubusercontent.com/peter88213/pywoo/master/dist/pywoo-1.8.1.oxt)
 
 -   Installation right at download, by double-clicking on the downloaded 
     file, or via the OpenOffice Extension Manager.
