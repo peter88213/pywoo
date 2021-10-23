@@ -56,6 +56,10 @@ __LibreOffice users:__  _A stand-alone LibreOffice variant not requiring a separ
 
 [Changelog](changelog)
 
+## Get updates
+
+This extension supports the update mechanism of OpenOffice. You can let the Extension Manager check for updates from time to time to get the latest release.
+
 ## Credits
 
 [OpenOffice Extension
