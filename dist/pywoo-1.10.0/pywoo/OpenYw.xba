@@ -16,6 +16,10 @@ Sub proof_yw
     open_yw(&quot;_proof&quot;, &quot;.odt&quot;)
 End Sub
 
+Sub get_brf_synopsis
+    open_yw(&quot;_brf_synopsis&quot;, &quot;.odt&quot;)
+End Sub
+
 Sub get_manuscript
     open_yw(&quot;_manuscript&quot;, &quot;.odt&quot;)
 End Sub
