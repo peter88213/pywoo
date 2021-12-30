@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.8.1
+Version 1.8.2
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -884,6 +884,9 @@ class Scene():
     ACTION_MARKER = 'A'
     REACTION_MARKER = 'R'
 
+    NULL_DATE = '0001-01-01'
+    NULL_TIME = '00:00:00'
+
     def __init__(self):
         self.title = None
         # str
@@ -1204,8 +1207,7 @@ class Yw7TreeBuilder():
                 scFields = xmlScn.find('Fields')
 
                 try:
-                    if scFields.find('Field_SceneType') is None:
-                        ET.SubElement(scFields, 'Field_SceneType').text = '1'
+                    scFields.find('Field_SceneType').text = '1'
 
                 except(AttributeError):
                     scFields = ET.SubElement(xmlScn, 'Fields')
@@ -1224,8 +1226,7 @@ class Yw7TreeBuilder():
 
                 try:
 
-                    if scFields.find('Field_SceneType') is None:
-                        ET.SubElement(scFields, 'Field_SceneType').text = '2'
+                    scFields.find('Field_SceneType').text = '2'
 
                 except(AttributeError):
                     scFields = ET.SubElement(xmlScn, 'Fields')
@@ -2223,6 +2224,9 @@ class Yw7File(Novel):
 
             else:
                 self.scenes[scId].isUnused = False
+
+            self.scenes[scId].isNotesScene = False
+            self.scenes[scId].isTodoScene = False
 
             for scFields in scn.findall('Fields'):
 
@@ -3295,8 +3299,11 @@ class FileExport(Novel):
     unusedChapterEndTemplate = ''
     notExportedChapterEndTemplate = ''
     notesChapterEndTemplate = ''
+    characterSectionHeading = ''
     characterTemplate = ''
+    locationSectionHeading = ''
     locationTemplate = ''
+    itemSectionHeading = ''
     itemTemplate = ''
     fileFooter = ''
 
@@ -3310,38 +3317,6 @@ class FileExport(Novel):
         self.characterFilter = Filter()
         self.locationFilter = Filter()
         self.itemFilter = Filter()
-
-    def get_string(self, elements):
-        """Return a string which is the concatenation of the 
-        members of the list of strings "elements", separated by 
-        a comma plus a space. The space allows word wrap in 
-        spreadsheet cells.
-        """
-        text = (', ').join(elements)
-        return text
-
-    def get_list(self, text):
-        """Split a sequence of strings into a list of strings
-        using a comma as delimiter. Remove leading and trailing
-        spaces, if any.
-        """
-        elements = []
-        tempList = text.split(',')
-
-        for element in tempList:
-            elements.append(element.lstrip().rstrip())
-
-        return elements
-
-    def convert_from_yw(self, text):
-        """Convert yw7 markup to target format.
-        This is a stub to be overridden by subclass methods.
-        """
-
-        if text is None:
-            text = ''
-
-        return(text)
 
     def merge(self, source):
         """Copy required attributes of the source object.
@@ -3511,7 +3486,7 @@ class FileExport(Novel):
 
         # Create a combined date information.
 
-        if self.scenes[scId].date is not None:
+        if self.scenes[scId].date is not None and self.scenes[scId].date != Scene.NULL_DATE:
             day = ''
             date = self.scenes[scId].date
             scDate = self.scenes[scId].date
@@ -3529,7 +3504,7 @@ class FileExport(Novel):
 
         # Create a combined time information.
 
-        if self.scenes[scId].time is not None:
+        if self.scenes[scId].time is not None and self.scenes[scId].date != Scene.NULL_DATE:
             hour = ''
             minute = ''
             time = self.scenes[scId].time
@@ -3561,7 +3536,7 @@ class FileExport(Novel):
 
         # Create a combined duration information.
 
-        if self.scenes[scId].lastsDays is not None:
+        if self.scenes[scId].lastsDays is not None and self.scenes[scId].lastsDays != '0':
             lastsDays = self.scenes[scId].lastsDays
             days = self.scenes[scId].lastsDays + 'd '
 
@@ -3569,7 +3544,7 @@ class FileExport(Novel):
             lastsDays = ''
             days = ''
 
-        if self.scenes[scId].lastsHours is not None:
+        if self.scenes[scId].lastsHours is not None and self.scenes[scId].lastsHours != '0':
             lastsHours = self.scenes[scId].lastsHours
             hours = self.scenes[scId].lastsHours + 'h '
 
@@ -3577,7 +3552,7 @@ class FileExport(Novel):
             lastsHours = ''
             hours = ''
 
-        if self.scenes[scId].lastsMinutes is not None:
+        if self.scenes[scId].lastsMinutes is not None and self.scenes[scId].lastsMinutes != '0':
             lastsMinutes = self.scenes[scId].lastsMinutes
             minutes = self.scenes[scId].lastsMinutes + 'min'
 
@@ -3877,8 +3852,7 @@ class FileExport(Novel):
                 dispNumber = chapterNumber
 
             if template is not None:
-                lines.append(template.safe_substitute(
-                    self.get_chapterMapping(chId, dispNumber)))
+                lines.append(template.safe_substitute(self.get_chapterMapping(chId, dispNumber)))
 
             # Process scenes.
 
@@ -3919,8 +3893,7 @@ class FileExport(Novel):
                 template = Template(self.chapterEndTemplate)
 
             if template is not None:
-                lines.append(template.safe_substitute(
-                    self.get_chapterMapping(chId, dispNumber)))
+                lines.append(template.safe_substitute(self.get_chapterMapping(chId, dispNumber)))
 
         return lines
 
@@ -3928,14 +3901,19 @@ class FileExport(Novel):
         """Process the characters.
         Return a list of strings.
         """
-        lines = []
+
+        if self.characterSectionHeading:
+            lines = [self.characterSectionHeading]
+
+        else:
+            lines = []
+
         template = Template(self.characterTemplate)
 
         for crId in self.srtCharacters:
 
             if self.characterFilter.accept(self, crId):
-                lines.append(template.safe_substitute(
-                    self.get_characterMapping(crId)))
+                lines.append(template.safe_substitute(self.get_characterMapping(crId)))
 
         return lines
 
@@ -3943,14 +3921,19 @@ class FileExport(Novel):
         """Process the locations.
         Return a list of strings.
         """
-        lines = []
+
+        if self.locationSectionHeading:
+            lines = [self.locationSectionHeading]
+
+        else:
+            lines = []
+
         template = Template(self.locationTemplate)
 
         for lcId in self.srtLocations:
 
             if self.locationFilter.accept(self, lcId):
-                lines.append(template.safe_substitute(
-                    self.get_locationMapping(lcId)))
+                lines.append(template.safe_substitute(self.get_locationMapping(lcId)))
 
         return lines
 
@@ -3958,14 +3941,19 @@ class FileExport(Novel):
         """Process the items.
         Return a list of strings.
         """
-        lines = []
+
+        if self.itemSectionHeading:
+            lines = [self.itemSectionHeading]
+
+        else:
+            lines = []
+
         template = Template(self.itemTemplate)
 
         for itId in self.srtItems:
 
             if self.itemFilter.accept(self, itId):
-                lines.append(template.safe_substitute(
-                    self.get_itemMapping(itId)))
+                lines.append(template.safe_substitute(self.get_itemMapping(itId)))
 
         return lines
 
@@ -3995,6 +3983,25 @@ class FileExport(Novel):
             return 'ERROR: Cannot write "' + os.path.normpath(self.filePath) + '".'
 
         return 'SUCCESS: "' + os.path.normpath(self.filePath) + '" written.'
+
+    def get_string(self, elements):
+        """Return a string which is the concatenation of the 
+        members of the list of strings "elements", separated by 
+        a comma plus a space. The space allows word wrap in 
+        spreadsheet cells.
+        """
+        text = (', ').join(elements)
+        return text
+
+    def convert_from_yw(self, text):
+        """Convert yw7 markup to target format.
+        This is a stub to be overridden by subclass methods.
+        """
+
+        if text is None:
+            text = ''
+
+        return(text)
 
 
 class OdfFile(FileExport):
@@ -5585,6 +5592,29 @@ class OdtPartDesc(OdtFile):
 '''
 
     fileFooter = OdtFile.CONTENT_XML_FOOTER
+
+
+class OdtBriefSynopsis(OdtFile):
+    """ODT brief synopsis file representation.
+
+    Export a brief synopsis with chapter titles and scene titles.
+    """
+
+    DESCRIPTION = 'Brief synopsis'
+    SUFFIX = '_brf_synopsis'
+
+    fileHeader = OdtFile.CONTENT_XML_HEADER + '''<text:p text:style-name="Title">$Title</text:p>
+<text:p text:style-name="Subtitle">$AuthorName</text:p>
+'''
+
+    partTemplate = '''<text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
+'''
+
+    chapterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title</text:h>
+'''
+
+    sceneTemplate = '''<text:p text:style-name="Text_20_body">$Title</text:p>
+'''
 
 
 class OdtExport(OdtFile):
@@ -7522,7 +7552,7 @@ import csv
 
 
 
-class CsvFile(FileExport):
+class CsvFile(Novel):
     """csv file representation.
 
     - Records are separated by line breaks.
@@ -7535,10 +7565,13 @@ class CsvFile(FileExport):
     _SEPARATOR = ','
     # delimits data fields within a record.
 
+    rowTitles = []
+
     def read(self):
         """Parse the csv file located at filePath, fetching the rows.
         Check the number of fields in each row.
         Return a message beginning with SUCCESS or ERROR.
+        Override the superclass method.
         """
         self.rows = []
         cellsPerRow = len(self.rowTitles)
@@ -7564,6 +7597,18 @@ class CsvFile(FileExport):
 
         return 'SUCCESS'
 
+    def get_list(self, text):
+        """Split a sequence of comma separated strings into a list of strings.
+        Remove leading and trailing spaces, if any.
+        """
+        elements = []
+        tempList = text.split(',')
+
+        for element in tempList:
+            elements.append(element.lstrip().rstrip())
+
+        return elements
+
 
 class CsvSceneList(CsvFile):
     """csv file representation of an yWriter project's scenes table. 
@@ -7584,6 +7629,7 @@ class CsvSceneList(CsvFile):
         """Parse the csv file located at filePath, 
         fetching the Scene attributes contained.
         Return a message beginning with SUCCESS or ERROR.
+        Extend the superclass method.
         """
         message = CsvFile.read(self)
 
@@ -7732,6 +7778,7 @@ class CsvPlotList(CsvFile):
         """Parse the csv file located at filePath, fetching 
         the Scene attributes contained.
         Return a message beginning with SUCCESS or ERROR.
+        Extend the superclass method.
         """
         message = CsvFile.read(self)
 
@@ -7811,6 +7858,7 @@ class CsvCharList(CsvFile):
         """Parse the csv file located at filePath, 
         fetching the Character attributes contained.
         Return a message beginning with SUCCESS or ERROR.
+        Extend the superclass method.
         """
         message = CsvFile.read(self)
 
@@ -7841,14 +7889,6 @@ class CsvCharList(CsvFile):
 
         return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
-    def merge(self, source):
-        """Copy required attributes of the source object.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-        self.srtCharacters = source.srtCharacters
-        self.characters = source.characters
-        return 'SUCCESS'
-
 
 
 
@@ -7865,6 +7905,7 @@ class CsvLocList(CsvFile):
         """Parse the csv file located at filePath, 
         fetching the WorldElement attributes contained.
         Return a message beginning with SUCCESS or ERROR.
+        Extend the superclass method.
         """
         message = CsvFile.read(self)
 
@@ -7884,14 +7925,6 @@ class CsvLocList(CsvFile):
 
         return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
-    def merge(self, source):
-        """Copy required attributes of the source object.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-        self.srtLocations = source.srtLocations
-        self.locations = source.locations
-        return 'SUCCESS'
-
 
 
 class CsvItemList(CsvFile):
@@ -7907,6 +7940,7 @@ class CsvItemList(CsvFile):
         """Parse the csv file located at filePath, 
         fetching the WorldElement attributes contained.
         Return a message beginning with SUCCESS or ERROR.
+        Extend the superclass method.
         """
         message = CsvFile.read(self)
 
@@ -7926,14 +7960,6 @@ class CsvItemList(CsvFile):
 
         return 'SUCCESS: Data read from "' + os.path.normpath(self.filePath) + '".'
 
-    def merge(self, source):
-        """Copy required attributes of the source object.
-        Return a message beginning with SUCCESS or ERROR.
-        """
-        self.srtItems = source.srtItems
-        self.items = source.items
-        return 'SUCCESS'
-
 
 class Yw7Converter(YwCnvUi):
     """A converter for universal import and export.
@@ -7952,6 +7978,7 @@ class Yw7Converter(YwCnvUi):
     EXPORT_TARGET_CLASSES = [OdtExport,
                              OdtProof,
                              OdtManuscript,
+                             OdtBriefSynopsis,
                              OdtSceneDesc,
                              OdtChapterDesc,
                              OdtPartDesc,
