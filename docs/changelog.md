@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.10.1 Bugfix release
+
+- Fix a bug in the PyWriter library where brief synopses cannot be opened with LibreOffice 7.
+
+Based on PyWriter v3.28.2
+
 ### v1.10.0 Brief synopsis
 
 - Add a brief synopsis with chapter and scene titles.
