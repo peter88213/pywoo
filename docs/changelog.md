@@ -4,7 +4,7 @@
 
 ## Changelog
 
-v1.10.0 Brief synopsis
+### v1.10.0 Brief synopsis
 
 - Add a brief synopsis with chapter and scene titles.
 
