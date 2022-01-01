@@ -1,10 +1,10 @@
 yWriter project import and export with Python.
  
 Import from yw7 project:
-- Generate a "standard manuscript" formatted OpenDocument textfile from an yWriter 7 project.
+- Generate a "standard manuscript" formatted OpenDocument textfile from a yWriter 7 project.
 
 Proof reading:
-- Import an yWriter 7 project into an OpenDocument file with chapter and scene markers.
+- Import a yWriter 7 project into an OpenDocument file with chapter and scene markers.
 - Write back the proofread scenes to the yWriter 7 project file.
 
 World building lists:
