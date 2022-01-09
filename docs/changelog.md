@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.12.0 Expand the document structure by splitting scenes.
+
+- Split scenes in manuscript and proof reading files using part, chapter and scene separators.
+
+Based on PyWriter v3.32.0
+
 ### v1.10.1 Bugfix release
 
 - Fix a bug in the PyWriter library where brief synopses cannot be opened with LibreOffice 7.
