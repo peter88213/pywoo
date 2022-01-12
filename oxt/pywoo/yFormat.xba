@@ -10,8 +10,10 @@
 
 sub to_blank_lines
 &apos; ----------------------------------------------------------------------
-&apos; Replace the &quot;* * *&quot; delimiter with a blank line. 
-&apos; Change the paragraph style from &quot;Heading 4&quot; to &quot;Heading 5&quot;.
+&apos; Replace scene dividers with blank lines
+&apos; 
+&apos; Replace the three-lines &quot;* * *&quot; scene dividers with a single blank line. 
+&apos; Change the style of the scene-dividing paragraphs from  _Heading 4_  to  _Heading 5_.
 &apos; ----------------------------------------------------------------------
 
 dim pStyles
@@ -158,8 +160,9 @@ end sub
 sub Indent
 &apos; ----------------------------------------------------------------------
 &apos; Indent paragraphs that begin with &quot;> &quot;.
-&apos; The paragraph style of lines beginning with &quot;&gt; &quot; 
-&apos; will be changed to  _Text body indent_.
+&apos;
+&apos; Select all paragraphs that begin with &quot;&gt; &quot; 
+&apos; and change their paragraph style to  _Text body indent_.
 &apos; ----------------------------------------------------------------------
 
 dim document   as object
