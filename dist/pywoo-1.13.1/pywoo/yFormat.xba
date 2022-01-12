@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
-<script:module xmlns:script="http://openoffice.org/2000/script" script:name="ChScDelim" script:language="StarBasic">&apos;  *****  BASIC  *****
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="yFormat" script:language="StarBasic">&apos;  *****  BASIC  *****
 
-&apos;ChScDelim - OpenOffice macro for changing the scene delimiter
+&apos; yFormat - OpenOffice macro module for formatting documents imported from yWriter
 &apos;
-&apos; Copyright (c) 2021 Peter Triesberger
+&apos; Copyright (c) 2022 Peter Triesberger
 &apos; For further information see https://github.com/peter88213/pywoo
 &apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
@@ -154,4 +154,83 @@ dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot
 
 
 end sub
+
+sub Indent
+&apos; ----------------------------------------------------------------------
+&apos; Replace the &quot;* * *&quot; delimiter with a blank line. 
+&apos; Change the paragraph style from &quot;Heading 4&quot; to &quot;Heading 5&quot;.
+&apos; ----------------------------------------------------------------------
+
+dim document   as object
+dim dispatcher as object
+dim pstyles
+
+document   = ThisComponent.CurrentController.Frame
+dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
+pStyles = ThisComponent.StyleFamilies.getByName(&quot;ParagraphStyles&quot;)
+
+&apos; Assign all paragraphs beginning with &apos;&gt; &apos; the &apos;Text body indent&apos; style.
+
+dim args1(18) as new com.sun.star.beans.PropertyValue
+args1(0).Name = &quot;SearchItem.StyleFamily&quot;
+args1(0).Value = 2
+args1(1).Name = &quot;SearchItem.CellType&quot;
+args1(1).Value = 0
+args1(2).Name = &quot;SearchItem.RowDirection&quot;
+args1(2).Value = true
+args1(3).Name = &quot;SearchItem.AllTables&quot;
+args1(3).Value = false
+args1(4).Name = &quot;SearchItem.Backward&quot;
+args1(4).Value = false
+args1(5).Name = &quot;SearchItem.Pattern&quot;
+args1(5).Value = false
+args1(6).Name = &quot;SearchItem.Content&quot;
+args1(6).Value = false
+args1(7).Name = &quot;SearchItem.AsianOptions&quot;
+args1(7).Value = false
+args1(8).Name = &quot;SearchItem.AlgorithmType&quot;
+args1(8).Value = 1
+args1(9).Name = &quot;SearchItem.SearchFlags&quot;
+args1(9).Value = 65536
+args1(10).Name = &quot;SearchItem.SearchString&quot;
+args1(10).Value = &quot;^&gt; &quot;
+args1(11).Name = &quot;SearchItem.ReplaceString&quot;
+args1(11).Value = &quot;&quot;
+args1(12).Name = &quot;SearchItem.Locale&quot;
+args1(12).Value = 255
+args1(13).Name = &quot;SearchItem.ChangedChars&quot;
+args1(13).Value = 2
+args1(14).Name = &quot;SearchItem.DeletedChars&quot;
+args1(14).Value = 2
+args1(15).Name = &quot;SearchItem.InsertedChars&quot;
+args1(15).Value = 2
+args1(16).Name = &quot;SearchItem.TransliterateFlags&quot;
+args1(16).Value = 1280
+args1(17).Name = &quot;SearchItem.Command&quot;
+args1(17).Value = 1
+args1(18).Name = &quot;Quiet&quot;
+args1(18).Value = true
+
+dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
+
+
+dim args2(1) as new com.sun.star.beans.PropertyValue
+args2(0).Name = &quot;Template&quot;
+args2(0).Value = pStyles.getByName(&quot;Text body indent&quot;).DisplayName
+args2(1).Name = &quot;Family&quot;
+args2(1).Value = 2
+
+dispatcher.executeDispatch(document, &quot;.uno:StyleApply&quot;, &quot;&quot;, 0, args2())
+
+&apos; Delete the markup.
+
+args1(17).Value = 3
+
+dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
+
+
+end sub
+
+
+
 </script:module>

@@ -4,5 +4,5 @@
  <library:element library:name="SaveYw"/>
  <library:element library:name="OpenYw"/>
  <library:element library:name="help"/>
- <library:element library:name="ChScDelim"/>
+ <library:element library:name="yFormat"/>
 </library:library>
