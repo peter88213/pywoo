@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.13.2
+Version 1.14.0
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -4163,7 +4163,7 @@ class FileExport(Novel):
         return lines
 
     def get_text(self):
-        """Assemple the whole text applying the templates.
+        """Assemble the whole text applying the templates.
         Return a string to be written to the output file.
         """
         lines = self.get_fileHeader()

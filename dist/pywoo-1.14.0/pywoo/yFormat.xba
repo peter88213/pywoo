@@ -159,9 +159,9 @@ end sub
 
 sub Indent
 &apos; ----------------------------------------------------------------------
-&apos; Indent paragraphs that begin with &quot;> &quot;.
+&apos; Indent paragraphs that start with &quot;> &quot;.
 &apos;
-&apos; Select all paragraphs that begin with &quot;&gt; &quot; 
+&apos; Select all paragraphs that start with &quot;&gt; &quot; 
 &apos; and change their paragraph style to  _Text body indent_.
 &apos; ----------------------------------------------------------------------
 
