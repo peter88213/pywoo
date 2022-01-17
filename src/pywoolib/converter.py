@@ -1,6 +1,6 @@
 """Provide a converter class for universal import and export. 
 
-Copyright (c) 2021 Peter Triesberger
+Copyright (c) 2022 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
@@ -8,12 +8,19 @@ from pywriter.converter.yw7_converter import Yw7Converter
 
 
 class Converter(Yw7Converter):
-    """Override the export_from_yw() method. 
-    Open the new file after conversion from yw.
+    """A converter for universal import and export.
+    Support yWriter 7 projects and most of the Novel subclasses 
+    that can be read or written by OpenOffice/LibreOffice.
+    - No message in case of success when converting from yWriter.
+    - Open the new file after conversion from yWriter.
     """
 
     def export_from_yw(self, sourceFile, targetFile):
-        """Override the super class method."""
+        """Method for conversion from yw to other.
+        Override the super class method.
+        Open the new file.
+        Show only error messages.
+        """
         message = self.convert(sourceFile, targetFile)
 
         if message.startswith('SUCCESS'):
