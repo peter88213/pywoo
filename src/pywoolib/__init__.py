@@ -1,4 +1,4 @@
-"""The pywoolib package - Modules for pywoo.
+"""Package for yWriter/OpenOffice file conversion.
 
 Modules:
 
