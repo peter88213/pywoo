@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.14.2 Bugfix release
+
+- Update bugfixed library
+
+Based on PyWriter v4.0.4
+
 ### v1.14.1 Minor bugfix
 
 Make sure that a brief synopsis cannot be exported to yWriter.

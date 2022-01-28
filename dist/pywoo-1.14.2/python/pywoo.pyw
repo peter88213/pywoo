@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.14.1
+Version 1.14.2
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -2916,7 +2916,7 @@ def read_html_file(filePath):
     """
     try:
         with open(filePath, 'r', encoding='utf-8') as f:
-            text = (f.read())
+            text = f.read()
     except:
         # HTML files exported by a word processor may be ANSI encoded.
         try:
@@ -2924,9 +2924,9 @@ def read_html_file(filePath):
                 text = (f.read())
 
         except(FileNotFoundError):
-            return ('ERROR: "{}" not found.'.format(os.path.normpath(filePath), None))
+            return 'ERROR: "{}" not found.'.format(os.path.normpath(filePath)), None
 
-    return ('SUCCESS', text)
+    return 'SUCCESS', text
 
 
 
