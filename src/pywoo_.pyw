@@ -19,14 +19,14 @@ YW_EXTENSIONS = ['.yw7']
 
 def run(sourcePath, suffix=None):
     converter = Converter()
-    converter.ui = UiMb('yWriter import/export (Python version {})'.format(platform.python_version()))
+    converter.ui = UiMb(f'yWriter import/export (Python version {platform.python_version()})')
     kwargs = {'suffix': suffix}
     converter.run(sourcePath, **kwargs)
 
 
 if __name__ == '__main__':
     '''Enable this for debugging unhandled exceptions:
-    sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-' + os.path.basename(sys.argv[0]) + '.txt'), 'w')
+    sys.stderr = open(os.path.join(os.getenv('TEMP'), f'stderr-{os.path.basename(sys.argv[0])}.txt'), 'w')
     '''
     try:
         sourcePath = sys.argv[1]
