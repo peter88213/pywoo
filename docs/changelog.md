@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.16.0 optional release
+
+- Rework the messages. 
+- Refactor the code.
+
+Based on PyWriter v5.0.0
+
 ### v1.14.2 Bugfix release
 
 - Update bugfixed library

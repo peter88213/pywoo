@@ -1173,7 +1173,7 @@ class Yw7Postprocessor():
         except:
             return 'ERROR: Can not write "{}".'.format(os.path.normpath(filePath))
 
-        return 'SUCCESS: "{}" written.'.format(os.path.normpath(filePath))
+        return '"{}" written.'.format(os.path.normpath(filePath))
 
 
 
@@ -4086,7 +4086,7 @@ class FileExport(Novel):
 
             return 'ERROR: Cannot write "{}".'.format(os.path.normpath(self.filePath))
 
-        return 'SUCCESS: "{}" written.'.format(os.path.normpath(self.filePath))
+        return '"{}" written.'.format(os.path.normpath(self.filePath))
 
     def get_string(self, elements):
         """Return a string which is the concatenation of the 
@@ -4278,7 +4278,7 @@ class OdfFile(FileExport):
 
         os.chdir(workdir)
         self.tear_down()
-        return 'SUCCESS: "{}" written.'.format(os.path.normpath(self.filePath))
+        return '"{}" written.'.format(os.path.normpath(self.filePath))
 
 
 class OdtFile(OdfFile):
