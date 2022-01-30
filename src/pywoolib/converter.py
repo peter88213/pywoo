@@ -23,10 +23,10 @@ class Converter(Yw7Converter):
         """
         message = self.convert(sourceFile, targetFile)
 
-        if message.startswith('SUCCESS'):
-            self.newFile = targetFile.filePath
-            self.open_newFile()
-
-        else:
+        if message.startswith('ERROR'):
             self.newFile = None
             self.ui.set_info_how(message)
+
+        else:
+            self.newFile = targetFile.filePath
+            self.open_newFile()
