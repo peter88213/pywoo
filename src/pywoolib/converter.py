@@ -4,6 +4,7 @@ Copyright (c) 2022 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
+from pywriter.pywriter_globals import ERROR
 from pywriter.converter.yw7_converter import Yw7Converter
 
 
@@ -23,7 +24,7 @@ class Converter(Yw7Converter):
         """
         message = self.convert(sourceFile, targetFile)
 
-        if message.startswith('ERROR'):
+        if message.startswith(ERROR):
             self.newFile = None
             self.ui.set_info_how(message)
 
