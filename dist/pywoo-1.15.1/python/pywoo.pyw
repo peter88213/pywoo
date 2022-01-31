@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.15.0
+Version 1.15.1
 
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -15,6 +15,7 @@ import platform
 ERROR = '!'
 
 import webbrowser
+
 
 
 
@@ -40,6 +41,11 @@ class Ui():
 
     def set_info_how(self, message):
         """How's the converter doing?"""
+
+        if message.startswith(ERROR):
+            message = f'FAIL: {message.split(ERROR, maxsplit=1)[1].strip()}'
+            sys.stderr.write(message)
+
         self.infoHowText = message
 
     def start(self):
