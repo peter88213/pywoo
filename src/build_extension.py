@@ -12,7 +12,7 @@ import inliner
 SRC = '../src/'
 BUILD = '../test/'
 SOURCE_FILE = SRC + 'pywoo_.pyw'
-TARGET_FILE = BUILD + 'pywoo.pyw'
+TARGET_FILE = f'{BUILD}pywoo.pyw'
 
 
 def main():
