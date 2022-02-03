@@ -20,7 +20,7 @@ You can find more information on the [help pages](help).
 
 - Windows.
 - [OpenOffice](https://www.openoffice.org) version 3.0 or more recent.
-- [Python](https://www.python.org/) version 3.4 or more recent will work. However, Python 3.7 or above is highly recommended.
+- [Python 3.6+](https://www.python.org/).
 - Java Runtime Environment (OpenOffice might need it for macro execution).
 
 
