@@ -30,4 +30,4 @@ class Converter(Yw7Converter):
 
         else:
             self.newFile = targetFile.filePath
-            self.open_newFile()
+            self._open_newFile()
