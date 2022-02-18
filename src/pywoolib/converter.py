@@ -16,18 +16,18 @@ class Converter(Yw7Converter):
     - Open the new file after conversion from yWriter.
     """
 
-    def export_from_yw(self, sourceFile, targetFile):
+    def export_from_yw(self, source, target):
         """Method for conversion from yw to other.
         Override the super class method.
         Open the new file.
         Show only error messages.
         """
-        message = self.convert(sourceFile, targetFile)
+        message = self.convert(source, target)
 
         if message.startswith(ERROR):
             self.newFile = None
             self.ui.set_info_how(message)
 
         else:
-            self.newFile = targetFile.filePath
+            self.newFile = target.filePath
             self._open_newFile()
