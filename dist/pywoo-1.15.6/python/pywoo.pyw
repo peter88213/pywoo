@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.15.5
+Version 1.15.6
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -10,7 +10,6 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 import platform
-
 
 ERROR = '!'
 
@@ -21,26 +20,54 @@ import webbrowser
 
 class Ui():
     """Base class for UI facades, implementing a 'silent mode'.
+    
+    Public methods:
+        ask_yes_no(text) -- return True or False.
+        set_info_what(message) -- show what the converter is going to do.
+        set_info_how(message) -- show how the converter is doing.
+        start() -- launch the GUI, if any.
+        
+    Public instance variables:
+        infoWhatText -- buffer for general messages.
+        infoHowText -- buffer for error/success messages.
     """
 
     def __init__(self, title):
         """Initialize text buffers for messaging.
+        
+        Positional arguments:
+            title -- application title.
         """
         self.infoWhatText = ''
         self.infoHowText = ''
 
     def ask_yes_no(self, text):
-        """The application may use a subclass  
-        for confirmation requests.    
+        """Return True or False.
+        
+        Positional arguments:
+            text -- question to be asked. 
+            
+        This is a stub used for "silent mode".
+        The application may use a subclass for confirmation requests.    
         """
         return True
 
     def set_info_what(self, message):
-        """What's the converter going to do?"""
+        """Show what the converter is going to do.
+        
+        Positional arguments:
+            message -- message to be buffered. 
+        """
         self.infoWhatText = message
 
     def set_info_how(self, message):
-        """How's the converter doing?"""
+        """Show how the converter is doing.
+        
+        Positional arguments:
+            message -- message to be buffered.
+            
+        Print the message to stderr, replacing the error marker, if any.
+        """
 
         if message.startswith(ERROR):
             message = f'FAIL: {message.split(ERROR, maxsplit=1)[1].strip()}'
@@ -49,7 +76,9 @@ class Ui():
         self.infoHowText = message
 
     def start(self):
-        """To be overridden by subclasses requiring
+        """Launch the GUI, if any.
+        
+        To be overridden by subclasses requiring
         special action to launch the user interaction.
         """
 
@@ -60,61 +89,65 @@ class YwCnv():
 
     Public methods:
         convert(sourceFile, targetFile) -- Convert sourceFile into targetFile.
-        _confirm_overwrite(fileName) -- Return boolean permission to overwrite the target file.
     """
 
-    def convert(self, sourceFile, targetFile):
-        """Convert sourceFile into targetFile and return a message.
+    def convert(self, source, target):
+        """Convert source into target and return a message.
 
         Positional arguments:
-            sourceFile, targetFile -- Novel subclass instances.
+            source, target -- Novel subclass instances.
 
+        Operation:
         1. Make the source object read the source file.
         2. Make the target object merge the source object's instance variables.
         3. Make the target object write the target file.
         Return a message beginning with the ERROR constant in case of error.
 
         Error handling:
-        - Check if sourceFile and targetFile are correctly initialized.
-        - Ask for permission to overwrite targetFile.
-        - Pass the error messages of the called methods of sourceFile and targetFile.
-        - The success message comes from targetFile.write(), if called.       
+        - Check if source and target are correctly initialized.
+        - Ask for permission to overwrite target.
+        - Pass the error messages of the called methods of source and target.
+        - The success message comes from target.write(), if called.       
         """
 
         # Initial error handling.
 
-        if sourceFile.filePath is None:
-            return f'{ERROR}Source "{os.path.normpath(sourceFile.filePath)}" is not of the supported type.'
+        if source.filePath is None:
+            return f'{ERROR}Source "{os.path.normpath(source.filePath)}" is not of the supported type.'
 
-        if not os.path.isfile(sourceFile.filePath):
-            return f'{ERROR}"{os.path.normpath(sourceFile.filePath)}" not found.'
+        if not os.path.isfile(source.filePath):
+            return f'{ERROR}"{os.path.normpath(source.filePath)}" not found.'
 
-        if targetFile.filePath is None:
-            return f'{ERROR}Target "{os.path.normpath(targetFile.filePath)}" is not of the supported type.'
+        if target.filePath is None:
+            return f'{ERROR}Target "{os.path.normpath(target.filePath)}" is not of the supported type.'
 
-        if os.path.isfile(targetFile.filePath) and not self._confirm_overwrite(targetFile.filePath):
+        if os.path.isfile(target.filePath) and not self._confirm_overwrite(target.filePath):
             return f'{ERROR}Action canceled by user.'
 
         # Make the source object read the source file.
 
-        message = sourceFile.read()
+        message = source.read()
 
         if message.startswith(ERROR):
             return message
 
         # Make the target object merge the source object's instance variables.
 
-        message = targetFile.merge(sourceFile)
+        message = target.merge(source)
 
         if message.startswith(ERROR):
             return message
 
         # Make the source object write the target file.
 
-        return targetFile.write()
+        return target.write()
 
     def _confirm_overwrite(self, fileName):
         """Return boolean permission to overwrite the target file.
+        
+        Positional argument:
+            fileName -- path to the target file.
+        
         This is a stub to be overridden by subclass methods.
         """
         return True
@@ -125,12 +158,12 @@ class YwCnvUi(YwCnv):
 
     Public methods:
         export_from_yw(sourceFile, targetFile) -- Convert from yWriter project to other file format.
+        create_yw(sourceFile, targetFile) -- Create target from source.
         import_to_yw(sourceFile, targetFile) -- Convert from any file format to yWriter project.
-        _confirm_overwrite(fileName) -- Return boolean permission to overwrite the target file.
 
     Instance variables:
         ui -- Ui (can be overridden e.g. by subclasses).
-        newFile -- string; path to the target file in case of success.   
+        newFile -- str: path to the target file in case of success.   
     """
 
     def __init__(self):
@@ -141,16 +174,16 @@ class YwCnvUi(YwCnv):
         self.newFile = None
         # Also indicates successful conversion.
 
-    def export_from_yw(self, sourceFile, targetFile):
+    def export_from_yw(self, source, target):
         """Convert from yWriter project to other file format.
 
-        sourceFile -- YwFile subclass instance.
-        targetFile -- Any Novel subclass instance.
+        Positional arguments:
+            source -- YwFile subclass instance.
+            target -- Any Novel subclass instance.
 
-        This is a primitive operation of the run() template method.
-
+        Operation:
         1. Send specific information about the conversion to the UI.
-        2. Convert sourceFile into targetFile.
+        2. Convert source into target.
         3. Pass the message to the UI.
         4. Save the new file pathname.
 
@@ -161,11 +194,11 @@ class YwCnvUi(YwCnv):
         # Send specific information about the conversion to the UI.
 
         self.ui.set_info_what(
-            f'Input: {sourceFile.DESCRIPTION} "{os.path.normpath(sourceFile.filePath)}"\nOutput: {targetFile.DESCRIPTION} "{os.path.normpath(targetFile.filePath)}"')
+            f'Input: {source.DESCRIPTION} "{os.path.normpath(source.filePath)}"\nOutput: {target.DESCRIPTION} "{os.path.normpath(target.filePath)}"')
 
-        # Convert sourceFile into targetFile.
+        # Convert source into target.
 
-        message = self.convert(sourceFile, targetFile)
+        message = self.convert(source, target)
 
         # Pass the message to the UI.
 
@@ -177,23 +210,23 @@ class YwCnvUi(YwCnv):
             self.newFile = None
 
         else:
-            self.newFile = targetFile.filePath
+            self.newFile = target.filePath
 
-    def create_yw7(self, sourceFile, targetFile):
-        """Create targetFile from sourceFile.
+    def create_yw7(self, source, target):
+        """Create target from source.
 
-        sourceFile -- Any Novel subclass instance.
-        targetFile -- YwFile subclass instance.
+        Positional arguments:
+            source -- Any Novel subclass instance.
+            target -- YwFile subclass instance.
 
-        This is a primitive operation of the run() template method.
-
+        Operation:
         1. Send specific information about the conversion to the UI.
-        2. Convert sourceFile into targetFile.
+        2. Convert source into target.
         3. Pass the message to the UI.
         4. Save the new file pathname.
 
         Error handling:
-        - Tf targetFile already exists as a file, the conversion is cancelled,
+        - Tf target already exists as a file, the conversion is cancelled,
           an error message is sent to the UI.
         - If the conversion fails, newFile is set to None.
         """
@@ -201,15 +234,15 @@ class YwCnvUi(YwCnv):
         # Send specific information about the conversion to the UI.
 
         self.ui.set_info_what(
-            f'Create a yWriter project file from {sourceFile.DESCRIPTION}\nNew project: "{os.path.normpath(targetFile.filePath)}"')
+            f'Create a yWriter project file from {source.DESCRIPTION}\nNew project: "{os.path.normpath(target.filePath)}"')
 
-        if os.path.isfile(targetFile.filePath):
-            self.ui.set_info_how(f'{ERROR}"{os.path.normpath(targetFile.filePath)}" already exists.')
+        if os.path.isfile(target.filePath):
+            self.ui.set_info_how(f'{ERROR}"{os.path.normpath(target.filePath)}" already exists.')
 
         else:
-            # Convert sourceFile into targetFile.
+            # Convert source into target.
 
-            message = self.convert(sourceFile, targetFile)
+            message = self.convert(source, target)
 
             # Pass the message to the UI.
 
@@ -221,18 +254,18 @@ class YwCnvUi(YwCnv):
                 self.newFile = None
 
             else:
-                self.newFile = targetFile.filePath
+                self.newFile = target.filePath
 
-    def import_to_yw(self, sourceFile, targetFile):
+    def import_to_yw(self, source, target):
         """Convert from any file format to yWriter project.
 
-        sourceFile -- Any Novel subclass instance.
-        targetFile -- YwFile subclass instance.
+        Positional arguments:
+            source -- Any Novel subclass instance.
+            target -- YwFile subclass instance.
 
-        This is a primitive operation of the run() template method.
-
+        Operation:
         1. Send specific information about the conversion to the UI.
-        2. Convert sourceFile into targetFile.
+        2. Convert source into target.
         3. Pass the message to the UI.
         4. Delete the temporay file, if exists.
         5. Save the new file pathname.
@@ -244,11 +277,11 @@ class YwCnvUi(YwCnv):
         # Send specific information about the conversion to the UI.
 
         self.ui.set_info_what(
-            f'Input: {sourceFile.DESCRIPTION} "{os.path.normpath(sourceFile.filePath)}"\nOutput: {targetFile.DESCRIPTION} "{os.path.normpath(targetFile.filePath)}"')
+            f'Input: {source.DESCRIPTION} "{os.path.normpath(source.filePath)}"\nOutput: {target.DESCRIPTION} "{os.path.normpath(target.filePath)}"')
 
-        # Convert sourceFile into targetFile.
+        # Convert source into target.
 
-        message = self.convert(sourceFile, targetFile)
+        message = self.convert(source, target)
 
         # Pass the message to the UI.
 
@@ -256,7 +289,7 @@ class YwCnvUi(YwCnv):
 
         # Delete the temporay file, if exists.
 
-        self._delete_tempfile(sourceFile.filePath)
+        self._delete_tempfile(source.filePath)
 
         # Save the new file pathname.
 
@@ -264,10 +297,16 @@ class YwCnvUi(YwCnv):
             self.newFile = None
 
         else:
-            self.newFile = targetFile.filePath
+            self.newFile = target.filePath
 
     def _confirm_overwrite(self, filePath):
-        """Return boolean permission to overwrite the target file, overriding the superclass method."""
+        """Return boolean permission to overwrite the target file.
+        
+        Positional arguments:
+            fileName -- path to the target file.
+        
+        Overrides the superclass method.
+        """
         return self.ui.ask_yes_no(f'Overwrite existing file "{os.path.normpath(filePath)}"?')
 
     def _delete_tempfile(self, filePath):
@@ -308,9 +347,9 @@ class FileFactory:
     """
 
     def __init__(self, fileClasses=[]):
-        """Write the parameter to a private instance variable.
+        """Write the parameter to a "private" instance variable.
 
-        Positional arguments:
+        Optional arguments:
             _fileClasses -- list of classes from which an instance can be returned.
         """
         self._fileClasses = fileClasses
@@ -328,7 +367,7 @@ class ExportSourceFactory(FileFactory):
         """Instantiate a source object for conversion from a yWriter project.
 
         Positional arguments:
-            sourcePath -- string; path to the source file to convert.
+            sourcePath -- str: path to the source file to convert.
 
         Return a tuple with three elements:
         - A message beginning with the ERROR constant in case of error
@@ -358,10 +397,13 @@ class ExportTargetFactory(FileFactory):
         """Instantiate a target object for conversion from a yWriter project.
 
         Positional arguments:
-            sourcePath -- string; path to the source file to convert.
+            sourcePath -- str: path to the source file to convert.
 
         Optional arguments:
-            suffix -- string; an indicator for the target file type.
+            suffix -- str: an indicator for the target file type.
+
+        Required keyword arguments: 
+            suffix -- str: target file name suffix.
 
         Return a tuple with three elements:
         - A message beginning with the ERROR constant in case of error
@@ -395,7 +437,7 @@ class ImportSourceFactory(FileFactory):
         """Instantiate a source object for conversion to a yWriter project.       
 
         Positional arguments:
-            sourcePath -- string; path to the source file to convert.
+            sourcePath -- str: path to the source file to convert.
 
         Return a tuple with three elements:
         - A message beginning with the ERROR constant in case of error
@@ -426,10 +468,13 @@ class ImportTargetFactory(FileFactory):
         """Instantiate a target object for conversion to a yWriter project.
 
         Positional arguments:
-            sourcePath -- string; path to the source file to convert.
+            sourcePath -- str: path to the source file to convert.
 
         Optional arguments:
-            suffix -- string; an indicator for the source file type.
+            suffix -- str: an indicator for the source file type.
+
+        Required keyword arguments: 
+            suffix -- str: target file name suffix.
 
         Return a tuple with three elements:
         - A message beginning with the ERROR constant in case of error
@@ -486,9 +531,11 @@ class YwCnvFf(YwCnvUi):
     IMPORT_TARGET_CLASSES = []
 
     def __init__(self):
-        """Define instance variables."""
+        """Create strategy class instances.
+        
+        Extends the superclass constructor.
+        """
         super().__init__()
-
         self.exportSourceFactory = ExportSourceFactory(self.EXPORT_SOURCE_CLASSES)
         self.exportTargetFactory = ExportTargetFactory(self.EXPORT_TARGET_CLASSES)
         self.importSourceFactory = ImportSourceFactory(self.IMPORT_SOURCE_CLASSES)
@@ -498,10 +545,13 @@ class YwCnvFf(YwCnvUi):
     def run(self, sourcePath, **kwargs):
         """Create source and target objects and run conversion.
 
-        sourcePath -- str; the source file path.
-        Required keyword argument: 'suffix' -- str; target file name suffix.
+        Positional arguments: 
+            sourcePath -- str: the source file path.
+        
+        Required keyword arguments: 
+            suffix -- str: target file name suffix.
 
-        This is a template method that calls primitive operations by case.
+        This is a template method that calls superclass methods as primitive operations by case.
         """
         self.newFile = None
 
@@ -555,7 +605,6 @@ from html import unescape
 import xml.etree.ElementTree as ET
 
 from urllib.parse import quote
-from shutil import copy2
 
 
 class Novel():
@@ -565,36 +614,44 @@ class Novel():
     attributes and structural information (a full set or a subset
     of the information included in an yWriter project file).
 
-    Public instance variables:
-        title -- str; title
-        desc -- str; description
-        author -- str; author name
-        fieldTitle1 -- str; field title 1
-        fieldTitle2 -- str; field title 2
-        fieldTitle3 -- str; field title 3
-        fieldTitle4 -- str; field title 4
-        chapters -- dict; key = chapter ID, value = Chapter instance.
-        scenes -- dict; key = scene ID, value = Scene instance.
-        srtChapters -- list of str; The novel's sorted chapter IDs. 
-        locations -- dict; key = location ID, value = WorldElement instance.
-        srtLocations -- list of str; The novel's sorted location IDs. 
-        items -- dict; key = item ID, value = WorldElement instance.
-        srtItems -- list of str; The novel's sorted item IDs. 
-        characters -- dict; key = character ID, value = Character instance.
-        srtCharacters -- list of str The novel's sorted character IDs.
-        filePath -- str; path to the file represented by the class.   
-    """
+    Public methods:
+        read() -- parse the file and get the instance variables.
+        merge(source) -- update instance variables from a source instance.
+        write() -- write instance variables to the file.
 
+    Public instance variables:
+        title -- str: title.
+        desc -- str: description in a single string.
+        authorName -- str: author's name.
+        author bio -- str: information about the author.
+        fieldTitle1 -- str: scene rating field title 1.
+        fieldTitle2 -- str: scene rating field title 2.
+        fieldTitle3 -- str: scene rating field title 3.
+        fieldTitle4 -- str: scene rating field title 4.
+        chapters -- dict: (key: ID; value: chapter instance).
+        scenes -- dict: (key: ID, value: scene instance).
+        srtChapters -- list: the novel's sorted chapter IDs.
+        locations -- dict: (key: ID, value: WorldElement instance).
+        srtLocations -- list: the novel's sorted location IDs.
+        items -- dict: (key: ID, value: WorldElement instance).
+        srtItems -- list: the novel's sorted item IDs.
+        characters -- dict: (key: ID, value: character instance).
+        srtCharacters -- list: the novel's sorted character IDs.
+        filePath -- str: path to the file (property with getter and setter). 
+    """
     DESCRIPTION = 'Novel'
     EXTENSION = None
     SUFFIX = None
     # To be extended by subclass methods.
 
     def __init__(self, filePath, **kwargs):
-        """Define instance variables.
+        """Initialize instance variables.
 
-        Positional argument:
-            filePath -- string; path to the file represented by the class.
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        Optional arguments:
+            kwargs -- keyword arguments to be used by subclasses.            
         """
         self.title = None
         # str
@@ -604,9 +661,13 @@ class Novel():
         # str
         # xml: <PROJECT><Desc>
 
-        self.author = None
+        self.authorName = None
         # str
         # xml: <PROJECT><AuthorName>
+
+        self.authorBio = None
+        # str
+        # xml: <PROJECT><Bio>
 
         self.fieldTitle1 = None
         # str
@@ -628,21 +689,18 @@ class Novel():
         # dict
         # xml: <CHAPTERS><CHAPTER><ID>
         # key = chapter ID, value = Chapter instance.
-        # The order of the elements does not matter (the novel's
-        # order of the chapters is defined by srtChapters)
+        # The order of the elements does not matter (the novel's order of the chapters is defined by srtChapters)
 
         self.scenes = {}
         # dict
         # xml: <SCENES><SCENE><ID>
         # key = scene ID, value = Scene instance.
-        # The order of the elements does not matter (the novel's
-        # order of the scenes is defined by the order of the chapters
-        # and the order of the scenes within the chapters)
+        # The order of the elements does not matter (the novel's order of the scenes is defined by
+        # the order of the chapters and the order of the scenes within the chapters)
 
         self.srtChapters = []
         # list of str
-        # The novel's chapter IDs. The order of its elements
-        # corresponds to the novel's order of the chapters.
+        # The novel's chapter IDs. The order of its elements corresponds to the novel's order of the chapters.
 
         self.locations = {}
         # dict
@@ -663,8 +721,7 @@ class Novel():
 
         self.srtItems = []
         # list of str
-        # The novel's item IDs. The order of its elements
-        # corresponds to the XML project file.
+        # The novel's item IDs. The order of its elements corresponds to the XML project file.
 
         self.characters = {}
         # dict
@@ -674,13 +731,11 @@ class Novel():
 
         self.srtCharacters = []
         # list of str
-        # The novel's character IDs. The order of its elements
-        # corresponds to the XML project file.
+        # The novel's character IDs. The order of its elements corresponds to the XML project file.
 
         self._filePath = None
         # str
-        # Path to the file. The setter only accepts files of a
-        # supported type as specified by EXTENSION.
+        # Path to the file. The setter only accepts files of a supported type as specified by EXTENSION.
 
         self._projectName = None
         # str
@@ -698,7 +753,8 @@ class Novel():
 
     @filePath.setter
     def filePath(self, filePath):
-        """Setter for the filePath instance variable.        
+        """Setter for the filePath instance variable.
+                
         - Format the path string according to Python's requirements. 
         - Accept only filenames with the right suffix and extension.
         """
@@ -715,14 +771,52 @@ class Novel():
             self.projectPath = quote(head.replace('\\', '/'), '/:')
             self.projectName = quote(tail.replace(f'{suffix}{self.EXTENSION}', ''))
 
+    def read(self):
+        """Parse the file and get the instance variables.
+        
+        Return a message beginning with the ERROR constant in case of error.
+        This is a stub to be overridden by subclass methods.
+        """
+        return f'{ERROR}Read method is not implemented.'
+
+    def merge(self, source):
+        """Update instance variables from a source instance.
+        
+        Positional arguments:
+            source -- Novel subclass instance to merge.
+        
+        Return a message beginning with the ERROR constant in case of error.
+        This is a stub to be overridden by subclass methods.
+        """
+        return f'{ERROR}Merge method is not implemented.'
+
+    def write(self):
+        """Write instance variables to the file.
+        
+        Return a message beginning with the ERROR constant in case of error.
+        This is a stub to be overridden by subclass methods.
+        """
+        return f'{ERROR}Write method is not implemented.'
+
     def _convert_to_yw(self, text):
         """Return text, converted from source format to yw7 markup.
+        
+        Positional arguments:
+            text -- string to convert.
+        
         This is a stub to be overridden by subclass methods.
         """
         return text
 
     def _convert_from_yw(self, text, quick=False):
         """Return text, converted from yw7 markup to target format.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Optional arguments:
+            quick -- bool: if True, apply a conversion mode for one-liners without formatting.
+        
         This is a stub to be overridden by subclass methods.
         """
         return text
@@ -730,14 +824,22 @@ class Novel():
 
 class Chapter():
     """yWriter chapter representation.
-    # xml: <CHAPTERS><CHAPTER>
+    
+    Public instance variables:
+        title -- str: chapter title (may be the heading).
+        desc -- str: chapter description in a single string.
+        chLevel -- int: chapter level (part/chapter).
+        oldType -- int: chapter type (Chapter/Other).
+        chType -- int: chapter type yWriter 7.0.7.2+ (Normal/Notes/Todo).
+        isUnused -- bool: True, if the chapter is marked "Unused".
+        suppressChapterTitle -- bool: uppress chapter title when exporting.
+        isTrash -- bool: True, if the chapter is the project's trash bin.
+        suppressChapterBreak -- bool: Suppress chapter break when exporting.
+        srtScenes -- list of str: the chapter's sorted scene IDs.        
     """
 
-    chapterTitlePrefix = "Chapter "
-    # str
-    # Can be changed at runtime for non-English projects.
-
     def __init__(self):
+        """Initialize instance variables."""
         self.title = None
         # str
         # xml: <Title>
@@ -757,6 +859,7 @@ class Chapter():
         # xml: <Type>
         # 0 = chapter type (marked "Chapter")
         # 1 = other type (marked "Other")
+        # Applies to projects created by a yWriter version prior to 7.0.7.2.
 
         self.chType = None
         # int
@@ -764,6 +867,7 @@ class Chapter():
         # 0 = Normal
         # 1 = Notes
         # 2 = Todo
+        # Applies to projects created by yWriter version 7.0.7.2+.
 
         self.isUnused = None
         # bool
@@ -791,34 +895,60 @@ class Chapter():
         # The chapter's scene IDs. The order of its elements
         # corresponds to the chapter's order of the scenes.
 
-    def get_title(self):
-        """Fix auto-chapter titles if necessary 
-        """
-        text = self.title
-
-        if text:
-            text = text.replace('Chapter ', self.chapterTitlePrefix)
-
-        return text
 
 
 class Scene():
     """yWriter scene representation.
-    # xml: <SCENES><SCENE>
+    
+    Public instance variables:
+        title -- str: scene title.
+        desc -- str: scene description in a single string.
+        sceneContent -- str: scene content (property with getter and setter).
+        rtfFile -- str: RTF file name (yWriter 5).
+        wordCount - int: word count (derived; updated by the sceneContent setter).
+        letterCount - int: letter count (derived; updated by the sceneContent setter).
+        isUnused -- bool: True if the scene is marked "Unused". 
+        isNotesScene -- bool: True if the scene type is "Notes".
+        isTodoScene -- bool: True if the scene type is "Todo". 
+        doNotExport -- bool: True if the scene is not to be exported to RTF.
+        status -- int: scene status (Outline/Draft/1st Edit/2nd Edit/Done).
+        sceneNotes -- str: scene notes in a single string.
+        tags -- list of scene tags. 
+        field1 -- int: scene ratings field 1.
+        field2 -- int: scene ratings field 2.
+        field3 -- int: scene ratings field 3.
+        field4 -- int: scene ratings field 4.
+        appendToPrev -- bool: if True, append the scene without a divider to the previous scene.
+        isReactionScene -- bool: if True, the scene is "reaction". Otherwise, it's "action". 
+        isSubPlot -- bool: if True, the scene belongs to a sub-plot. Otherwise it's main plot.  
+        goal -- str: the main actor's scene goal. 
+        conflict -- str: what hinders the main actor to achieve his goal.
+        outcome -- str: what comes out at the end of the scene.
+        characters -- list of character IDs related to this scene.
+        locations -- list of location IDs related to this scene. 
+        items -- list of item IDs related to this scene.
+        date -- str: specific start date in ISO format (yyyy-mm-dd).
+        time -- str: specific start time in ISO format (hh:mm).
+        minute -- str: unspecific start time: minutes.
+        hour -- str: unspecific start time: hour.
+        day -- str: unspecific start time: day.
+        lastsMinutes -- str: scene duration: minutes.
+        lastsHours -- str: scene duration: hours.
+        lastsDays -- str: scene duration: days. 
+        image -- str:  path to an image related to the scene. 
     """
-
+    STATUS = (None, 'Outline', 'Draft', '1st Edit', '2nd Edit', 'Done')
     # Emulate an enumeration for the scene status
     # Since the items are used to replace text,
     # they may contain spaces. This is why Enum cannot be used here.
 
-    STATUS = [None, 'Outline', 'Draft', '1st Edit', '2nd Edit', 'Done']
     ACTION_MARKER = 'A'
     REACTION_MARKER = 'R'
-
     NULL_DATE = '0001-01-01'
     NULL_TIME = '00:00:00'
 
     def __init__(self):
+        """Initialize instance variables."""
         self.title = None
         # str
         # xml: <Title>
@@ -992,13 +1122,19 @@ class Scene():
         self.letterCount = len(text)
 
 
-
 class WorldElement():
-    """Story world element representation.
-    # xml: <LOCATIONS><LOCATION> or # xml: <ITEMS><ITEM>
+    """Story world element representation (may be location or item).
+    
+    Public instance variables:
+        title -- str: title (name).
+        image -- str: image file path.
+        desc -- str: description.
+        tags -- list of tags.
+        aka -- str: alternate name.
     """
 
     def __init__(self):
+        """Initialize instance variables."""
         self.title = None
         # str
         # xml: <Title>
@@ -1022,13 +1158,19 @@ class WorldElement():
 
 class Character(WorldElement):
     """yWriter character representation.
-    # xml: <CHARACTERS><CHARACTER>
-    """
 
+    Public instance variables:
+        notes -- str: character notes.
+        bio -- str: character biography.
+        goals -- str: character's goals in the story.
+        fullName -- str: full name (the title inherited may be a short name).
+        isMajor -- bool: True, if it's a major character.
+    """
     MAJOR_MARKER = 'Major'
     MINOR_MARKER = 'Minor'
 
     def __init__(self):
+        """Extends the superclass constructor by adding instance variables."""
         super().__init__()
 
         self.notes = None
@@ -1053,38 +1195,66 @@ class Character(WorldElement):
 
 
 class Splitter():
-
+    """Helper class for scene and chapter splitting.
+    
+    When importing scenes to yWriter, they may contain manually inserted scene and chapter dividers.
+    The Splitter class updates a Novel instance by splitting such scenes and creating new chapters and scenes. 
+    
+    Public methods:
+        split_scenes(novel) -- Split scenes by inserted chapter and scene dividers.
+        
+    Public class constants:
+        PART_SEPARATOR -- marker indicating the beginning of a new part, splitting a scene.
+        CHAPTER_SEPARATOR -- marker indicating the beginning of a new chapter, splitting a scene.
+    """
     PART_SEPARATOR = '# '
     CHAPTER_SEPARATOR = '## '
-    SCENE_SEPARATOR = '* * *'
-    CLIP_TITLE = 20
-    # This is used for splitting scenes.
+    _SCENE_SEPARATOR = '* * *'
+    _CLIP_TITLE = 20
+    # Maximum length of newly generated scene titles.
 
-    def split_scenes(self, ywPrj):
-        """Generate new chapters and scenes if there are dividers within the scene content.
+    def split_scenes(self, novel):
+        """Split scenes by inserted chapter and scene dividers.
+        
+        Update a Novel instance by generating new chapters and scenes 
+        if there are dividers within the scene content.
+        
+        Positional argument: 
+            novel -- Novel instance to update.
         """
 
         def create_chapter(chapterId, title, desc, level):
             """Create a new chapter and add it to the novel.
+            
+            Positional arguments:
+                chapterId -- str: ID of the chapter to create.
+                title -- str: title of the chapter to create.
+                desc -- str: description of the chapter to create.
+                level -- int: chapter level (part/chapter).           
             """
             newChapter = Chapter()
             newChapter.title = title
             newChapter.desc = desc
             newChapter.chLevel = level
             newChapter.chType = 0
-            ywPrj.chapters[chapterId] = newChapter
+            novel.chapters[chapterId] = newChapter
 
         def create_scene(sceneId, parent, splitCount):
             """Create a new scene and add it to the novel.
+            
+            Positional arguments:
+                sceneId -- str: ID of the scene to create.
+                parent -- Scene instance: parent scene.
+                splitCount -- int: number of parent's splittings.
             """
             WARNING = ' (!) '
-
+            # Mark metadata of split scenes.
             newScene = Scene()
 
             if parent.title:
 
-                if len(parent.title) > self.CLIP_TITLE:
-                    title = f'{parent.title[:self.CLIP_TITLE]}...'
+                if len(parent.title) > self._CLIP_TITLE:
+                    title = f'{parent.title[:self._CLIP_TITLE]}...'
 
                 else:
                     title = parent.title
@@ -1123,55 +1293,57 @@ class Splitter():
             newScene.lastsDays = parent.lastsDays
             newScene.lastsHours = parent.lastsHours
             newScene.lastsMinutes = parent.lastsMinutes
-            ywPrj.scenes[sceneId] = newScene
+            novel.scenes[sceneId] = newScene
 
         # Get the maximum chapter ID and scene ID.
 
         chIdMax = 0
         scIdMax = 0
 
-        for chId in ywPrj.srtChapters:
+        for chId in novel.srtChapters:
 
             if int(chId) > chIdMax:
                 chIdMax = int(chId)
 
-        for scId in ywPrj.scenes:
+        for scId in novel.scenes:
 
             if int(scId) > scIdMax:
                 scIdMax = int(scId)
+                
+        #--- Process chapters and scenes.
 
         srtChapters = []
 
-        for chId in ywPrj.srtChapters:
+        for chId in novel.srtChapters:
             srtChapters.append(chId)
             chapterId = chId
             srtScenes = []
 
-            for scId in ywPrj.chapters[chId].srtScenes:
+            for scId in novel.chapters[chId].srtScenes:
                 srtScenes.append(scId)
 
-                if not ywPrj.scenes[scId].sceneContent:
+                if not novel.scenes[scId].sceneContent:
                     continue
 
                 sceneId = scId
-                lines = ywPrj.scenes[scId].sceneContent.split('\n')
+                lines = novel.scenes[scId].sceneContent.split('\n')
                 newLines = []
                 inScene = True
                 sceneSplitCount = 0
 
-                # Search scene content for dividers.
+                #--- Search scene content for dividers.
 
                 for line in lines:
 
                     if line.startswith(self.PART_SEPARATOR):
 
                         if inScene:
-                            ywPrj.scenes[sceneId].sceneContent = '\n'.join(newLines)
+                            novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
                             newLines = []
                             sceneSplitCount = 0
                             inScene = False
 
-                        ywPrj.chapters[chapterId].srtScenes = srtScenes
+                        novel.chapters[chapterId].srtScenes = srtScenes
                         srtScenes = []
 
                         chIdMax += 1
@@ -1182,12 +1354,12 @@ class Splitter():
                     elif line.startswith(self.CHAPTER_SEPARATOR):
 
                         if inScene:
-                            ywPrj.scenes[sceneId].sceneContent = '\n'.join(newLines)
+                            novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
                             newLines = []
                             sceneSplitCount = 0
                             inScene = False
 
-                        ywPrj.chapters[chapterId].srtScenes = srtScenes
+                        novel.chapters[chapterId].srtScenes = srtScenes
                         srtScenes = []
 
                         chIdMax += 1
@@ -1195,13 +1367,13 @@ class Splitter():
                         create_chapter(chapterId, 'New chapter', line.replace(self.CHAPTER_SEPARATOR, ''), 0)
                         srtChapters.append(chapterId)
 
-                    elif line.startswith(self.SCENE_SEPARATOR):
-                        ywPrj.scenes[sceneId].sceneContent = '\n'.join(newLines)
+                    elif line.startswith(self._SCENE_SEPARATOR):
+                        novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
                         newLines = []
                         sceneSplitCount += 1
                         scIdMax += 1
                         sceneId = str(scIdMax)
-                        create_scene(sceneId, ywPrj.scenes[scId], sceneSplitCount)
+                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount)
                         srtScenes.append(sceneId)
                         inScene = True
 
@@ -1210,18 +1382,18 @@ class Splitter():
                         sceneSplitCount += 1
                         scIdMax += 1
                         sceneId = str(scIdMax)
-                        create_scene(sceneId, ywPrj.scenes[scId], sceneSplitCount)
+                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount)
                         srtScenes.append(sceneId)
                         inScene = True
 
                     else:
                         newLines.append(line)
 
-                ywPrj.scenes[sceneId].sceneContent = '\n'.join(newLines)
+                novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
 
-            ywPrj.chapters[chapterId].srtScenes = srtScenes
+            novel.chapters[chapterId].srtScenes = srtScenes
 
-        ywPrj.srtChapters = srtChapters
+        novel.srtChapters = srtChapters
 
 
 def indent(elem, level=0):
@@ -1255,15 +1427,14 @@ class Yw7File(Novel):
     """yWriter 7 project file representation.
 
     Public methods: 
-        read() -- Parse the file and store selected properties.
-        merge(novel) -- Copy required attributes of the novel object.
-        write() -- Write selected properties to the file.
-        is_locked() -- Check whether the yw7 file is locked by yWriter.
+        read() -- parse the yWriter xml file and get the instance variables.
+        merge(source) -- update instance variables from a source instance.
+        write() -- write instance variables to the yWriter xml file.
+        is_locked() -- check whether the yw7 file is locked by yWriter.
 
-    Additional attributes:
+    Public instance variables:
         tree -- xml element tree of the yWriter project
     """
-
     DESCRIPTION = 'yWriter 7 project'
     EXTENSION = '.yw7'
 
@@ -1277,16 +1448,24 @@ class Yw7File(Novel):
     # ElementTree.write omits CDATA tags, so they have to be inserted afterwards.
 
     def __init__(self, filePath, **kwargs):
-        """Initialize instance variables:
-        Extend the superclass constructor.
+        """Initialize instance variables.
+        
+        Positional arguments:
+            filePath -- str: path to the yw7 file.
+            
+        Optional arguments:
+            kwargs -- keyword arguments (not used here).            
+        
+        Extends the superclass constructor.
         """
         super().__init__(filePath)
         self.tree = None
 
     def read(self):
-        """Parse the yWriter xml file, fetching the Novel attributes.
+        """Parse the yWriter xml file and get the instance variables.
+        
         Return a message beginning with the ERROR constant in case of error.
-        Override the superclass method.
+        Overrides the superclass method.
         """
 
         if self.is_locked():
@@ -1401,7 +1580,10 @@ class Yw7File(Novel):
             self.title = prj.find('Title').text
 
         if prj.find('AuthorName') is not None:
-            self.author = prj.find('AuthorName').text
+            self.authorName = prj.find('AuthorName').text
+
+        if prj.find('Bio') is not None:
+            self.authorBio = prj.find('Bio').text
 
         if prj.find('Desc') is not None:
             self.desc = prj.find('Desc').text
@@ -1689,9 +1871,13 @@ class Yw7File(Novel):
         return 'yWriter project data read in.'
 
     def merge(self, source):
-        """Copy required attributes of the source object.
+        """Update instance variables from a source instance.
+        
+        Positional arguments:
+            source -- Novel subclass instance to merge.
+        
         Return a message beginning with the ERROR constant in case of error.
-        Override the superclass method.
+        Overrides the superclass method.
         """
 
         def merge_lists(srcLst, tgtLst):
@@ -2082,8 +2268,11 @@ class Yw7File(Novel):
         if source.desc is not None:
             self.desc = source.desc
 
-        if source.author is not None:
-            self.author = source.author
+        if source.authorName is not None:
+            self.authorName = source.authorName
+
+        if source.authorBio is not None:
+            self.authorBio = source.authorBio
 
         if source.fieldTitle1 is not None:
             self.fieldTitle1 = source.fieldTitle1
@@ -2114,10 +2303,12 @@ class Yw7File(Novel):
         return 'yWriter project data updated or created.'
 
     def write(self):
-        """Open the yWriter xml file located at filePath and 
-        replace a set of attributes not being None.
+        """Write instance variables to the yWriter xml file.
+        
+        Open the yWriter xml file located at filePath and replace the instance variables 
+        not being None. Create new XML elements if necessary.
         Return a message beginning with the ERROR constant in case of error.
-        Override the superclass method.
+        Overrides the superclass method.
         """
 
         def build_scene_subtree(xmlScn, prjScn):
@@ -2598,13 +2789,21 @@ class Yw7File(Novel):
                 except(AttributeError):
                     ET.SubElement(xmlPrj, 'Desc').text = self.desc
 
-            if self.author is not None:
+            if self.authorName is not None:
 
                 try:
-                    xmlPrj.find('AuthorName').text = self.author
+                    xmlPrj.find('AuthorName').text = self.authorName
 
                 except(AttributeError):
-                    ET.SubElement(xmlPrj, 'AuthorName').text = self.author
+                    ET.SubElement(xmlPrj, 'AuthorName').text = self.authorName
+
+            if self.authorBio is not None:
+
+                try:
+                    xmlPrj.find('Bio').text = self.authorBio
+
+                except(AttributeError):
+                    ET.SubElement(xmlPrj, 'Bio').text = self.authorBio
 
             if self.fieldTitle1 is not None:
 
@@ -2788,13 +2987,16 @@ class Yw7File(Novel):
         return self._postprocess_xml_file(self.filePath)
 
     def is_locked(self):
-        """Return True if a .lock file placed by yWriter exists.
+        """Check whether the yw7 file is locked by yWriter.
+        
+        Return True if a .lock file placed by yWriter exists.
         Otherwise, return False. 
         """
         return os.path.isfile(f'{self.filePath}.lock')
     
     def _write_element_tree(self, ywProject):
-        """Write back the xml element tree to a yWriter xml file located at filePath.
+        """Write back the xml element tree to a .yw7 xml file located at filePath.
+        
         Return a message beginning with the ERROR constant in case of error.
         """
 
@@ -2817,12 +3019,26 @@ class Yw7File(Novel):
 
         return 'yWriter XML tree written.'
 
-    def _format_xml(self, text):
-        '''Postprocess the xml file created by ElementTree:
-           Insert the missing CDATA tags, replace xml entities by plain text.
+
+    def _postprocess_xml_file(self, filePath):
+        '''Postprocess an xml file created by ElementTree.
+        
+        Positional argument:
+            filePath -- str: path to xml file.
+        
+        Read the xml file, put a header on top, insert the missing CDATA tags,
+        and replace xml entities by plain text (unescape). Overwrite the .yw7 xml file.
+        Return a message beginning with the ERROR constant in case of error.
+        
+        Note: The path is given as an argument rather than using self.filePath. 
+        So this routine can be used for yWriter-generated xml files other than .yw7 as well. 
         '''
+
+        with open(filePath, 'r', encoding='utf-8') as f:
+            text = f.read()
+
         lines = text.split('\n')
-        newlines = []
+        newlines = ['<?xml version="1.0" encoding="utf-8"?>']
 
         for line in lines:
 
@@ -2836,21 +3052,6 @@ class Yw7File(Novel):
         text = text.replace('[CDATA[ \n', '[CDATA[')
         text = text.replace('\n]]', ']]')
         text = unescape(text)
-
-        return text
-
-    def _postprocess_xml_file(self, filePath):
-        '''Postprocess the xml file created by ElementTree:
-        Put a header on top, insert the missing CDATA tags,
-        and replace xml entities by plain text.
-        Return a message beginning with the ERROR constant in case of error.
-        '''
-
-        with open(filePath, 'r', encoding='utf-8') as f:
-            text = f.read()
-
-        text = self._format_xml(text)
-        text = f'<?xml version="1.0" encoding="utf-8"?>\n{text}'
 
         try:
 
@@ -2877,7 +3078,6 @@ class Yw7File(Novel):
 
         return stripped
 
-
 from html.parser import HTMLParser
 
 
@@ -2885,30 +3085,34 @@ from html.parser import HTMLParser
 
 def read_html_file(filePath):
     """Open a html file being encoded utf-8 or ANSI.
+    
     Return a tuple:
-    [0] = Message beginning with the ERROR constant in case of error.
-    [1] = The file content in a single string. 
+    message = Message beginning with the ERROR constant in case of error.
+    content = The file content in a single string. None in case of error.
     """
     try:
         with open(filePath, 'r', encoding='utf-8') as f:
-            text = f.read()
+            content = f.read()
     except:
         # HTML files exported by a word processor may be ANSI encoded.
         try:
             with open(filePath, 'r') as f:
-                text = (f.read())
+                content = (f.read())
 
         except(FileNotFoundError):
             return f'{ERROR}"{os.path.normpath(filePath)}" not found.', None
 
-    return 'HTML data read in.', text
-
-
+    return 'HTML data read in.', content
 
 
 class HtmlFile(Novel, HTMLParser):
-    """Generic HTML file representation."""
-
+    """Generic HTML file representation.
+    
+    Public methods:
+        handle_starttag -- identify scenes and chapters.
+        handle comment --
+        read --
+    """
     EXTENSION = '.html'
     
     _COMMENT_START = '/*'
@@ -2916,6 +3120,18 @@ class HtmlFile(Novel, HTMLParser):
     _SC_TITLE_BRACKET = '~'
 
     def __init__(self, filePath, **kwargs):
+        """Initialize the HTML parser and local instance variables for parsing.
+        
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        Optional arguments:
+            kwargs -- keyword arguments to be used by subclasses.            
+
+        The HTML parser works like a state machine. 
+        Scene ID, chapter ID and processed lines must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         HTMLParser.__init__(self)
         self._lines = []
@@ -2923,18 +3139,23 @@ class HtmlFile(Novel, HTMLParser):
         self._chId = None
 
     def _convert_to_yw(self, text):
-        """Convert html tags to yWriter 6/7 raw markup. 
-        Return a yw6/7 markup string.
+        """Convert html formatting tags to yWriter 7 raw markup.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Return a yw7 markup string.
+        Overrides the superclass method.
         """
 
-        # Clean up polluted HTML code.
+        #--- Clean up polluted HTML code.
 
         text = re.sub('</*font.*?>', '', text)
         text = re.sub('</*span.*?>', '', text)
         text = re.sub('</*FONT.*?>', '', text)
         text = re.sub('</*SPAN.*?>', '', text)
 
-        # Put everything in one line.
+        #--- Put everything in one line.
 
         text = text.replace('\n', ' ')
         text = text.replace('\r', ' ')
@@ -2943,7 +3164,7 @@ class HtmlFile(Novel, HTMLParser):
         while '  ' in text:
             text = text.replace('  ', ' ').strip()
 
-        # Replace HTML tags by yWriter markup.
+        #--- Replace HTML tags by yWriter markup.
 
         text = text.replace('<i>', '[i]')
         text = text.replace('<I>', '[i]')
@@ -2962,7 +3183,7 @@ class HtmlFile(Novel, HTMLParser):
         text = re.sub('<strong.*?>', '[b]', text)
         text = re.sub('<STRONG.*?>', '[b]', text)
 
-        # Remove orphaned tags.
+        #--- Remove orphaned tags.
 
         text = text.replace('[/b][b]', '')
         text = text.replace('[/i][i]', '')
@@ -2971,11 +3192,14 @@ class HtmlFile(Novel, HTMLParser):
         return text
 
     def _preprocess(self, text):
-        """Clean up the HTML code and strip yWriter 6/7 raw markup. 
-        This prevents accidentally applied formatting from being 
-        transferred to the yWriter metadata. If rich text is 
-        applicable, such as in scenes, overwrite this method 
-        in a subclass) 
+        """Clean up the HTML code and strip yWriter 7 raw markup.
+        
+        Positional arguments:
+            text -- str: HTML text to be processed.
+        
+        This prevents accidentally applied formatting from being transferred to the yWriter metadata.
+        If rich text is applicable, such as in scenes, overwrite this method in a subclass.
+        Return a sring.
         """
         text = self._convert_to_yw(text)
 
@@ -2986,15 +3210,20 @@ class HtmlFile(Novel, HTMLParser):
 
     def _postprocess(self):
         """Process the plain text after parsing.
+        
         This is a hook for subclasses.
         """
 
     def handle_starttag(self, tag, attrs):
         """Identify scenes and chapters.
-        Override HTMLparser.handle_starttag().
-        This method is applicable to HTML files that are divided into 
-        chapters and scenes. For differently structured HTML files 
-        do override this method in a subclass.
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides HTMLparser.handle_starttag() called by the parser to handle the start of a tag. 
+        This method is applicable to HTML files that are divided into chapters and scenes. 
+        For differently structured HTML files  do override this method in a subclass.
         """
         if tag == 'div':
 
@@ -3012,26 +3241,33 @@ class HtmlFile(Novel, HTMLParser):
                     self.srtChapters.append(self._chId)
 
     def handle_comment(self, data):
+        """Process inline comments within scene content.
+        
+        Positional arguments:
+            data -- str: comment text. 
+        
+        Overrides HTMLparser.handle_comment() called by the parser when a comment is encountered.
+        """
         
         if self._scId is not None: 
             self._lines.append(f'{self._COMMENT_START}{data}{self._COMMENT_END}')
             
 
     def read(self):
-        """Read and parse a html file, fetching the Novel attributes.
+        """Parse the file and get the instance variables.
+        
         Return a message beginning with the ERROR constant in case of error.
         This is a template method for subclasses tailored to the 
         content of the respective HTML file.
         """
-        result = read_html_file(self.filePath)
+        message, content = read_html_file(self._filePath)
 
-        if result[0].startswith(ERROR):
-            return (result[0])
+        if message.startswith(ERROR):
+            return message
 
-        text = self._preprocess(result[1])
-        self.feed(text)
+        content = self._preprocess(content)
+        self.feed(content)
         self._postprocess()
-
         return 'Created novel structure from HTML data.'
 
 
@@ -3040,7 +3276,6 @@ class HtmlImport(HtmlFile):
 
     Import untagged chapters and scenes.
     """
-
     DESCRIPTION = 'Work in progress'
     SUFFIX = ''
 
@@ -3048,16 +3283,36 @@ class HtmlImport(HtmlFile):
     _LOW_WORDCOUNT = 10
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        Chapter and scene count must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._chCount = 0
         self._scCount = 0
 
     def _preprocess(self, text):
         """Process the html text before parsing.
+        
+        Convert html formatting tags to yWriter 7 raw markup.
+        Overrides the superclass method.
         """
         return self._convert_to_yw(text)
 
     def handle_starttag(self, tag, attrs):
+        """Recognize the paragraph's beginning.
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides the superclass method.
+        """
 
         if tag in ('h1', 'h2'):
             self._scId = None
@@ -3093,7 +3348,7 @@ class HtmlImport(HtmlFile):
         elif tag == 'meta':
 
             if attrs[0][1].lower() == 'author':
-                self.author = attrs[1][1]
+                self.authorName = attrs[1][1]
 
             if attrs[0][1].lower() == 'description':
                 self.desc = attrs[1][1]
@@ -3102,6 +3357,13 @@ class HtmlImport(HtmlFile):
             self._lines = []
 
     def handle_endtag(self, tag):
+        """Recognize the paragraph's end.
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
+        """
 
         if tag == 'p':
             self._lines.append('\n')
@@ -3124,8 +3386,13 @@ class HtmlImport(HtmlFile):
 
     def handle_data(self, data):
         """Collect data within scene sections.
-        Overwrites HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._scId is not None and self._SCENE_DIVIDER in data:
             self._scId = None
 
@@ -3155,17 +3422,24 @@ class HtmlImport(HtmlFile):
             self._lines.append(data)
 
 
-
 class HtmlOutline(HtmlFile):
     """HTML outline file representation.
 
     Import an outline without chapter and scene tags.
     """
-
     DESCRIPTION = 'Novel outline'
     SUFFIX = ''
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        Chapter and scene count must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._chCount = 0
         self._scCount = 0
@@ -3204,7 +3478,7 @@ class HtmlOutline(HtmlFile):
         elif tag == 'meta':
 
             if attrs[0][1].lower() == 'author':
-                self.author = attrs[1][1]
+                self.authorName = attrs[1][1]
 
             if attrs[0][1].lower() == 'description':
                 self.desc = attrs[1][1]
@@ -3213,6 +3487,13 @@ class HtmlOutline(HtmlFile):
             self._lines = []
 
     def handle_endtag(self, tag):
+        """Recognize the paragraph's end.
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
+        """
 
         if tag == 'p':
             self._lines.append('\n')
@@ -3236,7 +3517,11 @@ class HtmlOutline(HtmlFile):
 
     def handle_data(self, data):
         """Collect data within scene sections.
-        Overwrites HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
         self._lines.append(data.strip())
 
@@ -3258,7 +3543,7 @@ class NewProjectFactory(FileFactory):
         """Instantiate a source and a target object for creation of a new yWriter project.
 
         Positional arguments:
-            sourcePath -- string; path to the source file to convert.
+            sourcePath -- str: path to the source file to convert.
 
         Return a tuple with three elements:
         - A message beginning with the ERROR constant in case of error
@@ -3272,17 +3557,16 @@ class NewProjectFactory(FileFactory):
         targetFile = Yw7File(f'{fileName}{Yw7File.EXTENSION}', **kwargs)
 
         if sourcePath.endswith('.html'):
-
             # The source file might be an outline or a "work in progress".
 
-            result = read_html_file(sourcePath)
+            message, content = read_html_file(sourcePath)
 
-            if result[0].startswith(ERROR):
-                return result[0], None, None
+            if message.startswith(ERROR):
+                return message, None, None
 
             else:
 
-                if "<h3" in result[1].lower():
+                if "<h3" in content.lower():
                     sourceFile = HtmlOutline(sourcePath, **kwargs)
 
                 else:
@@ -3302,7 +3586,12 @@ class NewProjectFactory(FileFactory):
             return f'{ERROR}File type of "{os.path.normpath(sourcePath)}" not supported.', None, None
 
     def _canImport(self, sourcePath):
-        """Return True, if the file located at sourcepath is of an importable type.
+        """Check whether the source file can be imported to yWriter.
+        
+        Positional arguments: 
+            sourcePath -- str: path of the file to be ckecked.
+        
+        Return True, if the file located at sourcepath is of an importable type.
         Otherwise, return False.
         """
         fileName, __ = os.path.splitext(sourcePath)
@@ -3328,20 +3617,35 @@ from string import Template
 
 
 class Filter():
-    """Strategy class, implementing filtering criteria 
-    for template-based export.
+    """Filter an entity (chapter/scene/character/location/item) by filter criteria.
+    
+    Public methods:
+        accept(source, eId) -- check whether an entity matches the filter criteria.
+    
+    Strategy class, implementing filtering criteria for template-based export.
+    This is a stub with no filter criteria specified.
     """
 
-    def accept(self, source, id):
-        """Return True if the entity is not to be filtered out.
-        This is a stub to be overridden by subclass methods
-        implementing filters.
+    def accept(self, source, eId):
+        """Check whether an entity matches the filter criteria.
+        
+        Positional arguments:
+            source -- Novel instance holding the entity to check.
+            eId -- ID of the entity to check.       
+        
+        Return True if the entity is not to be filtered out.
+        This is a stub to be overridden by subclass methods implementing filters.
         """
         return True
 
 
 class FileExport(Novel):
     """Abstract yWriter project file exporter representation.
+    
+    Public methods:
+        merge(source) -- update instance variables from a source instance.
+        write() -- write instance variables to the export file.
+    
     This class is generic and contains no conversion algorithm and no templates.
     """
     SUFFIX = ''
@@ -3374,8 +3678,15 @@ class FileExport(Novel):
     _fileFooter = ''
 
     def __init__(self, filePath, **kwargs):
-        """Extend the superclass constructor,
-        initializing a filter class.
+        """Initialize filter strategy class instances.
+        
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        Optional arguments:
+            kwargs -- keyword arguments to be used by subclasses.            
+
+        Extends the superclass constructor.
         """
         super().__init__(filePath, **kwargs)
         self._sceneFilter = Filter()
@@ -3385,8 +3696,13 @@ class FileExport(Novel):
         self._itemFilter = Filter()
 
     def merge(self, source):
-        """Copy required attributes of the source object.
+        """Update instance variables from a source instance.
+        
+        Positional arguments:
+            source -- Novel subclass instance to merge.
+        
         Return a message beginning with the ERROR constant in case of error.
+        Overrides the superclass method.
         """
 
         if source.title is not None:
@@ -3401,11 +3717,17 @@ class FileExport(Novel):
         else:
             self.desc = ''
 
-        if source.author is not None:
-            self.author = source.author
+        if source.authorName is not None:
+            self.authorName = source.authorName
 
         else:
-            self.author = ''
+            self.authorName = ''
+
+        if source.authorBio is not None:
+            self.authorBio = source.authorBio
+
+        else:
+            self.authorBio = ''
 
         if source.fieldTitle1 is not None:
             self.fieldTitle1 = source.fieldTitle1
@@ -3455,12 +3777,15 @@ class FileExport(Novel):
         return 'Export data updated from novel.'
 
     def _get_fileHeaderMapping(self):
-        """Return a mapping dictionary for the project section. 
+        """Return a mapping dictionary for the project section.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
         projectTemplateMapping = dict(
             Title=self._convert_from_yw(self.title, True),
             Desc=self._convert_from_yw(self.desc),
-            AuthorName=self._convert_from_yw(self.author, True),
+            AuthorName=self._convert_from_yw(self.authorName, True),
+            AuthorBio=self._convert_from_yw(self.authorBio, True),
             FieldTitle1=self._convert_from_yw(self.fieldTitle1, True),
             FieldTitle2=self._convert_from_yw(self.fieldTitle2, True),
             FieldTitle3=self._convert_from_yw(self.fieldTitle3, True),
@@ -3469,7 +3794,13 @@ class FileExport(Novel):
         return projectTemplateMapping
 
     def _get_chapterMapping(self, chId, chapterNumber):
-        """Return a mapping dictionary for a chapter section. 
+        """Return a mapping dictionary for a chapter section.
+        
+        Positional arguments:
+            chId -- str: chapter ID.
+            chapterNumber -- int: chapter number.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
         if chapterNumber == 0:
             chapterNumber = ''
@@ -3477,7 +3808,7 @@ class FileExport(Novel):
         chapterMapping = dict(
             ID=chId,
             ChapterNumber=chapterNumber,
-            Title=self._convert_from_yw(self.chapters[chId].get_title(), True),
+            Title=self._convert_from_yw(self.chapters[chId].title, True),
             Desc=self._convert_from_yw(self.chapters[chId].desc),
             ProjectName=self._convert_from_yw(self.projectName, True),
             ProjectPath=self.projectPath,
@@ -3485,9 +3816,18 @@ class FileExport(Novel):
         return chapterMapping
 
     def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
-        """Return a mapping dictionary for a scene section. 
+        """Return a mapping dictionary for a scene section.
+        
+        Positional arguments:
+            scId -- str: scene ID.
+            sceneNumber -- int: scene number to be displayed.
+            wordsTotal -- int: accumulated wordcount.
+            lettersTotal -- int: accumulated lettercount.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
-        # Create a comma separated tag list.
+        
+        #--- Create a comma separated tag list.
 
         if sceneNumber == 0:
             sceneNumber = ''
@@ -3498,7 +3838,7 @@ class FileExport(Novel):
         else:
             tags = ''
 
-        # Create a comma separated character list.
+        #--- Create a comma separated character list.
 
         try:
             # Note: Due to a bug, yWriter scenes might hold invalid
@@ -3516,7 +3856,7 @@ class FileExport(Novel):
             sceneChars = ''
             viewpointChar = ''
 
-        # Create a comma separated location list.
+        #--- Create a comma separated location list.
 
         if self.scenes[scId].locations is not None:
             sLcList = []
@@ -3529,7 +3869,7 @@ class FileExport(Novel):
         else:
             sceneLocs = ''
 
-        # Create a comma separated item list.
+        #--- Create a comma separated item list.
 
         if self.scenes[scId].items is not None:
             sItList = []
@@ -3542,7 +3882,7 @@ class FileExport(Novel):
         else:
             sceneItems = ''
 
-        # Create A/R marker string.
+        #--- Create A/R marker string.
 
         if self.scenes[scId].isReactionScene:
             reactionScene = Scene.REACTION_MARKER
@@ -3550,57 +3890,57 @@ class FileExport(Novel):
         else:
             reactionScene = Scene.ACTION_MARKER
 
-        # Create a combined date information.
+        #--- Create a combined scDate information.
 
         if self.scenes[scId].date is not None and self.scenes[scId].date != Scene.NULL_DATE:
-            day = ''
-            date = self.scenes[scId].date
+            scDay = ''
             scDate = self.scenes[scId].date
+            cmbDate = self.scenes[scId].date
 
         else:
-            date = ''
+            scDate = ''
 
             if self.scenes[scId].day is not None:
-                day = self.scenes[scId].day
-                scDate = f'Day {self.scenes[scId].day}'
+                scDay = self.scenes[scId].day
+                cmbDate = f'Day {self.scenes[scId].day}'
 
             else:
-                day = ''
-                scDate = ''
+                scDay = ''
+                cmbDate = ''
 
-        # Create a combined time information.
+        #--- Create a combined time information.
 
         if self.scenes[scId].time is not None and self.scenes[scId].date != Scene.NULL_DATE:
-            hour = ''
-            minute = ''
-            time = self.scenes[scId].time
-            scTime = self.scenes[scId].time.rsplit(':', 1)[0]
+            scHour = ''
+            scMinute = ''
+            scTime = self.scenes[scId].time
+            cmbTime = self.scenes[scId].time.rsplit(':', 1)[0]
 
         else:
-            time = ''
+            scTime = ''
 
             if self.scenes[scId].hour or self.scenes[scId].minute:
 
                 if self.scenes[scId].hour:
-                    hour = self.scenes[scId].hour
+                    scHour = self.scenes[scId].hour
 
                 else:
-                    hour = '00'
+                    scHour = '00'
 
                 if self.scenes[scId].minute:
-                    minute = self.scenes[scId].minute
+                    scMinute = self.scenes[scId].minute
 
                 else:
-                    minute = '00'
+                    scMinute = '00'
 
-                scTime = f'{hour.zfill(2)}:{minute.zfill(2)}'
+                cmbTime = f'{scHour.zfill(2)}:{scMinute.zfill(2)}'
 
             else:
-                hour = ''
-                minute = ''
-                scTime = ''
+                scHour = ''
+                scMinute = ''
+                cmbTime = ''
 
-        # Create a combined duration information.
+        #--- Create a combined duration information.
 
         if self.scenes[scId].lastsDays is not None and self.scenes[scId].lastsDays != '0':
             lastsDays = self.scenes[scId].lastsDays
@@ -3647,13 +3987,13 @@ class FileExport(Novel):
             Field2=self.scenes[scId].field2,
             Field3=self.scenes[scId].field3,
             Field4=self.scenes[scId].field4,
-            Date=date,
-            Time=time,
-            Day=day,
-            Hour=hour,
-            Minute=minute,
-            ScDate=scDate,
-            ScTime=scTime,
+            Date=scDate,
+            Time=scTime,
+            Day=scDay,
+            Hour=scHour,
+            Minute=scMinute,
+            ScDate=cmbDate,
+            ScTime=cmbTime,
             LastsDays=lastsDays,
             LastsHours=lastsHours,
             LastsMinutes=lastsMinutes,
@@ -3676,7 +4016,12 @@ class FileExport(Novel):
         return sceneMapping
 
     def _get_characterMapping(self, crId):
-        """Return a mapping dictionary for a character section. 
+        """Return a mapping dictionary for a character section.
+        
+        Positional arguments:
+            crId -- str: character ID.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self.characters[crId].tags is not None:
@@ -3709,7 +4054,12 @@ class FileExport(Novel):
         return characterMapping
 
     def _get_locationMapping(self, lcId):
-        """Return a mapping dictionary for a location section. 
+        """Return a mapping dictionary for a location section.
+        
+        Positional arguments:
+            lcId -- str: location ID.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self.locations[lcId].tags is not None:
@@ -3731,7 +4081,12 @@ class FileExport(Novel):
         return locationMapping
 
     def _get_itemMapping(self, itId):
-        """Return a mapping dictionary for an item section. 
+        """Return a mapping dictionary for an item section.
+        
+        Positional arguments:
+            itId -- str: item ID.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self.items[itId].tags is not None:
@@ -3754,7 +4109,12 @@ class FileExport(Novel):
 
     def _get_fileHeader(self):
         """Process the file header.
+        
+        Apply the file header template, substituting placeholders 
+        according to the file header mapping dictionary.
         Return a list of strings.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
         lines = []
         template = Template(self._fileHeader)
@@ -3763,7 +4123,25 @@ class FileExport(Novel):
 
     def _get_scenes(self, chId, sceneNumber, wordsTotal, lettersTotal, doNotExport):
         """Process the scenes.
-        Return a list of strings.
+        
+        Positional arguments:
+            chId -- str: chapter ID.
+            sceneNumber -- int: number of previously processed scenes.
+            wordsTotal -- int: accumulated wordcount of the previous scenes.
+            lettersTotal -- int: accumulated lettercount of the previous scenes.
+            doNotExport -- bool: scene belongs to a chapter that is not to be exported.
+        
+        Iterate through a sorted scene list and apply the templates, 
+        substituting placeholders according to the scene mapping dictionary.
+        Skip scenes not accepted by the scene filter.
+        
+        Return a tuple:
+            lines -- list of strings: the lines of the processed scene.
+            sceneNumber -- int: number of all processed scenes.
+            wordsTotal -- int: accumulated wordcount of all processed scenes.
+            lettersTotal -- int: accumulated lettercount of all processed scenes.
+        
+        This is a template method that can be extended or overridden by subclasses.
         """
         lines = []
         firstSceneInChapter = True
@@ -3845,7 +4223,13 @@ class FileExport(Novel):
 
     def _get_chapters(self):
         """Process the chapters and nested scenes.
+        
+        Iterate through the sorted chapter list and apply the templates, 
+        substituting placeholders according to the chapter mapping dictionary.
+        For each chapter call the processing of its included scenes.
+        Skip chapters not accepted by the chapter filter.
         Return a list of strings.
+        This is a template method that can be extended or overridden by subclasses.
         """
         lines = []
         chapterNumber = 0
@@ -3963,7 +4347,12 @@ class FileExport(Novel):
 
     def _get_characters(self):
         """Process the characters.
+        
+        Iterate through the sorted character list and apply the template, 
+        substituting placeholders according to the character mapping dictionary.
+        Skip characters not accepted by the character filter.
         Return a list of strings.
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self._characterSectionHeading:
@@ -3983,7 +4372,12 @@ class FileExport(Novel):
 
     def _get_locations(self):
         """Process the locations.
+        
+        Iterate through the sorted location list and apply the template, 
+        substituting placeholders according to the location mapping dictionary.
+        Skip locations not accepted by the location filter.
         Return a list of strings.
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self._locationSectionHeading:
@@ -4002,8 +4396,13 @@ class FileExport(Novel):
         return lines
 
     def _get_items(self):
-        """Process the items.
+        """Process the items. 
+        
+        Iterate through the sorted item list and apply the template, 
+        substituting placeholders according to the item mapping dictionary.
+        Skip items not accepted by the item filter.
         Return a list of strings.
+        This is a template method that can be extended or overridden by subclasses.
         """
 
         if self._itemSectionHeading:
@@ -4022,8 +4421,10 @@ class FileExport(Novel):
         return lines
 
     def _get_text(self):
-        """Assemble the whole text applying the templates.
+        """Call all processing methods.
+        
         Return a string to be written to the output file.
+        This is a template method that can be extended or overridden by subclasses.
         """
         lines = self._get_fileHeader()
         lines.extend(self._get_chapters())
@@ -4034,7 +4435,9 @@ class FileExport(Novel):
         return ''.join(lines)
 
     def write(self):
-        """Create a template-based output file. 
+        """Write instance variables to the export file.
+        
+        Create a template-based output file. 
         Return a message beginning with the ERROR constant in case of error.
         """
         text = self._get_text()
@@ -4064,7 +4467,9 @@ class FileExport(Novel):
         return f'"{os.path.normpath(self.filePath)}" written.'
 
     def _get_string(self, elements):
-        """Return a string which is the concatenation of the 
+        """Join strings from a list.
+        
+        Return a string which is the concatenation of the 
         members of the list of strings "elements", separated by 
         a comma plus a space. The space allows word wrap in 
         spreadsheet cells.
@@ -4073,8 +4478,15 @@ class FileExport(Novel):
         return text
 
     def _convert_from_yw(self, text, quick=False):
-        """Convert yw7 markup to target format.
-        This is a stub to be overridden by subclass methods.
+        """Return text, converted from yw7 markup to target format.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Optional arguments:
+            quick -- bool: if True, apply a conversion mode for one-liners without formatting.
+        
+        Overrides the superclass method.
         """
 
         if text is None:
@@ -4085,8 +4497,10 @@ class FileExport(Novel):
 
 class OdfFile(FileExport):
     """Generic OpenDocument xml file representation.
-    """
 
+    Public methods:
+        write() -- write instance variables to the export file.
+    """
     _ODF_COMPONENTS = []
     _MIMETYPE = ''
     _SETTINGS_XML = ''
@@ -4095,23 +4509,26 @@ class OdfFile(FileExport):
     _META_XML = ''
 
     def __init__(self, filePath, **kwargs):
-        """Extend the superclass constructor, 
-        creating a temporary directory.
+        """Create a temporary directory for zipfile generation.
+        
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        Optional arguments:
+            kwargs -- keyword arguments to be used by subclasses.            
+
+        Extends the superclass constructor,        
         """
         super().__init__(filePath, **kwargs)
         self._tempDir = tempfile.mkdtemp(suffix='.tmp', prefix='odf_')
         self._originalPath = self._filePath
 
     def __del__(self):
-        """Make sure to delete the temporary directory,
-        in case write() has not been called.
-        """
+        """Make sure to delete the temporary directory, in case write() has not been called."""
         self._tear_down()
 
     def _tear_down(self):
-        """Delete the temporary directory 
-        containing the unpacked ODF directory structure.
-        """
+        """Delete the temporary directory containing the unpacked ODF directory structure."""
         try:
             rmtree(self._tempDir)
         except:
@@ -4120,9 +4537,10 @@ class OdfFile(FileExport):
     def _set_up(self):
         """Helper method for ZIP file generation.
 
-        Prepare the temporary directory containing the internal 
-        structure of an ODF file except 'content.xml'.
+        Prepare the temporary directory containing the internal structure of an ODF file except 'content.xml'.
+        Return a message beginning with the ERROR constant in case of error.
         """
+        
         # Create and open a temporary directory for the files to zip.
 
         try:
@@ -4159,11 +4577,10 @@ class OdfFile(FileExport):
 
         # Generate styles.xml with system language set as document language.
 
-        localeCodes = locale.getdefaultlocale()[0].split('_')
-
+        lng, ctr = locale.getdefaultlocale()[0].split('_')
         localeMapping = dict(
-            Language=localeCodes[0],
-            Country=localeCodes[1],
+            Language=lng,
+            Country=ctr,
         )
         template = Template(self._STYLES_XML)
         text = template.safe_substitute(localeMapping)
@@ -4176,14 +4593,11 @@ class OdfFile(FileExport):
 
         # Generate meta.xml with actual document metadata.
 
-        dt = datetime.today()
-
         metaMapping = dict(
-            Author=self.author,
+            Author=self.authorName,
             Title=self.title,
             Summary=f'<![CDATA[{self.desc}]]>',
-            Date=f'{dt.year}-{dt.month:02}-{dt.day:02}',
-            Time=f'{dt.hour:02}:{dt.minute:02}:{dt.second:02}',
+            Datetime=datetime.today().replace(microsecond=0).isoformat(),
         )
         template = Template(self._META_XML)
         text = template.safe_substitute(metaMapping)
@@ -4197,7 +4611,12 @@ class OdfFile(FileExport):
         return 'ODF structure generated.'
 
     def write(self):
-        """Extend the super class method, adding ZIP file operations."""
+        """Write instance variables to the export file.
+        
+        Create a template-based output file. 
+        Return a message beginning with the ERROR constant in case of error.
+        Extends the super class method, adding ZIP file operations.
+        """
 
         # Create a temporary directory containing the internal
         # structure of an ODS file except "content.xml".
@@ -4300,7 +4719,7 @@ class OdtFile(OdfFile):
     <meta:keyword></meta:keyword>
     <meta:initial-creator>$Author</meta:initial-creator>
     <dc:creator></dc:creator>
-    <meta:creation-date>${Date}T${Time}Z</meta:creation-date>
+    <meta:creation-date>${Datetime}Z</meta:creation-date>
     <dc:date></dc:date>
   </office:meta>
 </office:document-meta>
@@ -4446,11 +4865,11 @@ class OdtFile(OdfFile):
    <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" style:writing-mode="lr-tb" style:font-independent-line-spacing="false">
     <style:tab-stops/>
    </style:paragraph-properties>
-   <style:text-properties fo:color="#000000" fo:font-size="10pt" fo:language="${Language}" fo:country="${Country}" style:font-size-asian="10pt" style:language-asian="zxx" style:country-asian="none" style:font-size-complex="1pt" style:language-complex="zxx" style:country-complex="none"/>
+   <style:text-properties fo:color="#000000" fo:font-size="10pt" fo:language="$Language" fo:country="$Country" style:font-size-asian="10pt" style:language-asian="zxx" style:country-asian="none" style:font-size-complex="1pt" style:language-complex="zxx" style:country-complex="none"/>
   </style:default-style>
   <style:default-style style:family="paragraph">
    <style:paragraph-properties fo:hyphenation-ladder-count="no-limit" style:text-autospace="ideograph-alpha" style:punctuation-wrap="hanging" style:line-break="strict" style:tab-stop-distance="1.251cm" style:writing-mode="lr-tb"/>
-   <style:text-properties fo:color="#000000" style:font-name="Segoe UI" fo:font-size="10pt" fo:language="${Language}" fo:country="${Country}" style:font-name-asian="Segoe UI" style:font-size-asian="10pt" style:language-asian="zxx" style:country-asian="none" style:font-name-complex="Segoe UI" style:font-size-complex="1pt" style:language-complex="zxx" style:country-complex="none" fo:hyphenate="false" fo:hyphenation-remain-char-count="2" fo:hyphenation-push-char-count="2"/>
+   <style:text-properties fo:color="#000000" style:font-name="Segoe UI" fo:font-size="10pt" fo:language="$Language" fo:country="$Country" style:font-name-asian="Segoe UI" style:font-size-asian="10pt" style:language-asian="zxx" style:country-asian="none" style:font-name-complex="Segoe UI" style:font-size-complex="1pt" style:language-complex="zxx" style:country-complex="none" fo:hyphenate="false" fo:hyphenation-remain-char-count="2" fo:hyphenation-push-char-count="2"/>
   </style:default-style>
   <style:default-style style:family="table">
    <style:table-properties table:border-model="separating"/>
@@ -5364,8 +5783,11 @@ class OdtFile(OdfFile):
     _MIMETYPE = 'application/vnd.oasis.opendocument.text'
 
     def _set_up(self):
-        """Create a temporary directory containing the internal 
-        structure of an ODT file except 'content.xml'.
+        """Helper method for ZIP file generation.
+
+        Add rdf manifest to the temporary directory containing the internal structure of an ODF file.
+        Return a message beginning with the ERROR constant in case of error.
+        Extends the superclass method.
         """
 
         # Generate the common ODF components.
@@ -5387,8 +5809,17 @@ class OdtFile(OdfFile):
         return 'ODT structure generated.'
 
     def _convert_from_yw(self, text, quick=False):
-        """Convert yw7 raw markup to odt. Return an xml string.
-        """        
+        """Return text, converted from yw7 markup to target format.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Optional arguments:
+            quick -- bool: if True, apply a conversion mode for one-liners without formatting.
+        
+        Overrides the superclass method.
+        """
+        
         if quick:            
             # Just clean up a one-liner without sophisticated formatting.
             
@@ -5409,12 +5840,11 @@ class OdtFile(OdfFile):
             ('[/i]', '</text:span>'),
             ('[b]', '<text:span text:style-name="Strong_20_Emphasis">'),
             ('[/b]', '</text:span>'),
-            ('/*', f'<office:annotation><dc:creator>{self.author}</dc:creator><text:p>'),
+            ('/*', f'<office:annotation><dc:creator>{self.authorName}</dc:creator><text:p>'),
             ('*/', '</text:p></office:annotation>'),
         ]
 
         try:
-
             # process italics and bold markup reaching across linebreaks
 
             italics = False
@@ -5472,7 +5902,6 @@ class OdtProof(OdtFile):
 
     Export a manuscript with visibly tagged chapters and scenes.
     """
-
     DESCRIPTION = 'Tagged manuscript for proofing'
     SUFFIX = '_proof'
 
@@ -5543,7 +5972,6 @@ class OdtManuscript(OdtFile):
 
     Export a manuscript with invisibly tagged chapters and scenes.
     """
-
     DESCRIPTION = 'Editable manuscript'
     SUFFIX = '_manuscript'
 
@@ -5588,7 +6016,14 @@ class OdtManuscript(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def _get_chapterMapping(self, chId, chapterNumber):
-        """Return a mapping dictionary for a chapter section. 
+        """Return a mapping dictionary for a chapter section.
+        
+        Positional arguments:
+            chId -- str: chapter ID.
+            chapterNumber -- int: chapter number.
+        
+        Suppress the chapter title if necessary.
+        Extends the superclass method.
         """
         chapterMapping = super()._get_chapterMapping(chId, chapterNumber)
 
@@ -5603,7 +6038,6 @@ class OdtSceneDesc(OdtFile):
 
     Export a full synopsis with invisibly tagged scene descriptions.
     """
-
     DESCRIPTION = 'Scene descriptions'
     SUFFIX = '_scenes'
 
@@ -5651,9 +6085,8 @@ class OdtSceneDesc(OdtFile):
 class OdtChapterDesc(OdtFile):
     """ODT chapter summaries file representation.
 
-    Export a brief synopsis with invisibly tagged chapter descriptions.
+    Export a synopsis with invisibly tagged chapter descriptions.
     """
-
     DESCRIPTION = 'Chapter descriptions'
     SUFFIX = '_chapters'
 
@@ -5676,9 +6109,8 @@ class OdtChapterDesc(OdtFile):
 class OdtPartDesc(OdtFile):
     """ODT part summaries file representation.
 
-    Export a very brief synopsis with invisibly tagged part descriptions.
+    Export a synopsis with invisibly tagged part descriptions.
     """
-
     DESCRIPTION = 'Part descriptions'
     SUFFIX = '_parts'
 
@@ -5700,7 +6132,6 @@ class OdtBriefSynopsis(OdtFile):
 
     Export a brief synopsis with chapter titles and scene titles.
     """
-
     DESCRIPTION = 'Brief synopsis'
     SUFFIX = '_brf_synopsis'
 
@@ -5753,9 +6184,16 @@ class OdtExport(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def _get_chapterMapping(self, chId, chapterNumber):
-        """Return a mapping dictionary for a chapter section. 
+        """Return a mapping dictionary for a chapter section.
+        
+        Positional arguments:
+            chId -- str: chapter ID.
+            chapterNumber -- int: chapter number.
+        
+        Suppress the chapter title if necessary.
+        Extends the superclass method.
         """
-        chapterMapping = OdtFile._get_chapterMapping(self, chId, chapterNumber)
+        chapterMapping = super()._get_chapterMapping(chId, chapterNumber)
 
         if self.chapters[chId].suppressChapterTitle:
             chapterMapping['Title'] = ''
@@ -5768,7 +6206,6 @@ class OdtCharacters(OdtFile):
 
     Export a character sheet with invisibly tagged descriptions.
     """
-
     DESCRIPTION = 'Character descriptions'
     SUFFIX = '_characters'
 
@@ -5800,7 +6237,13 @@ class OdtCharacters(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def _get_characterMapping(self, crId):
-        """Return a mapping dictionary for a character section. 
+        """Return a mapping dictionary for a character section.
+        
+        Positional arguments:
+            crId -- str: character ID.
+        
+        Special formatting of alternate and full name. 
+        Extends the superclass method.
         """
         characterMapping = OdtFile._get_characterMapping(self, crId)
 
@@ -5835,7 +6278,13 @@ class OdtItems(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def _get_itemMapping(self, itId):
-        """Return a mapping dictionary for an item section. 
+        """Return a mapping dictionary for an item section.
+        
+        Positional arguments:
+            itId -- str: item ID.
+        
+        Special formatting of alternate name. 
+        Extends the superclass method.
         """
         itemMapping = super()._get_itemMapping(itId)
 
@@ -5850,7 +6299,6 @@ class OdtLocations(OdtFile):
 
     Export a location sheet with invisibly tagged descriptions.
     """
-
     DESCRIPTION = 'Location descriptions'
     SUFFIX = '_locations'
 
@@ -5867,7 +6315,13 @@ class OdtLocations(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def _get_locationMapping(self, lcId):
-        """Return a mapping dictionary for a location section. 
+        """Return a mapping dictionary for a location section.
+        
+        Positional arguments:
+            lcId -- str: location ID.
+        
+        Special formatting of alternate name. 
+        Extends the superclass method.
         """
         locationMapping = super()._get_locationMapping(lcId)
 
@@ -5880,18 +6334,26 @@ from string import Template
 
 
 class CrossReferences():
-    """Create dictionaries containing a novel's cross references:
+    """Dictionaries containing a novel's cross references.
 
-    - Characters per tag
-    - Locations per tag
-    - Items per tag
-    - Scenes per character
-    - Scenes per location
-    - Scenes per item
-    - Scenes per tag
+    Public methods:
+        generate_xref(novel) -- Generate cross references for a novel.
+
+    Public instance variables:
+        scnPerChr -- scenes per character.
+        scnPerLoc -- scenes per location.
+        scnPerItm -- scenes per item.
+        scnPerTag -- scenes per tag.
+        chrPerTag -- characters per tag.
+        locPerTag -- locations per tag.
+        itmPerTag -- items per tag.
+        chpPerScn -- chapters per scene.
+        srtScenes -- the novel's sorted scene IDs.
     """
 
     def __init__(self):
+        """Initialize instance variables."""
+        
         # Cross reference dictionaries:
 
         self.scnPerChr = {}
@@ -5936,10 +6398,14 @@ class CrossReferences():
 
         self.srtScenes = None
         # list of str
-        # scene IDs in the overall order
+        # Scene IDs in the overall order
 
     def generate_xref(self, novel):
-        """Generate cross references."""
+        """Generate cross references for a novel.
+        
+        Positional argument:
+            novel -- Novel instance to process.
+        """
         self.scnPerChr = {}
         self.scnPerLoc = {}
         self.scnPerItm = {}
@@ -5950,7 +6416,7 @@ class CrossReferences():
         self.chpPerScn = {}
         self.srtScenes = []
 
-        # Characters per tag:
+        #--- Characters per tag.
 
         for crId in novel.srtCharacters:
             self.scnPerChr[crId] = []
@@ -5964,7 +6430,7 @@ class CrossReferences():
 
                     self.chrPerTag[tag].append(crId)
 
-        # Locations per tag:
+        #--- Locations per tag.
 
         for lcId in novel.srtLocations:
             self.scnPerLoc[lcId] = []
@@ -5978,7 +6444,7 @@ class CrossReferences():
 
                     self.locPerTag[tag].append(lcId)
 
-        # Items per tag:
+        #--- Items per tag.
 
         for itId in novel.srtItems:
             self.scnPerItm[itId] = []
@@ -5991,6 +6457,8 @@ class CrossReferences():
                         self.itmPerTag[tag] = []
 
                     self.itmPerTag[tag].append(itId)
+                    
+        #--- Process chapters and scenes.
 
         for chId in novel.srtChapters:
 
@@ -5998,28 +6466,28 @@ class CrossReferences():
                 self.srtScenes.append(scId)
                 self.chpPerScn[scId] = chId
 
-                # Scenes per character:
+                #--- Scenes per character.
 
                 if novel.scenes[scId].characters:
 
                     for crId in novel.scenes[scId].characters:
                         self.scnPerChr[crId].append(scId)
 
-                # Scenes per location:
+                #--- Scenes per location.
 
                 if novel.scenes[scId].locations:
 
                     for lcId in novel.scenes[scId].locations:
                         self.scnPerLoc[lcId].append(scId)
 
-                # Scenes per item:
+                #--- Scenes per item.
 
                 if novel.scenes[scId].items:
 
                     for itId in novel.scenes[scId].items:
                         self.scnPerItm[itId].append(scId)
 
-                # Scenes per tag:
+                #--- Scenes per tag.
 
                 if novel.scenes[scId].tags:
 
@@ -6085,14 +6553,20 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
     def __init__(self, filePath, **kwargs):
-        """Apply the strategy pattern 
-        by delegating the cross reference to an external object.
+        """Apply the strategy pattern by delegating the cross reference to an external object.
+        
+        Extends the superclass constructor.
         """
         super().__init__(filePath)
         self._xr = CrossReferences()
 
     def _get_sceneMapping(self, scId):
-        """Add the chapter number to the original mapping dictionary.
+        """Return a mapping dictionary for a scene section.
+
+        Positional arguments:
+            scId -- str: scene ID.
+        
+        Extends the superclass template method.
         """
         sceneNumber = self._xr.srtScenes.index(scId) + 1
         sceneMapping = super()._get_sceneMapping(scId, sceneNumber, 0, 0)
@@ -6102,6 +6576,9 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_tagMapping(self, tag):
         """Return a mapping dictionary for a tags section. 
+
+        Positional arguments:
+            tag -- str: a single scene tag.
         """
         tagMapping = dict(
             Tag=tag,
@@ -6110,8 +6587,12 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_scenes(self, scenes):
         """Process the scenes.
+        
+        Positional arguments:
+            scenes -- iterable of scene IDs.
+        
         Return a list of strings.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         lines = []
 
@@ -6136,6 +6617,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_sceneTags(self):
         """Process the scene related tags.
+        
         Return a list of strings.
         """
         lines = []
@@ -6152,8 +6634,9 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_characters(self):
         """Process the scenes per character.
+        
         Return a list of strings.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         lines = []
         headerTemplate = Template(self._scnPerChrTemplate)
@@ -6169,8 +6652,9 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_locations(self):
         """Process the locations.
+        
         Return a list of strings.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         lines = []
         headerTemplate = Template(self._scnPerLocTemplate)
@@ -6186,8 +6670,9 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_items(self):
         """Process the items.
+        
         Return a list of strings.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         lines = []
         headerTemplate = Template(self._scnPerItmTemplate)
@@ -6203,6 +6688,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_characterTags(self):
         """Process the character related tags.
+        
         Return a list of strings.
         """
         lines = []
@@ -6212,8 +6698,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
         for tag in self._xr.chrPerTag:
 
             if self._xr.chrPerTag[tag]:
-                lines.append(headerTemplate.safe_substitute(
-                    self._get_tagMapping(tag)))
+                lines.append(headerTemplate.safe_substitute(self._get_tagMapping(tag)))
 
                 for crId in self._xr.chrPerTag[tag]:
                     lines.append(template.safe_substitute(
@@ -6223,6 +6708,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_locationTags(self):
         """Process the location related tags.
+        
         Return a list of strings.
         """
         lines = []
@@ -6243,6 +6729,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
     def _get_itemTags(self):
         """Process the item related tags.
+        
         Return a list of strings.
         """
         lines = []
@@ -6262,9 +6749,10 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
         return lines
 
     def _get_text(self):
-        """Assemble the whole text applying the templates.
+        """Call all processing methods.
+        
         Return a string to be written to the output file.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         self._xr.generate_xref(self)
 
@@ -6282,7 +6770,7 @@ $SceneNumber (Ch $Chapter) $Title (ToDo)
 
 
 class OdsFile(OdfFile):
-    """ODS project file representation."""
+    """Generic OpenDocument spreadsheet document representation."""
 
     EXTENSION = '.ods'
     # overwrites Novel.EXTENSION
@@ -6350,7 +6838,7 @@ class OdsFile(OdfFile):
     <meta:keyword></meta:keyword>
     <meta:initial-creator>$Author</meta:initial-creator>
     <dc:creator></dc:creator>
-    <meta:creation-date>${Date}T${Time}Z</meta:creation-date>
+    <meta:creation-date>${Datetime}Z</meta:creation-date>
     <dc:date></dc:date>
   </office:meta>
 </office:document-meta>
@@ -6471,7 +6959,7 @@ class OdsFile(OdfFile):
  <office:styles>
   <style:default-style style:family="table-cell">
    <style:paragraph-properties style:tab-stop-distance="1.25cm"/>
-   <style:text-properties style:font-name="Arial" fo:language="de" fo:country="DE" style:font-name-asian="Arial Unicode MS" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Tahoma" style:language-complex="hi" style:country-complex="IN"/>
+   <style:text-properties style:font-name="Arial" fo:language="$Language" fo:country="$Country" style:font-name-asian="Arial Unicode MS" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Tahoma" style:language-complex="hi" style:country-complex="IN"/>
   </style:default-style>
   <number:number-style style:name="N0">
    <number:number number:min-integer-digits="1"/>
@@ -6550,9 +7038,16 @@ class OdsFile(OdfFile):
     _MIMETYPE = 'application/vnd.oasis.opendocument.spreadsheet'
 
     def _convert_from_yw(self, text, quick=False):
-        """Convert yw7 raw markup to ods. Return an xml string.
+        """Return text, converted from yw7 markup to target format.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Optional arguments:
+            quick -- bool: if True, apply a conversion mode for one-liners without formatting.
+        
+        Overrides the superclass method.
         """
-
         ODS_REPLACEMENTS = [
             ('&', '&amp;'),  # must be first!
             ('"', '&quot;'),
@@ -6978,7 +7473,16 @@ class OdsSceneList(OdsFile):
     _fileFooter = OdsFile._CONTENT_XML_FOOTER 
 
     def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
-        """Return a mapping dictionary for a scene section. 
+        """Return a mapping dictionary for a scene section.
+        
+        Positional arguments:
+            scId -- str: scene ID.
+            sceneNumber -- int: scene number to be displayed.
+            wordsTotal -- int: accumulated wordcount.
+            lettersTotal -- int: accumulated lettercount.
+        
+        Scene rating "1" is not applicable.
+        Extends the superclass template method.
         """
         sceneMapping = super()._get_sceneMapping(scId, sceneNumber, wordsTotal, lettersTotal)
 
@@ -7145,7 +7649,10 @@ class OdsPlotList(OdsFile):
     _fileFooter = OdsFile._CONTENT_XML_FOOTER 
 
     def _get_fileHeaderMapping(self):
-        """Return a mapping dictionary for the project section. 
+        """Return a mapping dictionary for the project section.
+        
+        Special treatment of scene ratings as storylines.
+        Overrides the superclass template method.
         """
         projectTemplateMapping = super()._get_fileHeaderMapping()
 
@@ -7186,7 +7693,17 @@ class OdsPlotList(OdsFile):
         return projectTemplateMapping
 
     def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
-        """Return a mapping dictionary for a scene section. 
+        """Return a mapping dictionary for a scene section.
+        
+        Positional arguments:
+            scId -- str: scene ID.
+            sceneNumber -- int: scene number to be displayed.
+            wordsTotal -- int: accumulated wordcount.
+            lettersTotal -- int: accumulated lettercount.
+        
+        Special treatment of scene ratings as storylines.
+        Scene rating "1" is not applicable.
+        Extends the superclass template method.
         """
         sceneMapping = super()._get_sceneMapping(scId, sceneNumber, wordsTotal, lettersTotal)
 
@@ -7222,27 +7739,39 @@ class OdsPlotList(OdsFile):
 
 
 
-
 class HtmlProof(HtmlFile):
     """HTML proof reading file representation.
 
     Import a manuscript with visibly tagged chapters and scenes.
     """
-
     DESCRIPTION = 'Tagged manuscript for proofing'
     SUFFIX = '_proof'
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        A prefix for chapter and scene recognition must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._prefix = None
 
     def _preprocess(self, text):
         """Process the html text before parsing.
+        
+        Convert html formatting tags to yWriter 7 raw markup.
+        Overrides the superclass method.
         """
         return self._convert_to_yw(text)
 
     def _postprocess(self):
         """Parse the converted text to identify chapters and scenes.
+        
+        Overrides the superclass method.
         """
         sceneText = []
         scId = ''
@@ -7275,8 +7804,14 @@ class HtmlProof(HtmlFile):
 
     def handle_starttag(self, tag, attrs):
         """Recognize the paragraph's beginning.
-        Overwrites HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides the superclass method.
         """
+
         if tag == 'p':
             self._prefix = ''
 
@@ -7287,19 +7822,27 @@ class HtmlProof(HtmlFile):
             self._prefix = Splitter.PART_SEPARATOR
 
     def handle_endtag(self, tag):
-        """Recognize the paragraph's end.
-        Overwrites HTMLparser.handle_endtag().
+        """Recognize the paragraph's end.      
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
         if tag in ['p', 'h2', 'h1']:
             self._prefix = None
 
     def handle_data(self, data):
-        """Copy the scene paragraphs.
-        Overwrites HTMLparser.handle_data().
+        """Copy the scene paragraphs.      
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._prefix is not None:
             self._lines.append(f'{self._prefix}{data}')
-
 
 
 class HtmlManuscript(HtmlFile):
@@ -7307,18 +7850,25 @@ class HtmlManuscript(HtmlFile):
 
     Import a manuscript with invisibly tagged chapters and scenes.
     """
-
     DESCRIPTION = 'Editable manuscript'
     SUFFIX = '_manuscript'
 
     def _preprocess(self, text):
         """Process the html text before parsing.
+        
+        Convert html formatting tags to yWriter 7 raw markup.
+        Overrides the superclass method.
         """
         return self._convert_to_yw(text)
 
     def handle_starttag(self, tag, attrs):
         """Identify scenes and chapters.
-        Extend HtmlFile.handle_starttag() by processing inline chapter and scene dividers.
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Extends the superclass method by processing inline chapter and scene dividers.
         """
         super().handle_starttag(tag, attrs)
 
@@ -7331,6 +7881,14 @@ class HtmlManuscript(HtmlFile):
                 self._lines.append(Splitter.CHAPTER_SEPARATOR)
 
     def handle_comment(self, data):
+        """Process inline comments within scene content.
+        
+        Positional arguments:
+            data -- str: comment text. 
+        
+        Use marked comments at scene start as scene titles.
+        Overrides the superclass method.
+        """
         
         if self._scId is not None: 
             
@@ -7351,8 +7909,13 @@ class HtmlManuscript(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
+
         if self._scId is not None:
 
             if tag == 'div':
@@ -7377,7 +7940,11 @@ class HtmlManuscript(HtmlFile):
 
     def handle_data(self, data):
         """Collect data within scene sections.
-        Override HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
        
         if self._scId is not None:
@@ -7391,19 +7958,21 @@ class HtmlManuscript(HtmlFile):
                 self.chapters[self._chId].title = data.strip()
 
 
-
 class HtmlSceneDesc(HtmlFile):
     """HTML scene summaries file representation.
 
     Import a full synopsis with invisibly tagged scene descriptions.
     """
-
     DESCRIPTION = 'Scene descriptions'
     SUFFIX = '_scenes'
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
-        Override HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
 
         if self._scId is not None:
@@ -7440,8 +8009,13 @@ class HtmlSceneDesc(HtmlFile):
 
     def handle_data(self, data):
         """Collect data within scene sections.
-        Override HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._scId is not None:
             self._lines.append(data.strip())
 
@@ -7451,20 +8025,23 @@ class HtmlSceneDesc(HtmlFile):
                 self.chapters[self._chId].title = data.strip()
 
 
-
 class HtmlChapterDesc(HtmlFile):
     """HTML chapter summaries file representation.
 
     Import a brief synopsis with invisibly tagged chapter descriptions.
     """
-
     DESCRIPTION = 'Chapter descriptions'
     SUFFIX = '_chapters'
 
     def handle_endtag(self, tag):
         """Recognize the end of the chapter section and save data.
-        Override HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
+        
         if self._chId is not None:
 
             if tag == 'div':
@@ -7482,23 +8059,26 @@ class HtmlChapterDesc(HtmlFile):
                     self._lines = []
 
     def handle_data(self, data):
-        """collect data within chapter sections.
-        Override HTMLparser.handle_data().
+        """Collect data within chapter sections.
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._chId is not None:
             self._lines.append(data.strip())
-
 
 
 class HtmlPartDesc(HtmlChapterDesc):
     """HTML part summaries file representation.
 
-    Import a very brief synopsis with invisibly tagged part descriptions.
+    Parts are chapters marked in yWriter as beginning of a new section.
+    Import a synopsis with invisibly tagged part descriptions.
     """
-
     DESCRIPTION = 'Part descriptions'
     SUFFIX = '_parts'
-
 
 
 
@@ -7512,14 +8092,29 @@ class HtmlCharacters(HtmlFile):
     SUFFIX = '_characters'
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        Character ID and section title must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         HtmlFile.__init__(self, filePath)
         self._crId = None
         self._section = None
 
     def handle_starttag(self, tag, attrs):
         """Identify characters with subsections.
-        Overwrites HTMLparser.handle_starttag()
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides the superclass method.
         """
+        
         if tag == 'div':
 
             if attrs[0][0] == 'id':
@@ -7541,8 +8136,13 @@ class HtmlCharacters(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the character section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
+        
         if self._crId is not None:
 
             if tag == 'div':
@@ -7572,11 +8172,15 @@ class HtmlCharacters(HtmlFile):
 
     def handle_data(self, data):
         """collect data within character sections.
-        Overwrites HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._section is not None:
             self._lines.append(data.strip())
-
 
 
 
@@ -7585,18 +8189,32 @@ class HtmlLocations(HtmlFile):
 
     Import a location sheet with invisibly tagged descriptions.
     """
-
     DESCRIPTION = 'Location descriptions'
     SUFFIX = '_locations'
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        The location ID must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._lcId = None
 
     def handle_starttag(self, tag, attrs):
         """Identify locations.
-        Overwrites HTMLparser.handle_starttag()
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides the superclass method.
         """
+
         if tag == 'div':
 
             if attrs[0][0] == 'id':
@@ -7608,7 +8226,11 @@ class HtmlLocations(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the location section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
         if self._lcId is not None:
 
@@ -7622,7 +8244,11 @@ class HtmlLocations(HtmlFile):
 
     def handle_data(self, data):
         """collect data within location sections.
-        Overwrites HTMLparser.handle_data().
+        
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
         if self._lcId is not None:
             self._lines.append(data.strip())
@@ -7634,18 +8260,32 @@ class HtmlItems(HtmlFile):
 
     Import a item sheet with invisibly tagged descriptions.
     """
-
     DESCRIPTION = 'Item descriptions'
     SUFFIX = '_items'
 
     def __init__(self, filePath, **kwargs):
+        """Initialize local instance variables for parsing.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        The HTML parser works like a state machine. 
+        The item ID must be saved between the transitions.         
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._itId = None
 
     def handle_starttag(self, tag, attrs):
         """Identify items.
-        Overwrites HTMLparser.handle_starttag()
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+            attrs -- list of (name, value) pairs containing the attributes found inside the tag’s <> brackets.
+        
+        Overrides the superclass method.
         """
+
         if tag == 'div':
 
             if attrs[0][0] == 'id':
@@ -7657,8 +8297,13 @@ class HtmlItems(HtmlFile):
 
     def handle_endtag(self, tag):
         """Recognize the end of the item section and save data.
-        Overwrites HTMLparser.handle_endtag().
+        
+        Positional arguments:
+            tag -- str: name of the tag converted to lower case.
+
+        Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
+
         if self._itId is not None:
 
             if tag == 'div':
@@ -7671,8 +8316,13 @@ class HtmlItems(HtmlFile):
 
     def handle_data(self, data):
         """collect data within item sections.
-        Overwrites HTMLparser.handle_data().
+
+        Positional arguments:
+            data -- str: text to be stored. 
+        
+        Overrides HTMLparser.handle_data() called by the parser when a comment is encountered.
         """
+        
         if self._itId is not None:
             self._lines.append(data.strip())
 
@@ -7684,10 +8334,13 @@ import csv
 class CsvFile(Novel):
     """csv file representation.
 
+    Public methods:
+        read() -- parse the file and get the instance variables.
+
+    Convention:
     - Records are separated by line breaks.
     - Data fields are delimited by the _SEPARATOR character.
     """
-
     EXTENSION = '.csv'
     # overwrites Novel.EXTENSION
 
@@ -7697,15 +8350,27 @@ class CsvFile(Novel):
     _rowTitles = []
 
     def __init__(self, filePath, **kwargs):
+        """Initialize instance variables.
+
+        Positional arguments:
+            filePath -- str: path to the file represented by the Novel instance.
+            
+        Optional arguments:
+            kwargs -- keyword arguments to be used by subclasses.            
+        
+        Extends the superclass constructor.
+        """
         super().__init__(filePath)
         self._rows = []
         
         
     def read(self):
-        """Parse the csv file located at filePath, fetching the _rows.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the rows.
         Check the number of fields in each row.
         Return a message beginning with the ERROR constant in case of error.
-        Override the superclass method.
+        Overrides the superclass method.
         """
         self._rows = []
         cellsPerRow = len(self._rowTitles)
@@ -7732,8 +8397,14 @@ class CsvFile(Novel):
         return 'CSV data read in.'
 
     def _get_list(self, text):
-        """Split a sequence of comma separated strings into a list of strings.
+        """Convert a string into a list.
+        
+        Positional arguments:
+            text -- string containing comma-separated substrings.
+        
+        Split a sequence of comma separated strings into a list of strings.
         Remove leading and trailing spaces, if any.
+        Return a list of strings.
         """
         elements = []
         tempList = text.split(',')
@@ -7746,8 +8417,10 @@ class CsvFile(Novel):
 
 class CsvSceneList(CsvFile):
     """csv file representation of a yWriter project's scenes table. 
+    
+    Public methods:
+        read() -- parse the file and get the instance variables.
     """
-
     DESCRIPTION = 'Scene list'
     SUFFIX = '_scenelist'
 
@@ -7760,10 +8433,11 @@ class CsvSceneList(CsvFile):
                  'Word count', 'Letter count', 'Status', 'Characters', 'Locations', 'Items']
 
     def read(self):
-        """Parse the csv file located at filePath, 
-        fetching the Scene attributes contained.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the Scene attributes contained.
         Return a message beginning with the ERROR constant in case of error.
-        Extend the superclass method.
+        Extends the superclass method.
         """
         message = super().read()
 
@@ -7893,8 +8567,10 @@ class CsvSceneList(CsvFile):
 
 class CsvPlotList(CsvFile):
     """csv file representation of a yWriter project's scenes table. 
+    
+    Public methods:
+        read() -- parse the file and get the instance variables.
     """
-
     DESCRIPTION = 'Plot list'
     SUFFIX = '_plotlist'
 
@@ -7908,10 +8584,11 @@ class CsvPlotList(CsvFile):
                  '$FieldTitle1', '$FieldTitle2', '$FieldTitle3', '$FieldTitle4']
 
     def read(self):
-        """Parse the csv file located at filePath, fetching 
-        the Scene attributes contained.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the Scene attributes contained.
         Return a message beginning with the ERROR constant in case of error.
-        Extend the superclass method.
+        Extends the superclass method.
         """
         message = super().read()
 
@@ -7979,18 +8656,21 @@ class CsvPlotList(CsvFile):
 
 class CsvCharList(CsvFile):
     """csv file representation of a yWriter project's characters table. 
+    
+    Public methods:
+        read() -- parse the file and get the instance variables.
     """
-
     DESCRIPTION = 'Character list'
     SUFFIX = '_charlist'
 
     _rowTitles = ['ID', 'Name', 'Full name', 'Aka', 'Description', 'Bio', 'Goals', 'Importance', 'Tags', 'Notes']
 
     def read(self):
-        """Parse the csv file located at filePath, 
-        fetching the Character attributes contained.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the Character attributes contained.
         Return a message beginning with the ERROR constant in case of error.
-        Extend the superclass method.
+        Extends the superclass method.
         """
         message = super().read()
 
@@ -8025,18 +8705,21 @@ class CsvCharList(CsvFile):
 
 class CsvLocList(CsvFile):
     """csv file representation of a yWriter project's locations table. 
+    
+    Public methods:
+        read() -- parse the file and get the instance variables.
     """
-
     DESCRIPTION = 'Location list'
     SUFFIX = '_loclist'
 
     _rowTitles = ['ID', 'Name', 'Description', 'Aka', 'Tags']
 
     def read(self):
-        """Parse the csv file located at filePath, 
-        fetching the WorldElement attributes contained.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the location attributes contained.
         Return a message beginning with the ERROR constant in case of error.
-        Extend the superclass method.
+        Extends the superclass method.
         """
         message = super().read()
 
@@ -8060,18 +8743,21 @@ class CsvLocList(CsvFile):
 
 class CsvItemList(CsvFile):
     """csv file representation of a yWriter project's items table. 
+    
+    Public methods:
+        read() -- parse the file and get the instance variables.
     """
-
     DESCRIPTION = 'Item list'
     SUFFIX = '_itemlist'
 
     _rowTitles = ['ID', 'Name', 'Description', 'Aka', 'Tags']
 
     def read(self):
-        """Parse the csv file located at filePath, 
-        fetching the WorldElement attributes contained.
+        """Parse the file and get the instance variables.
+        
+        Parse the csv file located at filePath, fetching the item attributes contained.
         Return a message beginning with the ERROR constant in case of error.
-        Extend the superclass method.
+        Extends the superclass method.
         """
         message = super().read()
 
@@ -8098,7 +8784,7 @@ class Yw7Converter(YwCnvFf):
     Support yWriter 7 projects and most of the Novel subclasses 
     that can be read or written by OpenOffice/LibreOffice.
 
-    Override the superclass constants EXPORT_SOURCE_CLASSES,
+    Overrides the superclass constants EXPORT_SOURCE_CLASSES,
     EXPORT_TARGET_CLASSES, IMPORT_SOURCE_CLASSES, IMPORT_TARGET_CLASSES.
 
     Class constants:
@@ -8141,9 +8827,9 @@ class Yw7Converter(YwCnvFf):
     CREATE_SOURCE_CLASSES = []
 
     def __init__(self):
-        """Initialize instance variables.
-        Extend the superclass constructor by
-        changing the newProjectFactory strategy.
+        """Change the newProjectFactory strategy.
+        
+        Extends the superclass constructor.
         """
         super().__init__()
         self.newProjectFactory = NewProjectFactory(self.CREATE_SOURCE_CLASSES)
@@ -8157,20 +8843,20 @@ class Converter(Yw7Converter):
     - Open the new file after conversion from yWriter.
     """
 
-    def export_from_yw(self, sourceFile, targetFile):
+    def export_from_yw(self, source, target):
         """Method for conversion from yw to other.
         Override the super class method.
         Open the new file.
         Show only error messages.
         """
-        message = self.convert(sourceFile, targetFile)
+        message = self.convert(source, target)
 
         if message.startswith(ERROR):
             self.newFile = None
             self.ui.set_info_how(message)
 
         else:
-            self.newFile = targetFile.filePath
+            self.newFile = target.filePath
             self._open_newFile()
 from tkinter import messagebox
 import tkinter as tk
@@ -8178,28 +8864,51 @@ import tkinter as tk
 
 
 class UiMb(Ui):
-    """UI subclass with messagebox."""
+    """UI subclass with messagebox.
+    
+    Public methods:
+        ask_yes_no(text) -- query yes or no with a pop-up box.
+        set_info_how(message) -- show a pop-up message in case of error.
+    """
 
     def __init__(self, title):
-        """Extend the Ui constructor. """
+        """Initialize the GUI and remove the tk window from the screen.
+        
+        Positional arguments:
+            title -- application title to be displayed at the messagebox frame.
+            
+        Extends the superclass constructor.
+        """
         super().__init__(title)
         root = tk.Tk()
         root.withdraw()
-        self.title = title
+        self._title = title
 
     def ask_yes_no(self, text):
-        """Override the superclass method."""
-        return messagebox.askyesno(self.title, text)
+        """Query yes or no with a pop-up box.
+        
+        Positional arguments:
+            text -- question to be asked in the pop-up box. 
+            
+        Overrides the superclass method.       
+        """
+        return messagebox.askyesno(self._title, text)
 
     def set_info_how(self, message):
-        """Override the superclass method."""
+        """Show a pop-up message in case of error.
+        
+        Positional arguments:
+            message -- message to be displayed. 
+            
+        Overrides the superclass method.
+        """
 
         if message.startswith(ERROR):
             message = message.split(ERROR, maxsplit=1)[1].strip()
-            messagebox.showerror(self.title, message)
+            messagebox.showerror(self._title, message)
 
         else:
-            messagebox.showinfo(self.title, message)
+            messagebox.showinfo(self._title, message)
 
 YW_EXTENSIONS = ['.yw7']
 
