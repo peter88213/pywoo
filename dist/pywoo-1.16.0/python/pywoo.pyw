@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.15.6
+Version 1.16.0
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3199,7 +3199,7 @@ class HtmlFile(Novel, HTMLParser):
         
         This prevents accidentally applied formatting from being transferred to the yWriter metadata.
         If rich text is applicable, such as in scenes, overwrite this method in a subclass.
-        Return a sring.
+        Return a string.
         """
         text = self._convert_to_yw(text)
 
@@ -3669,6 +3669,7 @@ class FileExport(Novel):
     _unusedChapterEndTemplate = ''
     _notExportedChapterEndTemplate = ''
     _notesChapterEndTemplate = ''
+    _todoChapterEndTemplate = ''
     _characterSectionHeading = ''
     _characterTemplate = ''
     _locationSectionHeading = ''
