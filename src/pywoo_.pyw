@@ -10,7 +10,6 @@ Published under the MIT License (https://opensource.org/licenses/mit-license.php
 import os
 import sys
 import platform
-
 from pywoolib.converter import Converter
 from pywriter.ui.ui_mb import UiMb
 
@@ -30,23 +29,16 @@ if __name__ == '__main__':
     '''
     try:
         sourcePath = sys.argv[1]
-
     except:
         sourcePath = ''
-
     fileName, FileExtension = os.path.splitext(sourcePath)
-
     if not FileExtension in YW_EXTENSIONS:
         # Source file is not a yWriter project.
         suffix = None
-
     else:
         # Source file is a yWriter project; suffix matters.
-
         try:
             suffix = sys.argv[2]
-
         except:
             suffix = ''
-
     run(sourcePath, suffix)

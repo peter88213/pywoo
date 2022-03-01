@@ -23,11 +23,9 @@ class Converter(Yw7Converter):
         Show only error messages.
         """
         message = self.convert(source, target)
-
         if message.startswith(ERROR):
             self.newFile = None
             self.ui.set_info_how(message)
-
         else:
             self.newFile = target.filePath
             self._open_newFile()
