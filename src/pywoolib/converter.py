@@ -10,6 +10,7 @@ from pywriter.converter.yw7_converter import Yw7Converter
 
 class Converter(Yw7Converter):
     """A converter for universal import and export.
+    
     Support yWriter 7 projects and most of the Novel subclasses 
     that can be read or written by OpenOffice/LibreOffice.
     - No message in case of success when converting from yWriter.
@@ -18,7 +19,8 @@ class Converter(Yw7Converter):
 
     def export_from_yw(self, source, target):
         """Method for conversion from yw to other.
-        Override the super class method.
+        
+        Overrides the super class method.
         Open the new file.
         Show only error messages.
         """
