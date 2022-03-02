@@ -18,11 +18,15 @@ class Converter(Yw7Converter):
     """
 
     def export_from_yw(self, source, target):
-        """Method for conversion from yw to other.
+        """Convert from yWriter project to other file format.
+
+        Positional arguments:
+            source -- YwFile subclass instance.
+            target -- Any Novel subclass instance.
         
-        Overrides the super class method.
         Open the new file.
         Show only error messages.
+        Overrides the super class method.
         """
         message = self.convert(source, target)
         if message.startswith(ERROR):

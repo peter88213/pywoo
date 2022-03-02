@@ -24,9 +24,9 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-    '''Enable this for debugging unhandled exceptions:
+    """Enable this for debugging unhandled exceptions:
     sys.stderr = open(os.path.join(os.getenv('TEMP'), f'stderr-{os.path.basename(sys.argv[0])}.txt'), 'w')
-    '''
+    """
     try:
         sourcePath = sys.argv[1]
     except:
