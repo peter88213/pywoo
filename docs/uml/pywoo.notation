@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.3/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/gmfdiag/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.3/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/gmfdiag/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
   <notation:Diagram xmi:id="_fKTjIJ4XEeyF8YP9gUP_SQ" type="PapyrusUMLClassDiagram" name="pywoolib package class diagram" measurementUnit="Pixel">
     <children xmi:type="notation:Shape" xmi:id="_gLky4J4XEeyF8YP9gUP_SQ" type="Package_Shape">
       <children xmi:type="notation:DecorationNode" xmi:id="_gLprYJ4XEeyF8YP9gUP_SQ" type="Package_NameLabel"/>
@@ -28,13 +28,13 @@
             <layoutConstraint xmi:type="notation:Bounds" xmi:id="_htss-Z4XEeyF8YP9gUP_SQ"/>
           </children>
           <element xmi:type="uml:Class" href="pywoo.uml#__331cPywEeqEK6KdQRY5bw"/>
-          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_htq3wZ4XEeyF8YP9gUP_SQ" x="54" y="72" width="157"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_htq3wZ4XEeyF8YP9gUP_SQ" x="54" y="32" width="157"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_gLprYp4XEeyF8YP9gUP_SQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gLprY54XEeyF8YP9gUP_SQ"/>
       </children>
       <element xmi:type="uml:Package" href="pywoo.uml#_6B5gkPywEeqEK6KdQRY5bw"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gLky4Z4XEeyF8YP9gUP_SQ" x="380" y="260" width="301" height="271"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gLky4Z4XEeyF8YP9gUP_SQ" x="380" y="300" width="241" height="201"/>
     </children>
     <children xmi:type="notation:Shape" xmi:id="_sCmEMJ4XEeyF8YP9gUP_SQ" type="Class_Shape">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="__DzrUJ4XEeyF8YP9gUP_SQ" source="QualifiedName">
@@ -210,6 +210,21 @@
       <element xmi:type="uml:Class" href="platform:/resource/PyWriter/PyWriter.uml#_JtCGsPxDEeq5hMee5ike2Q"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BDwUYZ4ZEeyF8YP9gUP_SQ" x="440" y="60" width="141"/>
     </children>
+    <children xmi:type="notation:Shape" xmi:id="_BuzqQJ4eEeyF8YP9gUP_SQ" type="Comment_Shape">
+      <children xmi:type="notation:DecorationNode" xmi:id="_BuzqQp4eEeyF8YP9gUP_SQ" type="Comment_BodyLabel"/>
+      <element xmi:type="uml:Comment" href="pywoo.uml#_BuPpkJ4eEeyF8YP9gUP_SQ"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BuzqQZ4eEeyF8YP9gUP_SQ" x="580" y="200"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_3ifx0J4eEeyF8YP9gUP_SQ" type="Comment_Shape">
+      <children xmi:type="notation:DecorationNode" xmi:id="_3ifx0p4eEeyF8YP9gUP_SQ" type="Comment_BodyLabel"/>
+      <element xmi:type="uml:Comment" href="pywoo.uml#_3h8YMJ4eEeyF8YP9gUP_SQ"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3ifx0Z4eEeyF8YP9gUP_SQ" x="587" y="-48"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_AtGgMJ4fEeyF8YP9gUP_SQ" type="Comment_Shape">
+      <children xmi:type="notation:DecorationNode" xmi:id="_AtGgMp4fEeyF8YP9gUP_SQ" type="Comment_BodyLabel"/>
+      <element xmi:type="uml:Comment" href="pywoo.uml#_Ase1IJ4fEeyF8YP9gUP_SQ"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_AtGgMZ4fEeyF8YP9gUP_SQ" x="704" y="366"/>
+    </children>
     <styles xmi:type="notation:StringValueStyle" xmi:id="_fKTjIZ4XEeyF8YP9gUP_SQ" name="diagram_compatibility_version" stringValue="1.4.0"/>
     <styles xmi:type="notation:DiagramStyle" xmi:id="_fKTjIp4XEeyF8YP9gUP_SQ"/>
     <styles xmi:type="style:PapyrusDiagramStyle" xmi:id="_fKTjI54XEeyF8YP9gUP_SQ" diagramKindId="org.eclipse.papyrus.uml.diagram.class">
@@ -254,11 +269,14 @@
         <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_zRdCIZ4YEeyF8YP9gUP_SQ" key="visible" value="true"/>
       </eAnnotations>
       <children xmi:type="notation:DecorationNode" xmi:id="_HKF1854YEeyF8YP9gUP_SQ" type="Generalization_StereotypeLabel">
+        <styles xmi:type="notation:BooleanValueStyle" xmi:id="_-W3BkJ4eEeyF8YP9gUP_SQ" name="IS_UPDATED_POSITION" booleanValue="true"/>
         <layoutConstraint xmi:type="notation:Location" xmi:id="_HKF19J4YEeyF8YP9gUP_SQ" y="40"/>
       </children>
       <styles xmi:type="notation:FontStyle" xmi:id="_HKF18Z4YEeyF8YP9gUP_SQ"/>
       <element xmi:type="uml:Generalization" href="pywoo.uml#_F7SJYPyxEeqEK6KdQRY5bw"/>
       <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_HKF18p4YEeyF8YP9gUP_SQ" points="[440, 410, -643984, -643984]$[341, 410, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_-XQDIJ4eEeyF8YP9gUP_SQ" id="(0.0,0.4)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_-XQqMJ4eEeyF8YP9gUP_SQ" id="(1.0,0.4)"/>
     </edges>
     <edges xmi:type="notation:Connector" xmi:id="_Gj_CwJ4ZEeyF8YP9gUP_SQ" type="Generalization_Edge" source="_uFALYJ4YEeyF8YP9gUP_SQ" target="_BDwUYJ4ZEeyF8YP9gUP_SQ">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_s-DU8J4ZEeyF8YP9gUP_SQ" source="PapyrusCSSForceValue">
@@ -304,6 +322,34 @@
       <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_s-ARop4ZEeyF8YP9gUP_SQ" points="[335, 65, -643984, -643984]$[440, -4, -643984, -643984]"/>
       <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_v8dm0J4ZEeyF8YP9gUP_SQ" id="(1.0,0.4)"/>
       <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_v8dm0Z4ZEeyF8YP9gUP_SQ" id="(0.0,0.4)"/>
+    </edges>
+    <edges xmi:type="notation:Connector" xmi:id="_KdstAJ4eEeyF8YP9gUP_SQ" type="Comment_AnnotatedElementEdge" source="_BuzqQJ4eEeyF8YP9gUP_SQ" target="_uFALYJ4YEeyF8YP9gUP_SQ">
+      <styles xmi:type="notation:FontStyle" xmi:id="_KdstAZ4eEeyF8YP9gUP_SQ"/>
+      <element xsi:nil="true"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_KdstAp4eEeyF8YP9gUP_SQ" points="[730, 240, -643984, -643984]$[740, 160, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_KeLOIJ4eEeyF8YP9gUP_SQ" id="(0.5333333333333333,0.0)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_KeLOIZ4eEeyF8YP9gUP_SQ" id="(0.27586206896551724,1.0)"/>
+    </edges>
+    <edges xmi:type="notation:Connector" xmi:id="_RSh20J4eEeyF8YP9gUP_SQ" type="Comment_AnnotatedElementEdge" source="_BuzqQJ4eEeyF8YP9gUP_SQ" target="_htq3wJ4XEeyF8YP9gUP_SQ">
+      <styles xmi:type="notation:FontStyle" xmi:id="_RSh20Z4eEeyF8YP9gUP_SQ"/>
+      <element xsi:nil="true"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_RSh20p4eEeyF8YP9gUP_SQ" points="[745, 240, -643984, -643984]$[520, 360, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_RS-iwJ4eEeyF8YP9gUP_SQ" id="(0.13333333333333333,1.0)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_RS-iwZ4eEeyF8YP9gUP_SQ" id="(0.7643312101910829,0.0)"/>
+    </edges>
+    <edges xmi:type="notation:Connector" xmi:id="_88xCIJ4eEeyF8YP9gUP_SQ" type="Comment_AnnotatedElementEdge" source="_3ifx0J4eEeyF8YP9gUP_SQ" target="_uFALYJ4YEeyF8YP9gUP_SQ">
+      <styles xmi:type="notation:FontStyle" xmi:id="_88xCIZ4eEeyF8YP9gUP_SQ"/>
+      <element xsi:nil="true"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_88xCIp4eEeyF8YP9gUP_SQ" points="[748, -20, -643984, -643984]$[700, 60, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_89dlsJ4eEeyF8YP9gUP_SQ" id="(0.8260869565217391,1.0)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_89dlsZ4eEeyF8YP9gUP_SQ" id="(0.41379310344827586,0.0)"/>
+    </edges>
+    <edges xmi:type="notation:Connector" xmi:id="_Iv55AJ4fEeyF8YP9gUP_SQ" type="Comment_AnnotatedElementEdge" source="_AtGgMJ4fEeyF8YP9gUP_SQ" target="_htq3wJ4XEeyF8YP9gUP_SQ">
+      <styles xmi:type="notation:FontStyle" xmi:id="_Iv55AZ4fEeyF8YP9gUP_SQ"/>
+      <element xsi:nil="true"/>
+      <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_Iv55Ap4fEeyF8YP9gUP_SQ" points="[740, 366, -643984, -643984]$[597, 420, -643984, -643984]"/>
+      <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Iwo40J4fEeyF8YP9gUP_SQ" id="(0.0,0.5666666666666667)"/>
+      <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Iwo40Z4fEeyF8YP9gUP_SQ" id="(1.0,0.6)"/>
     </edges>
   </notation:Diagram>
   <notation:Diagram xmi:id="_OG-IgJ4YEeyF8YP9gUP_SQ" type="PapyrusUMLClassDiagram" name="pywoolib package detailed class diagram" measurementUnit="Pixel">

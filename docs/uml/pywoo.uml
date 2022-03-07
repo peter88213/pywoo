@@ -4,6 +4,20 @@
     <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
   </packageImport>
   <packagedElement xmi:type="uml:Package" xmi:id="_6B5gkPywEeqEK6KdQRY5bw" name="pywoolib">
+    <ownedComment xmi:type="uml:Comment" xmi:id="_BuPpkJ4eEeyF8YP9gUP_SQ" annotatedElement="_6B5gkPywEeqEK6KdQRY5bw __331cPywEeqEK6KdQRY5bw">
+      <body>Strategy classes&#xD;
+used by the pywoo.pyw &#xD;
+application script</body>
+    </ownedComment>
+    <ownedComment xmi:type="uml:Comment" xmi:id="_3h8YMJ4eEeyF8YP9gUP_SQ">
+      <annotatedElement xmi:type="uml:Class" href="../PyWriter/PyWriter.uml#_Z2J44MFgEeu3Uqtx9hJ-Ng"/>
+      <body>Use tkinter messageboxes &#xD;
+for user interaction and&#xD;
+error messaging</body>
+    </ownedComment>
+    <ownedComment xmi:type="uml:Comment" xmi:id="_Ase1IJ4fEeyF8YP9gUP_SQ" annotatedElement="__331cPywEeqEK6KdQRY5bw">
+      <body>Open ODT/ODS file after conversion</body>
+    </ownedComment>
     <packagedElement xmi:type="uml:Class" xmi:id="__331cPywEeqEK6KdQRY5bw" name="Converter">
       <generalization xmi:type="uml:Generalization" xmi:id="_F7SJYPyxEeqEK6KdQRY5bw">
         <general xmi:type="uml:Class" href="../PyWriter/PyWriter.uml#_gJJ3IL4iEeuITv7MyBA5yA"/>
