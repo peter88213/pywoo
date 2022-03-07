@@ -43,8 +43,7 @@ This extension supports the update mechanism of OpenOffice. You can let the Exte
 
 ## Software development
 
-[pywoolib library overview](lib)
-
+[Project class library overview](lib)
 
 ## Credits
 

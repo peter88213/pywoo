@@ -1,10 +1,10 @@
-[home](../index) > pywoolib library overview
+[home](../index) > Project class library overview
 
 ---
 
-# pywoolib library overview
+# Project class library overview
 
-## Modules
+## Modules of the pywoolib package
 
 **converter** -- Provide a converter class for universal import and export. 
 

@@ -384,7 +384,7 @@
             <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QqJ3AJ4YEeyF8YP9gUP_SQ"/>
           </children>
           <element xmi:type="uml:Class" href="pywoo.uml#__331cPywEeqEK6KdQRY5bw"/>
-          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QqJP4Z4YEeyF8YP9gUP_SQ" x="94" y="32"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QqJP4Z4YEeyF8YP9gUP_SQ" x="94" y="32" width="181"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_OvL_FJ4YEeyF8YP9gUP_SQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_OvL_FZ4YEeyF8YP9gUP_SQ"/>
