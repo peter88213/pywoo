@@ -3,6 +3,7 @@
 	<name>pywoo</name>
 	<comment></comment>
 	<projects>
+		<project>PyWriter</project>
 	</projects>
 	<buildSpec>
 	</buildSpec>

@@ -41,6 +41,11 @@ __LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separa
 
 This extension supports the update mechanism of OpenOffice. You can let the Extension Manager check for updates from time to time to get the latest release.
 
+## Development
+
+[pywoolib library overview](lib)
+
+
 ## Credits
 
 [OpenOffice Extension Compiler](https://wiki.openoffice.org/wiki/Extensions_Packager#Extension_Compiler) by Bernard Marcelly.
