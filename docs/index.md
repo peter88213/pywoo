@@ -29,7 +29,7 @@ __LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separa
 
 ## Download and install
 
-[Download the latest release (version 1.16.2)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.16.2.oxt)
+[Download the latest release (version 1.17.0)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.17.0.oxt)
 
 - Installation right at download, by double-clicking on the downloaded file, or via the OpenOffice Extension Manager.
 - After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.
@@ -40,10 +40,6 @@ __LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separa
 ## Get updates
 
 This extension supports the update mechanism of OpenOffice. You can let the Extension Manager check for updates from time to time to get the latest release.
-
-## Software development
-
-[Project class library overview](lib)
 
 ## Credits
 
