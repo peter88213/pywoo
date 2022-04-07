@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.18.0
+Version 1.18.1
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -11,7 +11,23 @@ import os
 import sys
 import platform
 ERROR = '!'
-import webbrowser
+
+
+def open_document(document):
+    """Open a document with the operating system's standard application."""
+    try:
+        os.startfile(os.path.normpath(document))
+        # Windows
+    except:
+        try:
+            os.system('xdg-open "%s"' % os.path.normpath(document))
+            # Linux
+        except:
+            try:
+                os.system('open "%s"' % os.path.normpath(document))
+                # Mac
+            except:
+                pass
 
 
 class Ui:
@@ -268,7 +284,7 @@ class YwCnvUi(YwCnv):
 
     def _open_newFile(self):
         """Open the converted file for editing and exit the converter script."""
-        webbrowser.open(self.newFile)
+        open_document(self.newFile)
         sys.exit(0)
 
 
@@ -641,6 +657,10 @@ class Novel:
 
         self.filePath = filePath
 
+        self.kwVar = {}
+        # dictionary
+        # Optional key/value instance variables for customization.
+
     @property
     def filePath(self):
         return self._filePath
@@ -786,6 +806,9 @@ class Chapter:
         # The chapter's scene IDs. The order of its elements
         # corresponds to the chapter's order of the scenes.
 
+        self.kwVar = {}
+        # dictionary
+        # Optional key/value instance variables for customization.
 
 
 class Scene:
@@ -991,6 +1014,10 @@ class Scene:
         # str
         # xml: <ImageFile>
 
+        self.kwVar = {}
+        # dictionary
+        # Optional key/value instance variables for customization.
+
     @property
     def sceneContent(self):
         return self._sceneContent
@@ -1042,6 +1069,10 @@ class WorldElement:
         self.aka = None
         # str
         # xml: <AKA>
+
+        self.kwVar = {}
+        # dictionary
+        # Optional key/value instance variables for customization.
 
 
 class Character(WorldElement):
@@ -1971,6 +2002,26 @@ class Yw7File(Novel):
         Return a message beginning with the ERROR constant in case of error.
         Overrides the superclass method.
         """
+        if self.is_locked():
+            return f'{ERROR}yWriter seems to be open. Please close first.'
+
+        self._build_element_tree()
+        message = self._write_element_tree(self)
+        if message.startswith(ERROR):
+            return message
+
+        return self._postprocess_xml_file(self.filePath)
+
+    def is_locked(self):
+        """Check whether the yw7 file is locked by yWriter.
+        
+        Return True if a .lock file placed by yWriter exists.
+        Otherwise, return False. 
+        """
+        return os.path.isfile(f'{self.filePath}.lock')
+
+    def _build_element_tree(self):
+        """Modify the yWriter project attributes of an existing xml element tree."""
 
         def build_scene_subtree(xmlScn, prjScn):
             if prjScn.title is not None:
@@ -2423,14 +2474,11 @@ class Yw7File(Novel):
                 except(AttributeError):
                     ET.SubElement(xmlPrj, 'FieldTitle4').text = self.fieldTitle4
 
-        #--- Start write method.
-        if self.is_locked():
-            return f'{ERROR}yWriter seems to be open. Please close first.'
-
         TAG = 'YWRITER7'
         xmlScenes = {}
         xmlChapters = {}
         try:
+            # Try processing an existing tree.
             root = self.tree.getroot()
             xmlPrj = root.find('PROJECT')
             locations = root.find('LOCATIONS')
@@ -2439,6 +2487,7 @@ class Yw7File(Novel):
             scenes = root.find('SCENES')
             chapters = root.find('CHAPTERS')
         except(AttributeError):
+            # Build a new tree.
             root = ET.Element(TAG)
             xmlPrj = ET.SubElement(root, 'PROJECT')
             locations = ET.SubElement(root, 'LOCATIONS')
@@ -2542,19 +2591,6 @@ class Yw7File(Novel):
             except:
                 pass
         self.tree = ET.ElementTree(root)
-        message = self._write_element_tree(self)
-        if message.startswith(ERROR):
-            return message
-
-        return self._postprocess_xml_file(self.filePath)
-
-    def is_locked(self):
-        """Check whether the yw7 file is locked by yWriter.
-        
-        Return True if a .lock file placed by yWriter exists.
-        Otherwise, return False. 
-        """
-        return os.path.isfile(f'{self.filePath}.lock')
 
     def _write_element_tree(self, ywProject):
         """Write back the xml element tree to a .yw7 xml file located at filePath.
@@ -6111,6 +6147,7 @@ class HtmlManuscript(HtmlFile):
     """
     DESCRIPTION = 'Editable manuscript'
     SUFFIX = '_manuscript'
+    _BULLET = '-'
 
     def _preprocess(self, text):
         """Process the html text before parsing.
@@ -6141,6 +6178,8 @@ class HtmlManuscript(HtmlFile):
                 self._lines.append(f'{Splitter.CHAPTER_SEPARATOR} ')
             elif tag == 'h1':
                 self._lines.append(f'{Splitter.PART_SEPARATOR} ')
+            elif tag == 'li':
+                self._lines.append(f'{self._BULLET} ')
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.

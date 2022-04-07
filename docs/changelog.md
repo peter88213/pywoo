@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.18.1
+
+- Add "bullets" when converting lists to yWriter format.
+
+Based on PyWriter v5.4.0
+
 ### v1.18.0
 
 - New document types for "Notes" chapters import and export.
