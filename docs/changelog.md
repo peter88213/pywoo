@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.20.0
+
+- Add a macro that replaces list strokes with bullets.
+
+Based on PyWriter v5.4.0
+
 ### v1.18.1
 
 - Add "bullets" when converting lists to yWriter format.
