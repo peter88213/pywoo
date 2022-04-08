@@ -29,7 +29,7 @@ __LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separa
 
 ## Download and install
 
-[Download the latest release (version 1.19.0)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.19.0.oxt)
+[Download the latest release (version 1.20.0)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.20.0.oxt)
 
 - Installation right at download, by double-clicking on the downloaded file, or via the OpenOffice Extension Manager.
 - After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.

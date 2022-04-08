@@ -13,19 +13,24 @@ sub to_blank_lines
 &apos; Replace scene dividers with blank lines
 &apos; 
 &apos; Replace the three-lines &quot;* * *&quot; scene dividers with a single blank line. 
-&apos; Change the style of the scene-dividing paragraphs from  _Heading 4_  to  _Heading 5_.
+&apos; Change the style of the scene-dividing paragraphs
+&apos; from Heading 4 to Heading 5.
 &apos; ----------------------------------------------------------------------
-
 dim pStyles
 dim document   as object
 dim dispatcher as object
-
+dim oSaveCursor as object
+dim oViewCursor as object
 
 pStyles = ThisComponent.StyleFamilies.getByName(&quot;ParagraphStyles&quot;)
 document   = ThisComponent.CurrentController.Frame
 dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
 
-&apos; ----------------------------------------------------------------------
+&apos; Save cursor position.
+oViewCursor = ThisComponent.CurrentController().getViewCursor()
+oSaveCursor = ThisComponent.Text.createTextCursorByRange(oViewCursor)
+
+&apos; Replace &quot;Heading 4&quot; by &quot;Heading 5&quot;.
 dim args1(18) as new com.sun.star.beans.PropertyValue
 args1(0).Name = &quot;SearchItem.StyleFamily&quot;
 args1(0).Value = 2
@@ -65,10 +70,9 @@ args1(17).Name = &quot;SearchItem.Command&quot;
 args1(17).Value = 3
 args1(18).Name = &quot;Quiet&quot;
 args1(18).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
 
-&apos; ----------------------------------------------------------------------
+&apos; Find all &quot;Heading 5&quot;.
 dim args2(18) as new com.sun.star.beans.PropertyValue
 args2(0).Name = &quot;SearchItem.StyleFamily&quot;
 args2(0).Value = 2
@@ -108,10 +112,9 @@ args2(17).Name = &quot;SearchItem.Command&quot;
 args2(17).Value = 1
 args2(18).Name = &quot;Quiet&quot;
 args2(18).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args2())
 
-&apos; ----------------------------------------------------------------------
+&apos; Delete scene dividers.
 dim args3(18) as new com.sun.star.beans.PropertyValue
 args3(0).Name = &quot;SearchItem.StyleFamily&quot;
 args3(0).Value = 2
@@ -151,9 +154,17 @@ args3(17).Name = &quot;SearchItem.Command&quot;
 args3(17).Value = 3
 args3(18).Name = &quot;Quiet&quot;
 args3(18).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args3())
 
+&apos; Reset search options with a dummy search.
+args3(8).Value = 0
+args3(9).Value = 65536
+args3(10).Value = &quot;#&quot;
+args3(17).Value = 1
+dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args3())
+
+&apos; Restore cursor position.
+oViewCursor.gotoRange(oSaveCursor,False)
 
 end sub
 
@@ -164,17 +175,21 @@ sub Indent
 &apos; Select all paragraphs that start with &quot;&gt; &quot; 
 &apos; and change their paragraph style to  _Text body indent_.
 &apos; ----------------------------------------------------------------------
-
 dim document   as object
 dim dispatcher as object
 dim pstyles
+dim oSaveCursor as object
+dim oViewCursor as object
 
 document   = ThisComponent.CurrentController.Frame
 dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
 pStyles = ThisComponent.StyleFamilies.getByName(&quot;ParagraphStyles&quot;)
 
-&apos; Assign all paragraphs beginning with &apos;&gt; &apos; the &apos;Text body indent&apos; style.
+&apos; Save cursor position.
+oViewCursor = ThisComponent.CurrentController().getViewCursor()
+oSaveCursor = ThisComponent.Text.createTextCursorByRange(oViewCursor)
 
+&apos; Assign all paragraphs beginning with &apos;&gt; &apos; the &apos;Text body indent&apos; style.
 dim args1(18) as new com.sun.star.beans.PropertyValue
 args1(0).Name = &quot;SearchItem.StyleFamily&quot;
 args1(0).Value = 2
@@ -214,39 +229,52 @@ args1(17).Name = &quot;SearchItem.Command&quot;
 args1(17).Value = 1
 args1(18).Name = &quot;Quiet&quot;
 args1(18).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
-
 
 dim args2(1) as new com.sun.star.beans.PropertyValue
 args2(0).Name = &quot;Template&quot;
 args2(0).Value = pStyles.getByName(&quot;Text body indent&quot;).DisplayName
 args2(1).Name = &quot;Family&quot;
 args2(1).Value = 2
-
 dispatcher.executeDispatch(document, &quot;.uno:StyleApply&quot;, &quot;&quot;, 0, args2())
 
 &apos; Delete the markup.
-
 args1(17).Value = 3
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
 
+&apos; Reset search options with a dummy search.
+args1(8).Value = 0
+args1(10).Value = &quot;#&quot;
+args1(17).Value = 1
+dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
+
+&apos; Restore cursor position.
+oViewCursor.gotoRange(oSaveCursor,False)
 
 end sub
 
 
 sub bullets
-rem ----------------------------------------------------------------------
+&apos; ----------------------------------------------------------------------
+&apos; Replace list strokes with bullets
+&apos; 
+&apos; Select all paragraphs that start with &apos;- &apos;
+&apos; and apply a list paragraph style.
+&apos; ----------------------------------------------------------------------
 rem define variables
 dim document   as object
 dim dispatcher as object
-rem ----------------------------------------------------------------------
-rem get access to the document
+dim oSaveCursor as object
+dim oViewCursor as object
+
 document   = ThisComponent.CurrentController.Frame
 dispatcher = createUnoService(&quot;com.sun.star.frame.DispatchHelper&quot;)
 
-rem ----------------------------------------------------------------------
+&apos; Save cursor position.
+oViewCursor = ThisComponent.CurrentController().getViewCursor()
+oSaveCursor = ThisComponent.Text.createTextCursorByRange(oViewCursor)
+
+&apos; Find all list strokes
 dim args1(18) as new com.sun.star.beans.PropertyValue
 args1(0).Name = &quot;SearchItem.StyleFamily&quot;
 args1(0).Value = 2
@@ -286,19 +314,28 @@ args1(17).Name = &quot;SearchItem.Command&quot;
 args1(17).Value = 1
 args1(18).Name = &quot;Quiet&quot;
 args1(18).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
 
-rem ----------------------------------------------------------------------
+&apos; Apply list bullets to search result
 dim args2(0) as new com.sun.star.beans.PropertyValue
 args2(0).Name = &quot;On&quot;
 args2(0).Value = true
-
 dispatcher.executeDispatch(document, &quot;.uno:DefaultBullet&quot;, &quot;&quot;, 0, args2())
 
-rem ----------------------------------------------------------------------
+&apos; Delete list strokes.
 dispatcher.executeDispatch(document, &quot;.uno:Delete&quot;, &quot;&quot;, 0, Array())
 
+&apos; Reset search options with a dummy search.
+args1(8).Value = 0
+args1(10).Value = &quot;#&quot;
+args1(17).Value = 1
+dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot;, 0, args1())
+
+&apos; Restore cursor position.
+oViewCursor.gotoRange(oSaveCursor,False)
 
 end sub
+
+
+
 </script:module>
