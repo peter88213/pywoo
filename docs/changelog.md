@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.20.1 Bugfix release
+
+Fix a bug in the StarBasic formatting macros where characters are deleted if no list strokes are found.
+
+Based on PyWriter v5.4.0
+
 ### v1.20.0
 
 - Add a macro that replaces list strokes with bullets.

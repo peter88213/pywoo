@@ -47,6 +47,7 @@ This extension supports the update mechanism of OpenOffice. You can let the Exte
 
 Frederik Lundh published the [xml pretty print algorithm](http://effbot.org/zone/element-lib.htm#prettyprint).
 
+Andrew D. Pitonyak published useful Macro code examples in [OpenOffice.org Macros Explained](https://www.pitonyak.org/OOME_3_0.pdf).
 
 ## License
 
