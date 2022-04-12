@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.20.1
+Version 1.22.0
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -2694,6 +2694,8 @@ class HtmlFile(Novel, HTMLParser):
     _COMMENT_START = '/*'
     _COMMENT_END = '*/'
     _SC_TITLE_BRACKET = '~'
+    _BULLET = '-'
+    _INDENT = '>'
 
     def __init__(self, filePath, **kwargs):
         """Initialize the HTML parser and local instance variables for parsing.
@@ -2814,7 +2816,7 @@ class HtmlFile(Novel, HTMLParser):
         
         Overrides HTMLparser.handle_comment() called by the parser when a comment is encountered.
         """
-        if self._scId is not None: 
+        if self._scId is not None:
             self._lines.append(f'{self._COMMENT_START}{data}{self._COMMENT_END}')
 
     def read(self):
@@ -4037,8 +4039,9 @@ class OdtFile(OdfFile):
  <office:scripts/>
  <office:font-face-decls>
   <style:font-face style:name="StarSymbol" svg:font-family="StarSymbol" style:font-charset="x-symbol"/>
+  <style:font-face style:name="Consolas" svg:font-family="Consolas" style:font-adornments="Standard" style:font-family-generic="modern" style:font-pitch="fixed"/>
   <style:font-face style:name="Courier New" svg:font-family="&apos;Courier New&apos;" style:font-adornments="Standard" style:font-family-generic="modern" style:font-pitch="fixed"/>
-   </office:font-face-decls>
+ </office:font-face-decls>
  <office:automatic-styles/>
  <office:body>
   <office:text text:use-soft-page-breaks="true">
@@ -4196,7 +4199,8 @@ class OdtFile(OdfFile):
   <style:font-face style:name="StarSymbol" svg:font-family="StarSymbol" style:font-charset="x-symbol"/>
   <style:font-face style:name="Segoe UI" svg:font-family="&apos;Segoe UI&apos;"/>
   <style:font-face style:name="Courier New" svg:font-family="&apos;Courier New&apos;" style:font-adornments="Standard" style:font-family-generic="modern" style:font-pitch="fixed"/>
- </office:font-face-decls>
+  <style:font-face style:name="Consolas" svg:font-family="Consolas" style:font-adornments="Standard" style:font-family-generic="modern" style:font-pitch="fixed"/>
+  </office:font-face-decls>
  <office:styles>
   <style:default-style style:family="graphic">
    <style:graphic-properties svg:stroke-color="#3465a4" draw:fill-color="#729fcf" fo:wrap-option="no-wrap" draw:shadow-offset-x="0.3cm" draw:shadow-offset-y="0.3cm" draw:start-line-spacing-horizontal="0.283cm" draw:start-line-spacing-vertical="0.283cm" draw:end-line-spacing-horizontal="0.283cm" draw:end-line-spacing-vertical="0.283cm" style:flow-with-text="true"/>
@@ -4332,6 +4336,10 @@ class OdtFile(OdfFile):
    <style:paragraph-properties loext:contextual-spacing="false" fo:margin-top="0cm" fo:margin-bottom="0cm" style:page-number="auto"/>
    <style:text-properties fo:font-variant="normal" fo:text-transform="none" fo:letter-spacing="normal" fo:font-style="italic" fo:font-weight="normal"/>
   </style:style>
+  <style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="html">
+   <style:paragraph-properties fo:margin="100%" fo:margin-left="1cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
+   <style:text-properties style:font-name="Consolas"/>
+  </style:style>
   <style:style style:name="yWriter_20_mark" style:display-name="yWriter mark" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
    <style:text-properties fo:color="#008000" fo:font-size="10pt"/>
   </style:style>
@@ -4407,11 +4415,11 @@ class OdtFile(OdfFile):
         
         Overrides the superclass method.
         """
-        if quick:            
+        if quick:
             # Just clean up a one-liner without sophisticated formatting.
             try:
                 return text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
-            
+
             except AttributeError:
                 return ''
 
@@ -4456,6 +4464,8 @@ class OdtFile(OdfFile):
                 line = line.replace('[b][/b]', '')
                 newlines.append(line)
             text = '\n'.join(newlines).rstrip()
+
+            # Process the replacements list.
             for yw, od in ODT_REPLACEMENTS:
                 text = text.replace(yw, od)
 
@@ -6110,12 +6120,16 @@ class HtmlProof(HtmlFile):
         
         Overrides the superclass method.
         """
-        if tag == 'p':
+        if tag == 'p' and self._prefix is None:
             self._prefix = ''
         elif tag == 'h2':
             self._prefix = f'{Splitter.CHAPTER_SEPARATOR} '
         elif tag == 'h1':
             self._prefix = f'{Splitter.PART_SEPARATOR} '
+        elif tag == 'li':
+            self._prefix = f'{self._BULLET} '
+        elif tag == 'blockquote':
+            self._prefix = f'{self._INDENT} '
 
     def handle_endtag(self, tag):
         """Recognize the paragraph's end.      
@@ -6125,7 +6139,7 @@ class HtmlProof(HtmlFile):
 
         Overrides HTMLparser.handle_endtag() called by the HTML parser to handle the end tag of an element.
         """
-        if tag in ['p', 'h2', 'h1']:
+        if tag in ['p', 'h2', 'h1', 'blockquote']:
             self._prefix = None
 
     def handle_data(self, data):
@@ -6147,7 +6161,6 @@ class HtmlManuscript(HtmlFile):
     """
     DESCRIPTION = 'Editable manuscript'
     SUFFIX = '_manuscript'
-    _BULLET = '-'
 
     def _preprocess(self, text):
         """Process the html text before parsing.
@@ -6180,6 +6193,8 @@ class HtmlManuscript(HtmlFile):
                 self._lines.append(f'{Splitter.PART_SEPARATOR} ')
             elif tag == 'li':
                 self._lines.append(f'{self._BULLET} ')
+            elif tag == 'blockquote':
+                self._lines.append(f'{self._INDENT} ')
 
     def handle_endtag(self, tag):
         """Recognize the end of the scene section and save data.
@@ -6203,6 +6218,8 @@ class HtmlManuscript(HtmlFile):
                 self._lines.append('\n')
             elif tag == 'h3' and not self._getScTitle:
                 self._lines.append('\n')
+            elif tag == 'blockquote':
+                self._lines.append('\n')
         elif self._chId is not None:
             if tag == 'div':
                 self._chId = None
@@ -6219,13 +6236,14 @@ class HtmlManuscript(HtmlFile):
         if self._scId is not None:
             if not self._lines:
                 # Comment is at scene start
-                if self._SC_TITLE_BRACKET in data:
-                    # Comment is marked as a scene title
-                    try:
-                        self.scenes[self._scId].title = data.split(self._SC_TITLE_BRACKET)[1].strip()
-                    except:
-                        pass
-                    return
+                pass
+            if self._SC_TITLE_BRACKET in data:
+                # Comment is marked as a scene title
+                try:
+                    self.scenes[self._scId].title = data.split(self._SC_TITLE_BRACKET)[1].strip()
+                except:
+                    pass
+                return
 
             self._lines.append(f'{self._COMMENT_START}{data.strip()}{self._COMMENT_END}')
 

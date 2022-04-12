@@ -173,7 +173,7 @@ sub Indent
 &apos; Indent paragraphs that start with &quot;&gt; &quot;.
 &apos;
 &apos; Select all paragraphs that start with &quot;&gt; &quot; 
-&apos; and change their paragraph style to  _Text body indent_.
+&apos; and change their paragraph style to &quot;Quotations&quot;.
 &apos; ----------------------------------------------------------------------
 dim document   as object
 dim dispatcher as object
@@ -189,7 +189,7 @@ pStyles = ThisComponent.StyleFamilies.getByName(&quot;ParagraphStyles&quot;)
 oViewCursor = ThisComponent.CurrentController().getViewCursor()
 oSaveCursor = ThisComponent.Text.createTextCursorByRange(oViewCursor)
 
-&apos; Assign all paragraphs beginning with &apos;&gt; &apos; the &apos;Text body indent&apos; style.
+&apos; Assign all paragraphs beginning with &apos;&gt; &apos; the &apos;Quotations&apos; style.
 dim args1(18) as new com.sun.star.beans.PropertyValue
 args1(0).Name = &quot;SearchItem.StyleFamily&quot;
 args1(0).Value = 2
@@ -233,7 +233,7 @@ dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot
 If IsAnythingSelected(ThisComponent) Then 
 	dim args2(1) as new com.sun.star.beans.PropertyValue
 	args2(0).Name = &quot;Template&quot;
-	args2(0).Value = pStyles.getByName(&quot;Text body indent&quot;).DisplayName
+	args2(0).Value = pStyles.getByName(&quot;Quotations&quot;).DisplayName
 	args2(1).Name = &quot;Family&quot;
 	args2(1).Value = 2
 	dispatcher.executeDispatch(document, &quot;.uno:StyleApply&quot;, &quot;&quot;, 0, args2())
@@ -336,7 +336,6 @@ dispatcher.executeDispatch(document, &quot;.uno:ExecuteSearch&quot;, &quot;&quot
 oViewCursor.gotoRange(oSaveCursor,False)
 
 end sub
-
 
 Function IsAnythingSelected(oDoc As Object) As Boolean
 &apos; Code example by Andrew D. Pitonyak
