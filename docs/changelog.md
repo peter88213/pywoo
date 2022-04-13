@@ -6,12 +6,9 @@
 
 ### v1.22.0 Support quotations and lists
 
-- The *Indent paragraphs that start with '> '* macro now assigns the
-  *Quotations* paragraph style.
-- When exporting to yWriter, *Quotations* style paragraphs will
-automatically marked with "> " at the beginning.
-- When exporting to yWriter, Lists will
-automatically marked with "- " list strokes.
+- The *Indent paragraphs that start with '> '* macro now assigns the *Quotations* paragraph style.
+- When exporting to yWriter, *Quotations* style paragraphs are automatically marked with "> " at the beginning.
+- When exporting to yWriter, Lists are automatically marked with "- " list strokes.
 
 Based on PyWriter v5.4.2
 
