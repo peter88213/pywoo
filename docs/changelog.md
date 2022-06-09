@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.22.1 Optional updte
+
+When generating chapters from an outline or work in progress, add 
+chapter type as in yWriter version 7.0.7.2+
+
+Based on PyWriter v5.10.2
+
 ### v1.22.0 Support quotations and lists
 
 - The *Indent paragraphs that start with '> '* macro now assigns the *Quotations* paragraph style.
