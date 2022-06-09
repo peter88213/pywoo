@@ -4,7 +4,7 @@
 
 ## Changelog
 
-### v1.22.1 Optional updte
+### v1.22.1 Optional update
 
 When generating chapters from an outline or work in progress, add 
 chapter type as in yWriter version 7.0.7.2+
