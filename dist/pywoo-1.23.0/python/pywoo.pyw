@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.22.1
+Version 1.23.0
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -1130,10 +1130,12 @@ class Splitter:
     Public class constants:
         PART_SEPARATOR -- marker indicating the beginning of a new part, splitting a scene.
         CHAPTER_SEPARATOR -- marker indicating the beginning of a new chapter, splitting a scene.
+        DESC_SEPARATOR -- marker separating title and description of a chapter or scene.
     """
     PART_SEPARATOR = '#'
     CHAPTER_SEPARATOR = '##'
     SCENE_SEPARATOR = '###'
+    DESC_SEPARATOR = '|'
     _CLIP_TITLE = 20
     # Maximum length of newly generated scene titles.
 
@@ -1163,13 +1165,15 @@ class Splitter:
             newChapter.chType = 0
             novel.chapters[chapterId] = newChapter
 
-        def create_scene(sceneId, parent, splitCount, title):
+        def create_scene(sceneId, parent, splitCount, title, desc):
             """Create a new scene and add it to the novel.
             
             Positional arguments:
                 sceneId -- str: ID of the scene to create.
                 parent -- Scene instance: parent scene.
                 splitCount -- int: number of parent's splittings.
+                title -- str: title of the scene to create.
+                desc -- str: description of the scene to create.
             """
             WARNING = ' (!) '
 
@@ -1185,6 +1189,8 @@ class Splitter:
                 newScene.title = f'{title} Split: {splitCount}'
             else:
                 newScene.title = f'New scene Split: {splitCount}'
+            if desc:
+                newScene.desc = desc
             if parent.desc and not parent.desc.startswith(WARNING):
                 parent.desc = f'{WARNING}{parent.desc}'
             if parent.goal and not parent.goal.startswith(WARNING):
@@ -1240,6 +1246,12 @@ class Splitter:
 
                 # Search scene content for dividers.
                 for line in lines:
+                    heading = line.strip('# ').split(self.DESC_SEPARATOR)
+                    title = heading[0]
+                    try:
+                        desc = heading[1]
+                    except:
+                        desc = ''
                     if line.startswith(self.SCENE_SEPARATOR):
                         # Split the scene.
                         novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
@@ -1247,7 +1259,7 @@ class Splitter:
                         sceneSplitCount += 1
                         scIdMax += 1
                         sceneId = str(scIdMax)
-                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount, line.strip('# '))
+                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount, title, desc)
                         srtScenes.append(sceneId)
                         inScene = True
                     elif line.startswith(self.CHAPTER_SEPARATOR):
@@ -1261,7 +1273,9 @@ class Splitter:
                         srtScenes = []
                         chIdMax += 1
                         chapterId = str(chIdMax)
-                        create_chapter(chapterId, 'New chapter', line.strip('# '), 0)
+                        if not title:
+                            title = 'New chapter'
+                        create_chapter(chapterId, title, desc, 0)
                         srtChapters.append(chapterId)
                     elif line.startswith(self.PART_SEPARATOR):
                         # start a new part.
@@ -1274,7 +1288,9 @@ class Splitter:
                         srtScenes = []
                         chIdMax += 1
                         chapterId = str(chIdMax)
-                        create_chapter(chapterId, 'New part', line.strip('# '), 1)
+                        if not title:
+                            title = 'New part'
+                        create_chapter(chapterId, title, desc, 1)
                         srtChapters.append(chapterId)
                     elif not inScene:
                         # Append a scene without heading to a new chapter or part.
@@ -1282,7 +1298,7 @@ class Splitter:
                         sceneSplitCount += 1
                         scIdMax += 1
                         sceneId = str(scIdMax)
-                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount, '')
+                        create_scene(sceneId, novel.scenes[scId], sceneSplitCount, '', '')
                         srtScenes.append(sceneId)
                         inScene = True
                     else:
