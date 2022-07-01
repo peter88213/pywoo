@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.24.1
+Version 1.24.2
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -810,7 +810,7 @@ class Scene:
     def sceneContent(self, text):
         """Set sceneContent updating word count and letter count."""
         self._sceneContent = text
-        text = re.sub('--|—|–', ' ', text)
+        text = re.sub('--|—|–|…', ' ', text)
         # Make dashes separate words
         text = re.sub('\[.+?\]|\/\*.+?\*\/|\.|\,|-', '', text)
         # Remove comments and yWriter raw markup for word count; make hyphens join words
