@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.24.2
+Version 1.26.0
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3855,6 +3855,11 @@ class FileExport(Novel):
             dispNumber = 0
             if not self._sceneFilter.accept(self, scId):
                 continue
+
+            sceneContent = self.scenes[scId].sceneContent
+            if sceneContent is None:
+                sceneContent = ''
+
             # The order counts; be aware that "Todo" and "Notes" scenes are
             # always unused.
             if self.scenes[scId].isTodoScene:
@@ -3888,6 +3893,12 @@ class FileExport(Novel):
                     template = Template(self._notExportedSceneTemplate)
                 else:
                     continue
+
+            elif sceneContent.startswith('<HTML>'):
+                continue
+
+            elif sceneContent.startswith('<TEX>'):
+                continue
 
             else:
                 sceneNumber += 1
@@ -4981,6 +4992,7 @@ class OdtBriefSynopsis(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
 
+
 class OdtExport(OdtFile):
     """ODT novel file representation.
 
@@ -5025,6 +5037,25 @@ class OdtExport(OdtFile):
         if self.chapters[chId].suppressChapterTitle:
             chapterMapping['Title'] = ''
         return chapterMapping
+
+    def _convert_from_yw(self, text, quick=False):
+        """Return text, converted from yw7 markup to target format.
+        
+        Positional arguments:
+            text -- string to convert.
+        
+        Optional arguments:
+            quick -- bool: if True, apply a conversion mode for one-liners without formatting.
+        
+        Extends the superclass method.
+        """
+        if text and not quick:
+            # Remove inline raw code.
+            YW_SPECIAL_CODES = ('HTM', 'TEX', 'RTF', 'epub', 'mobi', 'rtfimg', 'RTFBRK')
+            for specialCode in YW_SPECIAL_CODES:
+                text = re.sub(f'\<{specialCode} .+?\/{specialCode}\>', '', text)
+        text = super()._convert_from_yw(text, quick)
+        return(text)
 
 
 class OdtCharacters(OdtFile):
