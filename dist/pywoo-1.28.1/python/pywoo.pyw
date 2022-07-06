@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.28.0
+Version 1.28.1
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -3368,7 +3368,6 @@ class NewProjectFactory(FileFactory):
                 return False
         
         return True
-
 import zipfile
 import locale
 import tempfile
@@ -4131,6 +4130,17 @@ class FileExport(Novel):
         if text is None:
             text = ''
         return(text)
+
+    def _remove_inline_code(self, text):
+        """Remove inline raw code from text and return the result."""
+        if text:
+            text = text.replace('<RTFBRK>', '')
+            YW_SPECIAL_CODES = ('HTM', 'TEX', 'RTF', 'epub', 'mobi', 'rtfimg')
+            for specialCode in YW_SPECIAL_CODES:
+                text = re.sub(f'\<{specialCode} .+?\/{specialCode}\>', '', text)
+        else:
+            text = ''
+        return text
 
 
 class OdfFile(FileExport):
@@ -4986,7 +4996,6 @@ class OdtBriefSynopsis(OdtFile):
     _fileFooter = OdtFile._CONTENT_XML_FOOTER
 
 
-
 class OdtExport(OdtFile):
     """ODT novel file representation.
 
@@ -5002,11 +5011,8 @@ class OdtExport(OdtFile):
     _chapterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title</text:h>
 '''
 
-    _sceneTemplate = '''<text:p text:style-name="Text_20_body"><office:annotation>
-<dc:creator>scene title</dc:creator>
-<text:p>~ ${Title} ~</text:p>
-</office:annotation>$SceneContent</text:p>
-'''
+    _sceneTemplate = ''''<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>scene title</dc:creator><text:p>~ ${Title} ~</text:p></office:annotation>$SceneContent</text:p>
+    '''
 
     _appendedSceneTemplate = '''<text:p text:style-name="First_20_line_20_indent"><office:annotation>
 <dc:creator>scene title</dc:creator>
@@ -5043,20 +5049,33 @@ class OdtExport(OdtFile):
         
         Extends the superclass method.
         """
-        if text and not quick:
-            # Remove inline raw code.
-            YW_SPECIAL_CODES = ('HTM', 'TEX', 'RTF', 'epub', 'mobi', 'rtfimg', 'RTFBRK')
-            for specialCode in YW_SPECIAL_CODES:
-                text = re.sub(f'\<{specialCode} .+?\/{specialCode}\>', '', text)
+        if not quick:
+            text = self._remove_inline_code(text)
         text = super()._convert_from_yw(text, quick)
+        return(text)
+
+    def _get_text(self):
+        """Call all processing methods.
+        
+        Return a string to be written to the output file.
+        Overrides the superclass method.
+        """
+        lines = self._get_fileHeader()
+        lines.extend(self._get_chapters())
+        lines.append(self._fileFooter)
+        text = ''.join(lines)
 
         # Set style of paragraphs that start with "> " to "Quotations".
-        quotMarks = ('"First_20_line_20_indent">&gt; ',
+        # This is done here to include the scene openings.
+        if '&gt; ' in text:
+            quotMarks = ('"First_20_line_20_indent">&gt; ',
                          '"Text_20_body">&gt; ',
                          )
-        for quotMark in quotMarks:
-            text = text.replace(quotMark, '"Quotations">')
-        return(text)
+            for quotMark in quotMarks:
+                text = text.replace(quotMark, '"Quotations">')
+            text = re.sub('"Text_20_body"\>(\<office\:annotation\>.+?\<\/office\:annotation\>)\&gt\; ', '"Quotations">\\1', text)
+        return text
+
 
 
 class OdtCharacters(OdtFile):
