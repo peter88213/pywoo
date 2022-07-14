@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.28.1
+Version 1.28.2
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -38,6 +38,7 @@ class Ui:
         set_info_what(message) -- show what the converter is going to do.
         set_info_how(message) -- show how the converter is doing.
         start() -- launch the GUI, if any.
+        show_warning(message) -- Stub for displaying a warning message.
         
     Public instance variables:
         infoWhatText -- buffer for general messages.
@@ -91,6 +92,9 @@ class Ui:
         To be overridden by subclasses requiring
         special action to launch the user interaction.
         """
+
+    def show_warning(self, message):
+        """Stub for displaying a warning message."""
 
 
 class YwCnv:
@@ -252,6 +256,8 @@ class YwCnvUi(YwCnv):
             self.newFile = None
         else:
             self.newFile = target.filePath
+            if target.scenesSplit:
+                self.ui.show_warning('New scenes created during conversion.')
 
     def _confirm_overwrite(self, filePath):
         """Return boolean permission to overwrite the target file.
@@ -1149,6 +1155,9 @@ class Splitter:
         
         Positional argument: 
             novel -- Novel instance to update.
+        
+        Return True if the sructure has changed, 
+        otherwise return False.        
         """
 
         def create_chapter(chapterId, title, desc, level):
@@ -1230,6 +1239,7 @@ class Splitter:
                 scIdMax = int(scId)
 
         # Process chapters and scenes.
+        scenesSplit = False
         srtChapters = []
         for chId in novel.srtChapters:
             srtChapters.append(chId)
@@ -1263,6 +1273,7 @@ class Splitter:
                         sceneId = str(scIdMax)
                         create_scene(sceneId, novel.scenes[scId], sceneSplitCount, title, desc)
                         srtScenes.append(sceneId)
+                        scenesSplit = True
                         inScene = True
                     elif line.startswith(self.CHAPTER_SEPARATOR):
                         # Start a new chapter.
@@ -1279,6 +1290,7 @@ class Splitter:
                             title = 'New chapter'
                         create_chapter(chapterId, title, desc, 0)
                         srtChapters.append(chapterId)
+                        scenesSplit = True
                     elif line.startswith(self.PART_SEPARATOR):
                         # start a new part.
                         if inScene:
@@ -1302,12 +1314,14 @@ class Splitter:
                         sceneId = str(scIdMax)
                         create_scene(sceneId, novel.scenes[scId], sceneSplitCount, '', '')
                         srtScenes.append(sceneId)
+                        scenesSplit = True
                         inScene = True
                     else:
                         newLines.append(line)
                 novel.scenes[sceneId].sceneContent = '\n'.join(newLines)
             novel.chapters[chapterId].srtScenes = srtScenes
         novel.srtChapters = srtChapters
+        return scenesSplit
 
 
 def indent(elem, level=0):
@@ -1376,6 +1390,7 @@ class Yw7File(Novel):
         """
         super().__init__(filePath)
         self.tree = None
+        self.scenesSplit = False
 
         #--- Initialize custom keyword variables.
         for field in self._PRJ_KWVAR:
@@ -2125,7 +2140,7 @@ class Yw7File(Novel):
         # in order to avoid creating duplicate IDs.
         if sourceHasSceneContent:
             sceneSplitter = Splitter()
-            sceneSplitter.split_scenes(self)
+            self.scenesSplit = sceneSplitter.split_scenes(self)
         return 'yWriter project data updated or created.'
 
     def write(self):
@@ -7280,6 +7295,7 @@ class UiMb(Ui):
     Public methods:
         ask_yes_no(text) -- query yes or no with a pop-up box.
         set_info_how(message) -- show a pop-up message in case of error.
+        show_warning(message) -- Display a warning message box.
     """
 
     def __init__(self, title):
@@ -7318,6 +7334,10 @@ class UiMb(Ui):
             messagebox.showerror(self._title, message)
         else:
             messagebox.showinfo(self._title, message)
+
+    def show_warning(self, message):
+        """Display a warning message box."""
+        messagebox.showwarning(self._title, message)
 
 YW_EXTENSIONS = ['.yw7']
 
