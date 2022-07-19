@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.28.3 Minor update
+
+- Modify scene split warning marker for descriptions.
+
+Based on PyWriter v5.18.1
+
 ### v1.28.2 Optional update
 
 Show a warning message if new scenes are created during export to yWriter.

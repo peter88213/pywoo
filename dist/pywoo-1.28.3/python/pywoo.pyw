@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.28.2
+Version 1.28.3
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -1186,7 +1186,7 @@ class Splitter:
                 title -- str: title of the scene to create.
                 desc -- str: description of the scene to create.
             """
-            WARNING = ' (!) '
+            WARNING = '(!)'
 
             # Mark metadata of split scenes.
             newScene = novel.SCENE_CLASS()
