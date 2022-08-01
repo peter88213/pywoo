@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="pywoo" basedir=".">
-	<property name="version" value="1.28.3" />
+	<property name="version" value="1.29.1" />
 	
 	<property name="application" value="${ant.project.name}" />
 	<property name="release" value="${application}-${version}" />
@@ -86,6 +86,10 @@
 		<copy file="${test-path}/${application}.pyw" todir="${dist-path}/${release}/python" />
 		<replace encoding="utf-8" file="${dist-path}/${release}/python/${application}.pyw" token="@release" value="${version}" />
 		<fixcrlf encoding="utf-8" eol="lf" file="${dist-path}/${release}/python/${application}.pyw" />
+		
+		<copy todir="${dist-path}/${release}/python/locale"> 
+			<fileset dir="../../PyWriter/i18n/locale" />
+		</copy>
 		
 		<copy file="${oxt-path}/AddonUI.xcu" todir="${dist-path}/${release}" />
 		<replace encoding="utf-8" file="${dist-path}/${release}/AddonUI.xcu" token="0.99.0" value="${version}" />
