@@ -4,6 +4,14 @@
 
 ## Changelog
 
+### v1.30.0 Optional update
+
+- Improved spreadsheet export.
+- Add internationalization according to GNU coding standards.
+- Provide extended German localization.
+
+Based on PyWriter v5.20.0
+
 ### v1.28.3 Minor update
 
 - Modify scene split warning marker for descriptions.
