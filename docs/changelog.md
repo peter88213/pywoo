@@ -7,6 +7,7 @@
 ### v1.30.0 Optional update
 
 - Improved spreadsheet export.
+- Improved ODT export.
 - Add internationalization according to GNU coding standards.
 - Provide extended German localization.
 

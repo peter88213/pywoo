@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="pywoo" basedir=".">
-	<property name="version" value="1.29.4" />
+	<property name="version" value="1.29.5" />
 	
 	<property name="application" value="${ant.project.name}" />
 	<property name="release" value="${application}-${version}" />
@@ -83,6 +83,10 @@
 			<fileset dir="${oxt-path}/Tooltips" />
 		</copy>
 		
+		<copy todir="${dist-path}/${release}/${application}"> 
+			<fileset dir="${oxt-path}/${application}" />
+		</copy>
+
 		<copy file="${test-path}/${application}.pyw" todir="${dist-path}/${release}/python" />
 		<replace encoding="utf-8" file="${dist-path}/${release}/python/${application}.pyw" token="@release" value="${version}" />
 		<fixcrlf encoding="utf-8" eol="lf" file="${dist-path}/${release}/python/${application}.pyw" />
