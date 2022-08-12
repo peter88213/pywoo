@@ -3,9 +3,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.29.6\n"
-"POT-Creation-Date: 2022-08-11 16:27:10\n"
-"PO-Revision-Date: 2022-08-11 16:27:10\n"
+"Project-Id-Version: 1.29.7\n"
+"POT-Creation-Date: 2022-08-12 11:42:39\n"
+"PO-Revision-Date: 2022-08-12 11:42:41\n"
 "Last-Translator: Peter Triesberger\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -101,7 +101,7 @@ msgid "No yWriter project to write"
 msgstr "Kein yWriter-Projekt zu schreiben"
 
 msgid "Notes chapters"
-msgstr "Notizenkapitel"
+msgstr "Notizen-Kapitel"
 
 msgid "Novel"
 msgstr "Roman"
@@ -126,6 +126,9 @@ msgstr "Manuskript mit Markierungen zum Überarbeiten"
 
 msgid "This document is not meant to be written back"
 msgstr "Dieses Dokument ist nicht zum Zurückschreiben gedacht"
+
+msgid "Todo chapters"
+msgstr "Planungs-Kapitel"
 
 msgid "Work in progress"
 msgstr "Manuskript in Arbeit"

@@ -68,6 +68,10 @@ Sub get_notes
     open_yw(&quot;_notes&quot;, &quot;.ods&quot;)
 End Sub
 
+Sub get_todo
+    open_yw(&quot;_todo&quot;, &quot;.ods&quot;)
+End Sub
+
 Sub get_xref
     open_yw(&quot;_xref&quot;, &quot;.odt&quot;)
 End Sub
