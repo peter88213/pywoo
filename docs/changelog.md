@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.32.0
+
+Introduce a notation for assigning text passages to another language/country. This is mainly for spell checking in Office Writer.
+
+Based on PyWriter v7.11.1
+
 ### v1.31.5 Improvements
 
 - When exporting a work in progress to yWriter, process lists and quotation paragraphs.
