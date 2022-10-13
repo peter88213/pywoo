@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert yWriter project to odt or ods and vice versa. 
 
-Version 1.32.0
+Version 1.32.1
 Requires Python 3.6+
 Copyright (c) 2021 Peter Triesberger
 For further information see https://github.com/peter88213/PyWriter
@@ -5253,7 +5253,10 @@ class OdtFormatted(OdtFile):
             for line in lines:
                 for tag in tags:
                     if isOpen[tag]:
-                        line = f'{opening[tag]}{line}'
+                        if line.startswith('&gt; '):
+                            line = f"&gt; {opening[tag]}{line.lstrip('&gt; ')}"
+                        else:
+                            line = f'{opening[tag]}{line}'
                         isOpen[tag] = False
                     while line.count(opening[tag]) > line.count(closing[tag]):
                         line = f'{line}{closing[tag]}'
@@ -7017,19 +7020,6 @@ class HtmlProof(HtmlFormatted):
     DESCRIPTION = _('Tagged manuscript for proofing')
     SUFFIX = '_proof'
 
-    def __init__(self, filePath, **kwargs):
-        """Initialize local instance variables for parsing.
-
-        Positional arguments:
-            filePath -- str: path to the file represented by the Novel instance.
-            
-        The HTML parser works like a state machine. 
-        A prefix for chapter and scene recognition must be saved between the transitions.         
-        Extends the superclass constructor.
-        """
-        super().__init__(filePath)
-        self._prefix = None
-
     def handle_starttag(self, tag, attrs):
         """Recognize the paragraph's beginning.
         
@@ -7039,9 +7029,7 @@ class HtmlProof(HtmlFormatted):
         
         Overrides the superclass method.
         """
-        if tag == 'p':
-            self._prefix = ''
-        elif tag == 'em' or tag == 'i':
+        if tag == 'em' or tag == 'i':
             self._lines.append('[i]')
         elif tag == 'strong' or tag == 'b':
             self._lines.append('[b]')
@@ -7052,13 +7040,13 @@ class HtmlProof(HtmlFormatted):
                     self.languages.append(self._language)
                 self._lines.append(f'[lang={self._language}]')
         elif tag == 'h2':
-            self._prefix = f'{Splitter.CHAPTER_SEPARATOR} '
+            self._lines.append(f'{Splitter.CHAPTER_SEPARATOR} ')
         elif tag == 'h1':
-            self._prefix = f'{Splitter.PART_SEPARATOR} '
+            self._lines.append(f'{Splitter.PART_SEPARATOR} ')
         elif tag == 'li':
-            self._prefix = f'{self._BULLET} '
+            self._lines.append(f'{self._BULLET} ')
         elif tag == 'blockquote':
-            self._prefix = f'{self._INDENT} '
+            self._lines.append(f'{self._INDENT} ')
         elif tag == 'body':
             for attr in attrs:
                 if attr[0].lower() == 'lang':
@@ -7083,7 +7071,6 @@ class HtmlProof(HtmlFormatted):
         """
         if tag in ['p', 'h2', 'h1', 'blockquote']:
             self._newline = True
-            self._prefix = ''
         elif tag == 'em' or tag == 'i':
             self._lines.append('[/i]')
         elif tag == 'strong' or tag == 'b':
@@ -7122,7 +7109,7 @@ class HtmlProof(HtmlFormatted):
             if self._newline:
                 self._newline = False
                 data = f'{data.rstrip()}\n'
-            self._lines.append(f'{self._prefix}{data}')
+            self._lines.append(data)
 
 
 class HtmlManuscript(HtmlFormatted):
