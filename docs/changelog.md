@@ -4,11 +4,11 @@
 
 ## Changelog
 
-### v1.32.0
+### v1.32.1
 
 Introduce a notation for assigning text passages to another language/country. This is mainly for spell checking in Office Writer.
 
-Based on PyWriter v7.11.1
+Based on PyWriter v7.11.3
 
 ### v1.31.5 Improvements
 
