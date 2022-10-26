@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Convert yWriter project to odt or ods and vice versa. 
+"""Convert yw7 to odt/ods, or html/csv to yw7. 
 
 Version @release
 Requires Python 3.6+
-Copyright (c) 2021 Peter Triesberger
-For further information see https://github.com/peter88213/PyWriter
+Copyright (c) 2022 Peter Triesberger
+For further information see https://github.com/peter88213/pywoo
 Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 """
 import os
@@ -24,9 +24,8 @@ def run(sourcePath, suffix=None):
 
 
 if __name__ == '__main__':
-    """Enable this for debugging unhandled exceptions:
-    sys.stderr = open(os.path.join(os.getenv('TEMP'), f'stderr-{os.path.basename(sys.argv[0])}.txt'), 'w')
-    """
+    # Enable this for debugging unhandled exceptions:
+    # sys.stderr = open(os.path.join(os.getenv('TEMP'), f'stderr-{os.path.basename(sys.argv[0])}.txt'), 'w')
     try:
         sourcePath = sys.argv[1]
     except:
