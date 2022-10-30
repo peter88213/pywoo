@@ -32,7 +32,7 @@ class Converter(Yw7Converter):
             self.convert(source, target)
         except Error as ex:
             self.newFile = None
-            self.ui.set_info_how(f'{ERROR}{str(ex)}')
+            self.ui.set_info_how(f'!{str(ex)}')
         else:
             self.newFile = target.filePath
             self._open_newFile()

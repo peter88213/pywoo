@@ -25,7 +25,9 @@ You can find more information on the [help pages](help).
 - Java Runtime Environment (OpenOffice might need it for macro execution).
 
 
-__LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv)._
+**LibreOffice users:** *A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv).*
+
+**novelyst users:** *A lightweight alternative, providing export to the yw7 file format only, is [oo2yw7](https://peter88213.github.io/oo2yw7).*
 
 
 ## Download and install

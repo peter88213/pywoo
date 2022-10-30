@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.33.0
+
+- Code optimization and library upgrade. 
+- Fix a bug where attempting to save a write-protected file raises an uncaught exception.
+
+Based on PyWriter v8.0.2
+
 ### v1.32.5
 
 - Fix a bug in odt manuscript import, where the "Quotation" style is not applied at scene start.

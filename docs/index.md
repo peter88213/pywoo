@@ -25,12 +25,14 @@ You can find more information on the [help pages](help).
 - Java Runtime Environment (OpenOffice might need it for macro execution).
 
 
-__LibreOffice users:__ _A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv)._
+**LibreOffice users:** *A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv).*
+
+**novelyst users:** *A lightweight alternative, providing export to the yw7 file format only, is [oo2yw7](https://peter88213.github.io/oo2yw7).*
 
 
 ## Download and install
 
-[Download the latest release (version 1.32.5)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.32.5.oxt)
+[Download the latest release (version 1.33.0)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.33.0.oxt)
 
 - Installation right at download, by double-clicking on the downloaded file, or via the OpenOffice Extension Manager.
 - After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.
