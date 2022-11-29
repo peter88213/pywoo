@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.33.3
+
+- Fix a regression from v1.33.2 where wrong language markers are imported
+from the "proofread" document.
+
+Based on PyWriter v8.0.10
+
 ### v1.33.2
 
 - When converting to ODT format, apply all XML predefined entities.
