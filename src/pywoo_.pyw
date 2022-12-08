@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
 Version @release

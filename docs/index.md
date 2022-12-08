@@ -21,7 +21,7 @@ You can find more information on the [help pages](help).
 
 - Windows.
 - [OpenOffice](https://www.openoffice.org) version 3.1 or more recent.
-- [Python](https://www.python.org/) from version 3.6 to 3.10. Beware: Version 3.11 is not recommended.
+- [Python](https://www.python.org/) from version 3.6.
 - Java Runtime Environment (OpenOffice might need it for macro execution).
 
 
@@ -32,7 +32,7 @@ You can find more information on the [help pages](help).
 
 ## Download and install
 
-[Download the latest release (version 1.33.3)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.33.3.oxt)
+[Download the latest release (version 1.33.4)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.33.4.oxt)
 
 - Installation right at download, by double-clicking on the downloaded file, or via the OpenOffice Extension Manager.
 - After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.

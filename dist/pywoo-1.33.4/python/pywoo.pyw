@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.33.3
+Version 1.33.4
 Requires Python 3.6+
 Copyright (c) 2022 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
