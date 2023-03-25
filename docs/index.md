@@ -59,6 +59,6 @@ This extension is distributed under the [MIT License](http://www.opensource.org/
 
 [The "curly" extensions for OpenOffice and LibreOffice](https://peter88213.github.io/curly/)
 
-[The StyleSwitcher extension for OpenOffice](https://peter88213.github.io/StyleSwitcher/)
+[The StyleSwitcher extension for OpenOffice and LibreOffice](https://peter88213.github.io/StyleSwitcher/)
 
 [The emph extension for OpenOffice and LibreOffice](https://peter88213.github.io/emph/)
