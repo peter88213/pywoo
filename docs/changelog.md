@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.34.1
+
+- Make it run with files on virtual file systems.
+- Remove docstrings and comments from the application code.
+
+Based on PyWriter v12.3.2
+
 ### v1.34.0
 
 - When exporting to yw7, save the document only if modified.
