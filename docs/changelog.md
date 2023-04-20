@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.34.3
+
+- When creating a new scene on ODT import, localize the default title.
+
+Based on PyWriter v12.4.2
+
 ### v1.34.2
 
 - Show a message when scenes are split during conversion.
