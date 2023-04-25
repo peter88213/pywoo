@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.34.4
+
+- Improve error handling when exporting the "proof" document.
+
+Based on PyWriter v12.5.1
+
 ### v1.34.3
 
 - When creating a new scene on ODT import, localize the default title.
