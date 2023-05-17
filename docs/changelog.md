@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.34.5
+
+- Update help.
+
+Based on PyWriter v12.5.1
+
 ### v1.34.4
 
 - Improve error handling when exporting the "proof" document.
