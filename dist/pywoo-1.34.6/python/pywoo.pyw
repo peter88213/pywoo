@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.34.5
+Version 1.34.6
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -1268,6 +1268,19 @@ class Yw7File(File):
                 xmlSceneFields = ET.SubElement(xmlScene, 'Fields')
                 ET.SubElement(xmlSceneFields, 'Field_SceneType').text = ySceneType
 
+            if self.novel.scenes[scId].doNotExport is not None:
+                xmlExportCondSpecific = xmlScene.find('ExportCondSpecific')
+                xmlExportWhenRtf = xmlScene.find('ExportWhenRTF')
+                if self.novel.scenes[scId].doNotExport:
+                    if xmlExportCondSpecific is None:
+                        xmlExportCondSpecific = ET.SubElement(xmlScene, 'ExportCondSpecific')
+                    if xmlExportWhenRtf is not None:
+                        xmlScene.remove(xmlExportWhenRtf)
+                else:
+                    if xmlExportCondSpecific is not None:
+                        if xmlExportWhenRtf is None:
+                            ET.SubElement(xmlScene, 'ExportWhenRTF').text = '-1'
+
             for field in self.SCN_KWVAR:
                 if self.novel.scenes[scId].kwVar.get(field, None):
                     if xmlSceneFields is None:
@@ -1377,7 +1390,7 @@ class Yw7File(File):
                         except(AttributeError):
                             ET.SubElement(xmlScene, 'Day').text = prjScn.day
                     if prjScn.time is not None:
-                        hours, minutes, seconds = prjScn.time.split(':')
+                        hours, minutes, __ = prjScn.time.split(':')
                         try:
                             xmlScene.find('Hour').text = hours
                         except(AttributeError):
@@ -2187,9 +2200,9 @@ class OdtParser(sax.ContentHandler):
             elif styleName == 'Quotations':
                 self._blockquoteTags.append(self._style)
         elif name == 'style:text-properties':
-            if xmlAttributes.get('style:font-style', None) == 'italic':
+            if xmlAttributes.get('fo:font-style', None) == 'italic':
                 self._emTags.append(self._style)
-            if xmlAttributes.get('style:font-weight', None) == 'bold':
+            if xmlAttributes.get('fo:font-weight', None) == 'bold':
                 self._strongTags.append(self._style)
             if xmlAttributes.get('fo:language', False):
                 lngCode = xmlAttributes['fo:language']
@@ -3676,6 +3689,11 @@ class OdtWriter(OdfFile):
             text = ''
         return text
 
+    def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
+        sceneMapping = super()._get_sceneMapping(scId, sceneNumber, wordsTotal, lettersTotal)
+        sceneMapping['sceneTitle'] = _('Scene')
+        return sceneMapping
+
     def _set_up(self):
 
         super()._set_up()
@@ -3892,16 +3910,16 @@ class OdtWManuscript(OdtWFormatted):
 '''
 
     _sceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
-<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>scene title</dc:creator><text:p>~ ${Title} ~</text:p><text:p/><text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→Summary</text:a></text:p></office:annotation>$SceneContent</text:p>
+<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>$sceneTitle</dc:creator><text:p>~ ${Title} ~</text:p><text:p/><text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→$Summary</text:a></text:p></office:annotation>$SceneContent</text:p>
 </text:section>
 '''
 
     _appendedSceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
 <text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>scene title</dc:creator>
+<dc:creator>$sceneTitle</dc:creator>
 <text:p>~ ${Title} ~</text:p>
 <text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→Summary</text:a></text:p>
+<text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→$Summary</text:a></text:p>
 </office:annotation>$SceneContent</text:p>
 </text:section>
 '''
@@ -3918,6 +3936,11 @@ class OdtWManuscript(OdtWFormatted):
         if self.novel.chapters[chId].suppressChapterTitle:
             chapterMapping['Title'] = ''
         return chapterMapping
+
+    def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
+        sceneMapping = super()._get_sceneMapping(scId, sceneNumber, wordsTotal, lettersTotal)
+        sceneMapping['Summary'] = _('Summary')
+        return sceneMapping
 
 
 
@@ -3939,20 +3962,20 @@ class OdtWSceneDesc(OdtWriter):
 
     _sceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
 <text:p text:style-name="Text_20_body"><office:annotation>
-<dc:creator>scene title</dc:creator>
+<dc:creator>$sceneTitle</dc:creator>
 <text:p>~ ${Title} ~</text:p>
 <text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→Manuscript</text:a></text:p>
+<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→$Manuscript</text:a></text:p>
 </office:annotation>$Desc</text:p>
 </text:section>
 '''
 
     _appendedSceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
 <text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>scene title</dc:creator>
+<dc:creator>$sceneTitle</dc:creator>
 <text:p>~ ${Title} ~</text:p>
 <text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→Manuscript</text:a></text:p>
+<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→$Manuscript</text:a></text:p>
 </office:annotation>$Desc</text:p>
 </text:section>
 '''
@@ -3964,6 +3987,11 @@ class OdtWSceneDesc(OdtWriter):
 '''
 
     _fileFooter = OdtWriter._CONTENT_XML_FOOTER
+
+    def _get_sceneMapping(self, scId, sceneNumber, wordsTotal, lettersTotal):
+        sceneMapping = super()._get_sceneMapping(scId, sceneNumber, wordsTotal, lettersTotal)
+        sceneMapping['Manuscript'] = _('Manuscript')
+        return sceneMapping
 
 
 class OdtWChapterDesc(OdtWriter):
@@ -4035,11 +4063,11 @@ class OdtWExport(OdtWFormatted):
     _chapterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title</text:h>
 '''
 
-    _sceneTemplate = ''''<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>scene title</dc:creator><text:p>~ ${Title} ~</text:p></office:annotation>$SceneContent</text:p>
+    _sceneTemplate = ''''<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>$sceneTitle</dc:creator><text:p>~ ${Title} ~</text:p></office:annotation>$SceneContent</text:p>
     '''
 
     _appendedSceneTemplate = '''<text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>scene title</dc:creator>
+<dc:creator>$sceneTitle</dc:creator>
 <text:p>~ ${Title} ~</text:p>
 </office:annotation>$SceneContent</text:p>
 '''

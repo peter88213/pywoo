@@ -3,9 +3,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.34.5\n"
-"POT-Creation-Date: 2023-05-17 10:53:14\n"
-"PO-Revision-Date: 2023-05-17 10:53:14\n"
+"Project-Id-Version: 1.34.6\n"
+"POT-Creation-Date: 2023-05-18 11:20:03\n"
+"PO-Revision-Date: 2023-05-18 11:20:03\n"
 "Last-Translator: Peter Triesberger\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -100,6 +100,9 @@ msgstr "Schauplatzbeschreibungen"
 msgid "Location list"
 msgstr "Schauplatzliste"
 
+msgid "Manuscript"
+msgstr "Manuskript"
+
 msgid "New Chapter"
 msgstr "Neues Kapitel"
 
@@ -138,6 +141,9 @@ msgstr "Szenebeschreibungen"
 
 msgid "Scene list"
 msgstr "Szenenliste"
+
+msgid "Summary"
+msgstr "Zusammenfassung"
 
 msgid "Tagged manuscript for proofing"
 msgstr "Manuskript mit Markierungen zum Überarbeiten"
