@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.35.1
+Version 1.35.2
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -2114,6 +2114,8 @@ class OdtParser(sax.ContentHandler):
     def endElement(self, name):
         if name == 'text:p':
             if self._commentParagraphCount is None:
+                while self._span:
+                    self.handle_endtag(self._span.pop())
                 if self._blockquote:
                     self.handle_endtag('blockquote')
                     self._blockquote = False
@@ -2146,10 +2148,9 @@ class OdtParser(sax.ContentHandler):
             xmlAttributes[attrKey] = attrValue
         style = xmlAttributes.get('text:style-name', '')
         if name == 'text:p':
+            param = [()]
             if style in self._languageTags:
                 param = [('lang', self._languageTags[style])]
-            else:
-                param = [()]
             if self._commentParagraphCount is not None:
                 self._commentParagraphCount += 1
             elif style in self._blockquoteTags:
@@ -2168,14 +2169,20 @@ class OdtParser(sax.ContentHandler):
             else:
                 self.handle_starttag('p', param)
                 self._paragraph = True
+            if style in self._emTags:
+                self._span.append('em')
+                self.handle_starttag('em', [()])
+            if style in self._strongTags:
+                self._span.append('strong')
+                self.handle_starttag('strong', [()])
         elif name == 'text:span':
             if style in self._emTags:
                 self._span.append('em')
                 self.handle_starttag('em', [()])
-            elif style in self._strongTags:
+            if style in self._strongTags:
                 self._span.append('strong')
                 self.handle_starttag('strong', [()])
-            elif style in self._languageTags:
+            if style in self._languageTags:
                 self._span.append('lang')
                 self.handle_starttag('lang', [('lang', self._languageTags[style])])
         elif name == 'text:section':
@@ -3620,16 +3627,16 @@ class OdtWriter(OdfFile):
    <style:text-properties style:font-name="Consolas"/>
   </style:style>
   <style:style style:name="scene_20_mark" style:display-name="Scene mark" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
-   <style:text-properties fo:color="#008000" fo:font-size="10pt"/>
+   <style:text-properties fo:color="#008000" fo:font-size="10pt" fo:language="zxx" fo:country="none"/>
   </style:style>
   <style:style style:name="scene_20_mark_20_unused" style:display-name="Scene mark (unused type)" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
-   <style:text-properties fo:color="#808080" fo:font-size="10pt"/>
+   <style:text-properties fo:color="#808080" fo:font-size="10pt" fo:language="zxx" fo:country="none"/>
   </style:style>
   <style:style style:name="scene_20_mark_20_notes" style:display-name="Scene mark (notes type)" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
-   <style:text-properties fo:color="#0000FF" fo:font-size="10pt"/>
+   <style:text-properties fo:color="#0000FF" fo:font-size="10pt" fo:language="zxx" fo:country="none"/>
   </style:style>
   <style:style style:name="scene_20_mark_20_todo" style:display-name="Scene mark (todo type)" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
-   <style:text-properties fo:color="#B22222" fo:font-size="10pt"/>
+   <style:text-properties fo:color="#B22222" fo:font-size="10pt" fo:language="zxx" fo:country="none"/>
   </style:style>
   <style:style style:name="Emphasis" style:family="text">
    <style:text-properties fo:font-style="italic" fo:background-color="transparent"/>
