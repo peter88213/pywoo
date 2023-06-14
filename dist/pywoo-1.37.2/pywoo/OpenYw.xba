@@ -9,7 +9,7 @@
 &apos; Published under the MIT License (https://opensource.org/licenses/mit-license.php)
 
 Sub import_yw
-	open_yw(&quot;&quot;, &quot;.odt&quot;)
+    open_yw(&quot;&quot;, &quot;.odt&quot;)
 End Sub
 
 Sub proof_yw
@@ -79,62 +79,64 @@ End Sub
 
 Sub open_yw(suffix As String, new_ext As String)
     &apos; ----------------------------------------------------------------------
-	&apos; Check whether the current document is associated with an yWriter project.
+    &apos; Check whether the current document is associated with an yWriter project.
     &apos; ----------------------------------------------------------------------
-	Dim default_file As String    
-	Dim document As object
+    Dim default_file As String    
+    Dim document As object
     Dim document_url, document_path, document_dir, document_name, project_name As String
- 	Dim a() As String
- 	If NOT Globalscope.BasicLibraries.IsLibraryLoaded(&quot;Tools&quot;) Then
-		Globalscope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
-	End If 
+    Dim a() As String
+    If NOT Globalscope.BasicLibraries.IsLibraryLoaded(&quot;Tools&quot;) Then
+        Globalscope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
+    End If 
     default_file = &quot;&quot;
     document = ThisComponent.CurrentController.Frame
     document_url = ThisComponent.getURL()
-    document_path =  REPLACE(ConvertFromURL(document_url), &quot;\&quot;, &quot;/&quot;)
-    document_name = FileNameoutofPath(document_path,&quot;/&quot;)
-    project_name = GetFileNameWithoutExtension(document_name)
-    a = Split(project_name, &quot;_&quot;)
-	l = UBound(a)
-	project_name = a(0)
-	If l &gt; 0 Then		
-		For i = 1 To l-1
-			project_name = project_name + &quot;_&quot; + a(i)
-		Next i
-	End If   
-    document_dir = DirectoryNameoutofPath(document_path,&quot;/&quot;)
-    project_path = document_dir + &quot;/&quot; + project_name + &quot;.yw7&quot;
-    If fileExists(project_path) Then
-	    default_file = ConvertToURL(project_path)
-	End If
+    If document_url &lt;&gt; &quot;&quot; Then
+        document_path =  REPLACE(ConvertFromURL(document_url), &quot;\&quot;, &quot;/&quot;)
+        document_name = FileNameoutofPath(document_path,&quot;/&quot;)
+        project_name = GetFileNameWithoutExtension(document_name)
+        a = Split(project_name, &quot;_&quot;)
+        l = UBound(a)
+        project_name = a(0)
+        If l &gt; 0 Then        
+            For i = 1 To l-1
+                project_name = project_name + &quot;_&quot; + a(i)
+            Next i
+        End If   
+        document_dir = DirectoryNameoutofPath(document_path,&quot;/&quot;)
+        project_path = document_dir + &quot;/&quot; + project_name + &quot;.yw7&quot;
+        If fileExists(project_path) Then
+            default_file = ConvertToURL(project_path)
+        End If
+    End If
     
    
     &apos; ----------------------------------------------------------------------
     &apos; Set last opened yWriter project As default (if existing).
     &apos; ----------------------------------------------------------------------
-	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
-	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)
+    oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
+    sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)
 
     Dim file_no As Integer
-	Dim script_dir, ini_file, yw_last_open, last_file As String
+    Dim script_dir, ini_file, yw_last_open, last_file As String
 
 
-	script_dir = ConvertFromURL(sPackageLocation)
-	ini_file = ConvertFromURL(sPackageLocation + &quot;/python/pywoo.ini&quot;
+    script_dir = ConvertFromURL(sPackageLocation)
+    ini_file = ConvertFromURL(sPackageLocation + &quot;/python/pywoo.ini&quot;
 
-	last_file = &quot;&quot;
-	If FileExists(ini_file) Then
-	    file_no = FreeFile
-	    Open ini_file For Input As #file_no
-	    Line Input #file_no, yw_last_open
-	    Close #file_no
-	    If FileExists(yw_last_open) Then
-	        last_file = yw_last_open
-	    End If	
-	End If
-	If default_file = &quot;&quot; Then   	 
-		default_file = last_file	
-	End If
+    last_file = &quot;&quot;
+    If FileExists(ini_file) Then
+        file_no = FreeFile
+        Open ini_file For Input As #file_no
+        Line Input #file_no, yw_last_open
+        Close #file_no
+        If FileExists(yw_last_open) Then
+            last_file = yw_last_open
+        End If  
+    End If
+    If default_file = &quot;&quot; Then      
+        default_file = last_file    
+    End If
 
     &apos; ----------------------------------------------------------------------
     &apos; Ask for yWriter 7 project to open:
@@ -157,13 +159,13 @@ Sub open_yw(suffix As String, new_ext As String)
 
     If open_status = 1 Then
         file_path = file_dialog.Files(0)
-	    &apos; ----------------------------------------------------------------------
-	    &apos; Store selected yWriter project as &quot;last opened&quot;.
-	    &apos; ----------------------------------------------------------------------
-	    file_no = FreeFile
-		Open ini_file For Output As #file_no
-		Print #file_no, file_path
-		Close #file_no
+        &apos; ----------------------------------------------------------------------
+        &apos; Store selected yWriter project as &quot;last opened&quot;.
+        &apos; ----------------------------------------------------------------------
+        file_no = FreeFile
+        Open ini_file For Output As #file_no
+        Print #file_no, file_path
+        Close #file_no
     End If
 
     file_dialog.Dispose()
@@ -177,34 +179,34 @@ Sub open_yw(suffix As String, new_ext As String)
 
     source_name = FileNameoutofPath(file_path,&quot;/&quot;)
     source_name = REPLACE(source_name, &quot;.yw7&quot;, suffix + new_ext)
-  	
+    
     source_dir = DirectoryNameoutofPath(file_path,&quot;/&quot;)
-   	lock_file = source_dir  + &quot;/.~lock.&quot; + source_name + &quot;#&quot;
+    lock_file = source_dir  + &quot;/.~lock.&quot; + source_name + &quot;#&quot;
     
     file_path = ConvertFromURL(file_path)
-	source_dir = ConvertFromURL(source_dir)
-	lock_file = ConvertFromURL(lock_file)
-	
-	     
+    source_dir = ConvertFromURL(source_dir)
+    lock_file = ConvertFromURL(lock_file)
+    
+         
     If FileExists(lock_file) Then
-    	msgbox(&quot;Please close &apos;&quot; + source_name + &quot;&apos; first.&quot;)
-    	Exit Sub
-    	
+        msgbox(&quot;Please close &apos;&quot; + source_name + &quot;&apos; first.&quot;)
+        Exit Sub
+        
     End If
 
     &apos; ----------------------------------------------------------------------
     &apos; Open yWriter project and convert data.
     &apos; ----------------------------------------------------------------------
-	Dim launcher As Object
-	Dim aCommand,aParameter As String
-	Dim nflags as Long
+    Dim launcher As Object
+    Dim aCommand,aParameter As String
+    Dim nflags as Long
 
-	launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
-	aCommand = sPackageLocation + &quot;/python/pywoo.pyw&quot;
-	aParameter = &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix
-	nFlags = 0
-	launcher.execute(aCommand, aParameter, nFlags)	
-	
+    launcher = CreateUnoService(&quot;com.sun.star.system.SystemShellExecute&quot;)
+    aCommand = sPackageLocation + &quot;/python/pywoo.pyw&quot;
+    aParameter = &quot;&quot;&quot;&quot; + file_path + &quot;&quot;&quot; &quot; + suffix
+    nFlags = 0
+    launcher.execute(aCommand, aParameter, nFlags)  
+    
 flop:
 
 End Sub

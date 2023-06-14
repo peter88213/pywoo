@@ -4,6 +4,14 @@
 
 ## Changelog
 
+### v1.37.2
+
+- Fix a regression from v1.37.1 where an exception is raised when calling yw7 import 
+with no document loaded.
+- German translations: replace "Szene" with "Abschnitt". 
+
+Based on PyWriter v12.13.2
+
 ### v1.37.1
 
 - When importing from yw7, set the current project, if any, as file picker default.
