@@ -85,7 +85,9 @@ Sub open_yw(suffix As String, new_ext As String)
 	Dim document As object
     Dim document_url, document_path, document_dir, document_name, project_name As String
  	Dim a() As String
-  
+ 	If NOT Globalscope.BasicLibraries.IsLibraryLoaded(&quot;Tools&quot;) Then
+		Globalscope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
+	End If 
     default_file = &quot;&quot;
     document = ThisComponent.CurrentController.Frame
     document_url = ThisComponent.getURL()
