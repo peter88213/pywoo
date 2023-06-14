@@ -79,28 +79,60 @@ End Sub
 
 Sub open_yw(suffix As String, new_ext As String)
     &apos; ----------------------------------------------------------------------
+	&apos; Check whether the current document is associated with an yWriter project.
+    &apos; ----------------------------------------------------------------------
+	Dim default_file As String    
+	Dim document As object
+    Dim document_url, document_path, document_dir, document_name, project_name As String
+ 	Dim a() As String
+  
+    default_file = &quot;&quot;
+    document = ThisComponent.CurrentController.Frame
+    document_url = ThisComponent.getURL()
+    document_path =  REPLACE(ConvertFromURL(document_url), &quot;\&quot;, &quot;/&quot;)
+    document_name = FileNameoutofPath(document_path,&quot;/&quot;)
+    project_name = GetFileNameWithoutExtension(document_name)
+    a = Split(project_name, &quot;_&quot;)
+	l = UBound(a)
+	project_name = a(0)
+	If l &gt; 0 Then		
+		For i = 1 To l-1
+			project_name = project_name + &quot;_&quot; + a(i)
+		Next i
+	End If   
+    document_dir = DirectoryNameoutofPath(document_path,&quot;/&quot;)
+    project_path = document_dir + &quot;/&quot; + project_name + &quot;.yw7&quot;
+    If fileExists(project_path) Then
+	    default_file = ConvertToURL(project_path)
+	End If
+    
+   
+    &apos; ----------------------------------------------------------------------
     &apos; Set last opened yWriter project As default (if existing).
     &apos; ----------------------------------------------------------------------
 	oPackageInfoProvider = GetDefaultContext.getByName(&quot;/singletons/com.sun.star.deployment.PackageInformationProvider&quot;)
 	sPackageLocation = oPackageInfoProvider.getPackageLocation(&quot;org.peter88213.pywoo&quot;)
 
     Dim file_no As Integer
-	Dim script_dir, ini_file, yw_last_open, default_file As String
+	Dim script_dir, ini_file, yw_last_open, last_file As String
+
 
 	script_dir = ConvertFromURL(sPackageLocation)
 	ini_file = ConvertFromURL(sPackageLocation + &quot;/python/pywoo.ini&quot;
 
-    If FileExists(ini_file) Then
-        file_no = FreeFile
-        Open ini_file For Input As #file_no
-        Line Input #file_no, yw_last_open
-        Close #file_no
-
-        If FileExists(yw_last_open) Then
-            default_file = yw_last_open
-        End If
-
-    End If
+	last_file = &quot;&quot;
+	If FileExists(ini_file) Then
+	    file_no = FreeFile
+	    Open ini_file For Input As #file_no
+	    Line Input #file_no, yw_last_open
+	    Close #file_no
+	    If FileExists(yw_last_open) Then
+	        last_file = yw_last_open
+	    End If	
+	End If
+	If default_file = &quot;&quot; Then   	 
+		default_file = last_file	
+	End If
 
     &apos; ----------------------------------------------------------------------
     &apos; Ask for yWriter 7 project to open:
@@ -110,7 +142,6 @@ Sub open_yw(suffix As String, new_ext As String)
 
     GlobalScope.BasicLibraries.LoadLibrary(&quot;Tools&quot;)
     file_dialog = CreateUnoService(&quot;com.sun.star.ui.dialogs.FilePicker&quot;)
-
 
     Dim filterNames(1) As String
 

@@ -4,6 +4,13 @@
 
 ## Changelog
 
+### v1.37.1
+
+- When importing from yw7, set the current project, if any, as file picker default.
+- Change the menu entries: replace "yWriter" by "yw7".
+
+Based on PyWriter v12.13.2
+
 ### v1.37.0
 
 - Move the "Export to yWriter" menu entry from the "yWriter import/export" submenu to the "Files" menu. 
