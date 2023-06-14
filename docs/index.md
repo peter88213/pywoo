@@ -26,12 +26,9 @@ You can find more information on the [help pages](help).
 
 **LibreOffice users:** *A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv).*
 
-**novelyst users:** *A lightweight alternative, providing export to the yw7 file format only, is [oo2yw7](https://peter88213.github.io/oo2yw7).*
-
-
 ## Download and install
 
-[Download the latest release (version 1.36.1)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.36.1.oxt)
+[Download the latest release (version 1.37.0)](https://raw.githubusercontent.com/peter88213/pywoo/main/dist/pywoo-1.37.0.oxt)
 
 - Installation right at download, by double-clicking on the downloaded file, or via the OpenOffice Extension Manager.
 - After installation (and Office restart) you find a new "yWriter Import/Export" submenu in the "Files" menu.
