@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.37.3
+
+- Ignore leading blanks when parsing footnote/endnote markup.
+
+Based on PyWriter v12.13.5
+
 ### v1.37.2
 
 - Fix a regression from v1.37.1 where an exception is raised when calling yw7 import 
