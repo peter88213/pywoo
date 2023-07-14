@@ -6,7 +6,7 @@
 
 ### v1.37.4
 
-- Fix the "Advanced features" link in the Englisch help file.
+- Fix the "Advanced features" link in the Englich help file.
 
 Based on PyWriter v12.13.5
 
