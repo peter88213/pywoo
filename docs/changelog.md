@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.38.0
+
+- Add scene headings to the "proofing" document.
+
+Based on PyWriter v12.14.0
+
 ### v1.37.4
 
 - Fix the "Advanced features" link in the English help file.
