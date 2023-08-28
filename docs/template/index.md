@@ -24,7 +24,7 @@ You can find more information on the [help pages](help).
 - [Python](https://www.python.org/) version 3.6+. The easiest way to install Python on your PC may be via the Microsoft store.
 
 
-**LibreOffice users:** *A stand-alone LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv).*
+**LibreOffice users:** *A LibreOffice variant not requiring a separate Python installation can be found [here](https://peter88213.github.io/yw-cnv).*
 
 ## Download and install
 
@@ -62,6 +62,6 @@ This extension is distributed under the [MIT License](http://www.opensource.org/
 
 [The StyleSwitcher extension for OpenOffice and LibreOffice](https://peter88213.github.io/StyleSwitcher/)
 
-[The yW2OO standalone converter for yWriter and OpenOffice/LibreOffice](https://peter88213.github.io/yW2OO/)
-
 [The emph extension for OpenOffice and LibreOffice](https://peter88213.github.io/emph/)
+
+[The yW2OO standalone converter for yWriter and OpenOffice/LibreOffice](https://peter88213.github.io/yW2OO/)
