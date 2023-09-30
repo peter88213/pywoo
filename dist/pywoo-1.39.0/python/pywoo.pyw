@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.38.0
+Version 1.39.0
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -148,7 +148,7 @@ NON_LETTERS: Pattern = re.compile('\[.+?\]|\/\*.+?\*\/|\n|\r')
 
 
 class Scene(BasicElement):
-    STATUS: set = (None, 'Outline', 'Draft', '1st Edit', '2nd Edit', 'Done')
+    STATUS: set = [None, 'Outline', 'Draft', '1st Edit', '2nd Edit', 'Done']
 
     ACTION_MARKER: str = 'A'
     REACTION_MARKER: str = 'R'
@@ -1171,13 +1171,13 @@ class Yw7File(File):
 
             xmlLocationFields = xmlLoc.find('Fields')
             for field in self.LOC_KWVAR:
-                if self.novel.locations[lcId].kwVar.get(field, None):
+                if prjLoc.kwVar.get(field, None):
                     if xmlLocationFields is None:
                         xmlLocationFields = ET.SubElement(xmlLoc, 'Fields')
                     try:
-                        xmlLocationFields.find(field).text = self.novel.locations[lcId].kwVar[field]
+                        xmlLocationFields.find(field).text = prjLoc.kwVar[field]
                     except(AttributeError):
-                        ET.SubElement(xmlLocationFields, field).text = self.novel.locations[lcId].kwVar[field]
+                        ET.SubElement(xmlLocationFields, field).text = prjLoc.kwVar[field]
                 elif xmlLocationFields is not None:
                     try:
                         xmlLocationFields.remove(xmlLocationFields.find(field))
@@ -1222,13 +1222,13 @@ class Yw7File(File):
 
             xmlItemFields = xmlItm.find('Fields')
             for field in self.ITM_KWVAR:
-                if self.novel.items[itId].kwVar.get(field, None):
+                if prjItm.kwVar.get(field, None):
                     if xmlItemFields is None:
                         xmlItemFields = ET.SubElement(xmlItm, 'Fields')
                     try:
-                        xmlItemFields.find(field).text = self.novel.items[itId].kwVar[field]
+                        xmlItemFields.find(field).text = prjItm.kwVar[field]
                     except(AttributeError):
-                        ET.SubElement(xmlItemFields, field).text = self.novel.items[itId].kwVar[field]
+                        ET.SubElement(xmlItemFields, field).text = prjItm.kwVar[field]
                 elif xmlItemFields is not None:
                     try:
                         xmlItemFields.remove(xmlItemFields.find(field))
@@ -1270,13 +1270,13 @@ class Yw7File(File):
 
             xmlCharacterFields = xmlCrt.find('Fields')
             for field in self.CRT_KWVAR:
-                if self.novel.characters[crId].kwVar.get(field, None):
+                if prjCrt.kwVar.get(field, None):
                     if xmlCharacterFields is None:
                         xmlCharacterFields = ET.SubElement(xmlCrt, 'Fields')
                     try:
-                        xmlCharacterFields.find(field).text = self.novel.characters[crId].kwVar[field]
+                        xmlCharacterFields.find(field).text = prjCrt.kwVar[field]
                     except(AttributeError):
-                        ET.SubElement(xmlCharacterFields, field).text = self.novel.characters[crId].kwVar[field]
+                        ET.SubElement(xmlCharacterFields, field).text = prjCrt.kwVar[field]
                 elif xmlCharacterFields is not None:
                     try:
                         xmlCharacterFields.remove(xmlCharacterFields.find(field))
@@ -2497,9 +2497,9 @@ class OdtRImport(OdtRFormatted):
                 sceneText = self._cleanup_scene(sceneText)
                 self.novel.scenes[self._scId].sceneContent = sceneText
                 if self.novel.scenes[self._scId].wordCount < self._LOW_WORDCOUNT:
-                    self.novel.scenes[self._scId].status = Scene.STATUS.index('Outline')
+                    self.novel.scenes[self._scId].status = 1
                 else:
-                    self.novel.scenes[self._scId].status = Scene.STATUS.index('Draft')
+                    self.novel.scenes[self._scId].status = 2
         elif tag == 'em':
             self._lines.append('[/i]')
         elif tag == 'strong':
@@ -2522,7 +2522,8 @@ class OdtRImport(OdtRFormatted):
                 self._scId = str(self._scCount)
                 self.novel.scenes[self._scId] = Scene()
                 self.novel.chapters[self._chId].srtScenes.append(self._scId)
-                self.novel.scenes[self._scId].status = '1'
+                self.novel.scenes[self._scId].status = 1
+                self.novel.scenes[self._scId].scType = 0
                 self.novel.scenes[self._scId].title = f'{_("Scene")} {self._scCount}'
             try:
                 if attrs[0][0] == 'lang':
@@ -2645,7 +2646,8 @@ class OdtROutline(OdtReader):
             self.novel.scenes[self._scId] = Scene()
             self.novel.chapters[self._chId].srtScenes.append(self._scId)
             self.novel.scenes[self._scId].sceneContent = ''
-            self.novel.scenes[self._scId].status = Scene.STATUS.index('Outline')
+            self.novel.scenes[self._scId].status = 1
+            self.novel.scenes[self._scId].scType = 0
         elif tag == 'div':
             self._scId = None
             self._chId = None
@@ -3228,13 +3230,16 @@ class OdfFile(FileExport):
     def __del__(self):
         self._tear_down()
 
+    def write_content_xml(self):
+        super().write()
+
     def write(self):
 
         self._set_up()
 
         self._originalPath = self._filePath
         self._filePath = f'{self._tempDir}/content.xml'
-        super().write()
+        self.write_content_xml()
         self._filePath = self._originalPath
 
         workdir = os.getcwd()
@@ -3641,6 +3646,10 @@ class OdtWriter(OdfFile):
   <style:style style:name="scene_20_mark_20_todo" style:display-name="Scene mark (todo type)" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text">
    <style:text-properties fo:color="#B22222" fo:font-size="10pt" fo:language="zxx" fo:country="none"/>
   </style:style>
+  <style:style style:name="Invisible_20_Heading_20_3" style:display-name="Invisible Heading 3" style:family="paragraph" style:parent-style-name="Heading_20_3" style:class="text">
+   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%"/>
+   <style:text-properties text:display="none"/>
+  </style:style>
   <style:style style:name="Emphasis" style:family="text">
    <style:text-properties fo:font-style="italic" fo:background-color="transparent"/>
   </style:style>
@@ -3965,25 +3974,22 @@ class OdtWManuscript(OdtWFormatted):
 '''
 
     _partTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
-<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_parts.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
+<text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
 '''
 
     _chapterTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
-<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:a xlink:href="../${ProjectName}_chapters.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
+<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title</text:h>
 '''
 
-    _sceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
-<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>$sceneTitle</dc:creator><text:p>~ ${Title} ~</text:p><text:p/><text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→$Summary</text:a></text:p></office:annotation>$SceneContent</text:p>
+    _sceneTemplate = '''<text:h text:style-name="Invisible_20_Heading_20_3" text:outline-level="3">$Title</text:h>
+<text:section text:style-name="Sect1" text:name="ScID:$ID">
+<text:p text:style-name="Text_20_body">$SceneContent</text:p>
 </text:section>
 '''
 
-    _appendedSceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
-<text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>$sceneTitle</dc:creator>
-<text:p>~ ${Title} ~</text:p>
-<text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_scenes.odt#ScID:$ID%7Cregion">→$Summary</text:a></text:p>
-</office:annotation>$SceneContent</text:p>
+    _appendedSceneTemplate = '''<text:h text:style-name="Invisible_20_Heading_20_3" text:outline-level="3">$Title</text:h>
+<text:section text:style-name="Sect1" text:name="ScID:$ID">
+<text:p text:style-name="First_20_line_20_indent">$SceneContent</text:p>
 </text:section>
 '''
 
@@ -4016,30 +4022,22 @@ class OdtWSceneDesc(OdtWriter):
 '''
 
     _partTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
-<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_parts.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
+<text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
 '''
 
     _chapterTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
-<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:a xlink:href="../${ProjectName}_chapters.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
+<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:a xlink:href="../${ProjectName}_manuscript.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
 '''
 
-    _sceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
-<text:p text:style-name="Text_20_body"><office:annotation>
-<dc:creator>$sceneTitle</dc:creator>
-<text:p>~ ${Title} ~</text:p>
-<text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→$Manuscript</text:a></text:p>
-</office:annotation>$Desc</text:p>
+    _sceneTemplate = '''<text:h text:style-name="Invisible_20_Heading_20_3" text:outline-level="3">$Title</text:h>
+<text:section text:style-name="Sect1" text:name="ScID:$ID">
+<text:p text:style-name="Text_20_body">$Desc</text:p>
 </text:section>
 '''
 
-    _appendedSceneTemplate = '''<text:section text:style-name="Sect1" text:name="ScID:$ID">
-<text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>$sceneTitle</dc:creator>
-<text:p>~ ${Title} ~</text:p>
-<text:p/>
-<text:p><text:a xlink:href="../${ProjectName}_manuscript.odt#ScID:$ID%7Cregion">→$Manuscript</text:a></text:p>
-</office:annotation>$Desc</text:p>
+    _appendedSceneTemplate = '''<text:h text:style-name="Invisible_20_Heading_20_3" text:outline-level="3">$Title</text:h>
+<text:section text:style-name="Sect1" text:name="ScID:$ID">
+<text:p text:style-name="First_20_line_20_indent">$Desc</text:p>
 </text:section>
 '''
 
@@ -4065,7 +4063,7 @@ class OdtWChapterDesc(OdtWriter):
 <text:p text:style-name="Subtitle">$AuthorName</text:p>
 '''
 
-    _partTemplate = '''<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:a xlink:href="../${ProjectName}_parts.odt#ChID:$ID%7Cregion">$Title</text:a></text:h>
+    _partTemplate = '''<text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
 '''
 
     _chapterTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
@@ -4126,13 +4124,10 @@ class OdtWExport(OdtWFormatted):
     _chapterTemplate = '''<text:h text:style-name="Heading_20_2" text:outline-level="2">$Title</text:h>
 '''
 
-    _sceneTemplate = ''''<text:p text:style-name="Text_20_body"><office:annotation><dc:creator>$sceneTitle</dc:creator><text:p>~ ${Title} ~</text:p></office:annotation>$SceneContent</text:p>
+    _sceneTemplate = ''''<text:p text:style-name="Text_20_body">$SceneContent</text:p>
     '''
 
-    _appendedSceneTemplate = '''<text:p text:style-name="First_20_line_20_indent"><office:annotation>
-<dc:creator>$sceneTitle</dc:creator>
-<text:p>~ ${Title} ~</text:p>
-</office:annotation>$SceneContent</text:p>
+    _appendedSceneTemplate = '''<text:p text:style-name="First_20_line_20_indent">$SceneContent</text:p>
 '''
 
     _sceneDivider = '<text:p text:style-name="Heading_20_4">* * *</text:p>\n'
@@ -5602,7 +5597,7 @@ class OdtRCharacters(OdtReader):
                     self._lines = []
                     self._section = None
                 elif self._section == 'notes':
-                    self.novel.characters[self._crId].notes = ''.join(self._lines)
+                    self.novel.characters[self._crId].notes = ''.join(self._lines).rstrip()
                     self._lines = []
                     self._section = None
             elif tag == 'p':
