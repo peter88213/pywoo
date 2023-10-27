@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.40.0
+Version 1.40.1
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -4588,6 +4588,7 @@ class OdtWNotes(OdtWManuscript):
     _chapterTemplate = ''
     _chapterEndTemplate = ''
     _sceneTemplate = ''
+    _appendedSceneTemplate = ''
 
     _notesPartTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
 <text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
@@ -4618,6 +4619,7 @@ class OdtWTodo(OdtWManuscript):
     _chapterTemplate = ''
     _chapterEndTemplate = ''
     _sceneTemplate = ''
+    _appendedSceneTemplate = ''
 
     _todoPartTemplate = '''<text:section text:style-name="Sect1" text:name="ChID:$ID">
 <text:h text:style-name="Heading_20_1" text:outline-level="1">$Title</text:h>
