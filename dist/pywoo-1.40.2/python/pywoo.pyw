@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.40.1
+Version 1.40.2
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -702,6 +702,17 @@ class Yw7File(File):
     SCN_KWVAR = [
         'Field_SceneArcs',
         'Field_SceneMode',
+        ]
+    CRT_KWVAR = [
+        'Field_Link',
+        'Field_BirthDate',
+        'Field_DeathDate',
+        ]
+    LOC_KWVAR = [
+        'Field_Link',
+        ]
+    ITM_KWVAR = [
+        'Field_Link',
         ]
 
     def __init__(self, filePath, **kwargs):
