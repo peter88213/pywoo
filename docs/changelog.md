@@ -4,6 +4,12 @@
 
 ## Changelog
 
+### v1.40.3
+
+- Read .yw7 files created with the iOS yWriter version.
+
+Based on PyWriter v12.19.0
+
 ### v1.40.2
 
 - Make sure to keep custom data from other applications when updating .yw7 files.

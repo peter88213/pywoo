@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.40.2
+Version 1.40.3
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -736,11 +736,18 @@ class Yw7File(File):
         if self.is_locked():
             raise Error(f'{_("yWriter seems to be open. Please close first")}.')
         try:
-            self.tree = ET.parse(self.filePath)
+            try:
+                self.tree = ET.parse(self.filePath)
+                root = self.tree.getroot()
+            except:
+                with open(self.filePath, 'r', encoding='utf-16') as f:
+                    xmlText = f.read()
+                root = ET.fromstring(xmlText)
+                xmlText = None
+                self.tree = ET.ElementTree(root)
         except:
             raise Error(f'{_("Can not process file")}: "{norm_path(self.filePath)}".')
 
-        root = self.tree.getroot()
         self._read_project(root)
         self._read_locations(root)
         self._read_items(root)
