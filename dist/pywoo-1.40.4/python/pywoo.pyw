@@ -1,6 +1,6 @@
 """Convert yw7 to odt/ods, or html/csv to yw7. 
 
-Version 1.40.3
+Version 1.40.4
 Requires Python 3.6+
 Copyright (c) 2023 Peter Triesberger
 For further information see https://github.com/peter88213/pywoo
@@ -119,7 +119,7 @@ class BasicElement:
 
         self.kwVar = {}
 
-LANGUAGE_TAG = re.compile('\[lang=(.*?)\]')
+LANGUAGE_TAG = re.compile(r'\[lang=(.*?)\]')
 
 
 class Novel(BasicElement):
@@ -443,11 +443,11 @@ class Chapter(BasicElement):
         self.srtScenes = []
 
 
-ADDITIONAL_WORD_LIMITS = re.compile('--|—|–')
+ADDITIONAL_WORD_LIMITS = re.compile(r'--|—|–')
 
-NO_WORD_LIMITS = re.compile('\[.+?\]|\/\*.+?\*\/|-|^\>', re.MULTILINE)
+NO_WORD_LIMITS = re.compile(r'\[.+?\]|\/\*.+?\*\/|-|^\>', re.MULTILINE)
 
-NON_LETTERS = re.compile('\[.+?\]|\/\*.+?\*\/|\n|\r')
+NON_LETTERS = re.compile(r'\[.+?\]|\/\*.+?\*\/|\n|\r')
 
 
 class Scene(BasicElement):
@@ -606,6 +606,7 @@ class File(ABC):
 
     @filePath.setter
     def filePath(self, filePath):
+        filePath = filePath.replace('\\', '/')
         if self.SUFFIX is not None:
             suffix = self.SUFFIX
         else:
@@ -746,7 +747,10 @@ class Yw7File(File):
                 xmlText = None
                 self.tree = ET.ElementTree(root)
         except:
-            raise Error(f'{_("Can not process file")}: "{norm_path(self.filePath)}".')
+            try:
+                self.tree = ET.parse(self.filePath)
+            except Exception as ex:
+                raise Error(f'{_("Can not process file")} - {str(ex)}')
 
         self._read_project(root)
         self._read_locations(root)
@@ -1618,8 +1622,8 @@ class Yw7File(File):
         newlines = ['<?xml version="1.0" encoding="utf-8"?>']
         for line in lines:
             for tag in self._CDATA_TAGS:
-                line = re.sub(f'\<{tag}\>', f'<{tag}><![CDATA[', line)
-                line = re.sub(f'\<\/{tag}\>', f']]></{tag}>', line)
+                line = re.sub(fr'\<{tag}\>', f'<{tag}><![CDATA[', line)
+                line = re.sub(fr'\<\/{tag}\>', f']]></{tag}>', line)
             newlines.append(line)
         text = '\n'.join(newlines)
         text = text.replace('[CDATA[ \n', '[CDATA[')
@@ -2336,13 +2340,13 @@ class OdtReader(File, ABC):
         if tag == 'div':
             if attrs[0][0] == 'id':
                 if attrs[0][1].startswith('ScID'):
-                    self._scId = re.search('[0-9]+', attrs[0][1]).group()
+                    self._scId = re.search(r'[0-9]+', attrs[0][1]).group()
                     if not self._scId in self.novel.scenes:
                         self.novel.scenes[self._scId] = Scene()
                         self.novel.chapters[self._chId].srtScenes.append(self._scId)
                     self.novel.scenes[self._scId].scType = self._TYPE
                 elif attrs[0][1].startswith('ChID'):
-                    self._chId = re.search('[0-9]+', attrs[0][1]).group()
+                    self._chId = re.search(r'[0-9]+', attrs[0][1]).group()
                     if not self._chId in self.novel.chapters:
                         self.novel.chapters[self._chId] = Chapter()
                         self.novel.chapters[self._chId].srtScenes = []
@@ -3274,7 +3278,7 @@ class FileExport(File):
             text = text.replace('<RTFBRK>', '')
             YW_SPECIAL_CODES = ('HTM', 'TEX', 'RTF', 'epub', 'mobi', 'rtfimg')
             for specialCode in YW_SPECIAL_CODES:
-                text = re.sub(f'\<{specialCode} .+?\/{specialCode}\>', '', text)
+                text = re.sub(fr'\<{specialCode} .+?\/{specialCode}\>', '', text)
         else:
             text = ''
         return text
@@ -3851,7 +3855,7 @@ class OdtWFormatted(OdtWriter):
             for yw, od in odtReplacements:
                 text = text.replace(yw, od)
 
-            text = re.sub('\[\/*[h|c|r|s|u]\d*\]', '', text)
+            text = re.sub(r'\[\/*[h|c|r|s|u]\d*\]', '', text)
         else:
             text = ''
         return text
@@ -3906,7 +3910,7 @@ class OdtWFormatted(OdtWriter):
                          )
             for quotMark in quotMarks:
                 text = text.replace(quotMark, '"Quotations">')
-            text = re.sub('"Text_20_body"\>(\<office\:annotation\>.+?\<\/office\:annotation\>)\&gt\; ',
+            text = re.sub(r'"Text_20_body"\>(\<office\:annotation\>.+?\<\/office\:annotation\>)\&gt\; ',
                           '"Quotations">\\1', text)
         return text
 
@@ -3992,7 +3996,7 @@ class OdtWProof(OdtWFormatted):
             for yw, od in odtReplacements:
                 text = text.replace(yw, od)
 
-            text = re.sub('\[\/*[h|c|r|s|u]\d*\]', '', text)
+            text = re.sub(r'\[\/*[h|c|r|s|u]\d*\]', '', text)
         else:
             text = ''
         return text
@@ -4255,9 +4259,9 @@ class OdtWExport(OdtWFormatted):
             simpleComment = (f'<office:annotation><dc:creator>{self.novel.authorName}'
                              '</dc:creator><text:p>\\1</text:p></office:annotation>'
                              )
-            text = re.sub('\/\* *@([ef]n\**) (.*?)\*\/', replace_note, text)
-            text = re.sub('\/\*(.*?)\*\/', simpleComment, text)
-            text = text.replace('@r@', '\r').replace('@n@', '\n')
+            text = re.sub(r'\/\* *@([ef]n\**) (.*?)\*\/', replace_note, text)
+            text = re.sub(r'\/\*(.*?)\*\/', simpleComment, text)
+            text = text.replace(r'@r@', '\r').replace('@n@', '\n')
         return text
 
 
@@ -5320,7 +5324,7 @@ class OdtRProof(OdtRFormatted):
             if self._skip_data:
                 self._skip_data = False
             elif '[ScID' in data:
-                self._scId = re.search('[0-9]+', data).group()
+                self._scId = re.search(r'[0-9]+', data).group()
                 self._lines = []
             elif '[/ScID' in data:
                 if self._scId in self.novel.scenes:
@@ -5611,7 +5615,7 @@ class OdtRCharacters(OdtReader):
         if tag == 'div':
             if attrs[0][0] == 'id':
                 if attrs[0][1].startswith('CrID_desc'):
-                    self._crId = re.search('[0-9]+', attrs[0][1]).group()
+                    self._crId = re.search(r'[0-9]+', attrs[0][1]).group()
                     if not self._crId in self.novel.characters:
                         self.novel.srtCharacters.append(self._crId)
                         self.novel.characters[self._crId] = Character()
@@ -5652,7 +5656,7 @@ class OdtRLocations(OdtReader):
         if tag == 'div':
             if attrs[0][0] == 'id':
                 if attrs[0][1].startswith('LcID'):
-                    self._lcId = re.search('[0-9]+', attrs[0][1]).group()
+                    self._lcId = re.search(r'[0-9]+', attrs[0][1]).group()
                     if not self._lcId in self.novel.locations:
                         self.novel.srtLocations.append(self._lcId)
                         self.novel.locations[self._lcId] = WorldElement()
@@ -5686,7 +5690,7 @@ class OdtRItems(OdtReader):
         if tag == 'div':
             if attrs[0][0] == 'id':
                 if attrs[0][1].startswith('ItID'):
-                    self._itId = re.search('[0-9]+', attrs[0][1]).group()
+                    self._itId = re.search(r'[0-9]+', attrs[0][1]).group()
                     if not self._itId in self.novel.items:
                         self.novel.srtItems.append(self._itId)
                         self.novel.items[self._itId] = WorldElement()
@@ -5798,7 +5802,7 @@ class OdsRSceneList(OdsReader):
         for cells in self._rows:
             i = 0
             if 'ScID:' in cells[i]:
-                scId = re.search('ScID\:([0-9]+)', cells[0]).group(1)
+                scId = re.search(r'ScID\:([0-9]+)', cells[0]).group(1)
                 if not scId in self.novel.scenes:
                     self.novel.scenes[scId] = Scene()
                 i += 1
@@ -5870,7 +5874,7 @@ class OdsRCharList(OdsReader):
         self.novel.srtCharacters = []
         for cells in self._rows:
             if 'CrID:' in cells[0]:
-                crId = re.search('CrID\:([0-9]+)', cells[0]).group(1)
+                crId = re.search(r'CrID\:([0-9]+)', cells[0]).group(1)
                 self.novel.srtCharacters.append(crId)
                 if not crId in self.novel.characters:
                     self.novel.characters[crId] = Character()
@@ -5906,7 +5910,7 @@ class OdsRLocList(OdsReader):
         self.novel.srtLocations = []
         for cells in self._rows:
             if 'LcID:' in cells[0]:
-                lcId = re.search('LcID\:([0-9]+)', cells[0]).group(1)
+                lcId = re.search(r'LcID\:([0-9]+)', cells[0]).group(1)
                 self.novel.srtLocations.append(lcId)
                 if not lcId in self.novel.locations:
                     self.novel.locations[lcId] = WorldElement()
@@ -5930,7 +5934,7 @@ class OdsRItemList(OdsReader):
         self.novel.srtItems = []
         for cells in self._rows:
             if 'ItID:' in cells[0]:
-                itId = re.search('ItID\:([0-9]+)', cells[0]).group(1)
+                itId = re.search(r'ItID\:([0-9]+)', cells[0]).group(1)
                 self.novel.srtItems.append(itId)
                 if not itId in self.novel.items:
                     self.novel.items[itId] = WorldElement()
