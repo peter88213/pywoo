@@ -19,10 +19,9 @@ TARGET_FILE = f'{BUILD}pywoo.pyw'
 
 
 def main():
+    os.makedirs(BUILD, exist_ok=True)
     inliner.run(SOURCE_FILE, TARGET_FILE, 'pywoolib', '../src/', copyPyWriter=False)
     inliner.run(TARGET_FILE, TARGET_FILE, 'pywriter', '../../PyWriter/src/', copyPyWriter=False)
-    # inliner.run(SOURCE_FILE, TARGET_FILE, 'pywoolib', '../src/')
-    # inliner.run(TARGET_FILE, TARGET_FILE, 'pywriter', '../src/')
     print('Done.')
 
 
